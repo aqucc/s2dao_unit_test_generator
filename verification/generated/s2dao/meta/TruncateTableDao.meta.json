@@ -1,0 +1,87 @@
+{
+  "daoClassName" : "examples.dao.TruncateTableDao",
+  "daoSimpleName" : "TruncateTableDao",
+  "packageName" : "examples.dao",
+  "annotationStyle" : "CONSTANT",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/samples/s2dao/s2-dao-examples/src/main/java/examples/dao/TruncateTableDao.java",
+  "methods" : [ {
+    "name" : "updateDrop",
+    "returnType" : "void",
+    "parameters" : [ ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "MANUAL_ANNOTATION",
+      "rawSql" : "DROP TABLE IF EXISTS H2TEST",
+      "twoWay" : false,
+      "bindVariables" : [ ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "DROP TABLE IF EXISTS H2TEST",
+      "expandedBindOrder" : [ ],
+      "structure" : {
+        "statementType" : "OTHER",
+        "tables" : [ ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  }, {
+    "name" : "updateCreate",
+    "returnType" : "void",
+    "parameters" : [ ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "MANUAL_ANNOTATION",
+      "rawSql" : "CREATE TABLE H2TEST (ID INT PRIMARY KEY, AAA VARCHAR(255))",
+      "twoWay" : false,
+      "bindVariables" : [ ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "CREATE TABLE H2TEST (ID INT PRIMARY KEY, AAA VARCHAR(255))",
+      "expandedBindOrder" : [ ],
+      "structure" : {
+        "statementType" : "OTHER",
+        "tables" : [ ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  }, {
+    "name" : "updateTrancate",
+    "returnType" : "void",
+    "parameters" : [ ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "MANUAL_ANNOTATION",
+      "rawSql" : "TRUNCATE TABLE H2TEST",
+      "twoWay" : false,
+      "bindVariables" : [ ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "TRUNCATE TABLE H2TEST",
+      "expandedBindOrder" : [ ],
+      "structure" : {
+        "statementType" : "OTHER",
+        "tables" : [ ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  } ],
+  "notes" : [ ]
+}

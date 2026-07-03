@@ -1,0 +1,66 @@
+{
+  "daoClassName" : "examples.dao.NoPkTableDao",
+  "daoSimpleName" : "NoPkTableDao",
+  "packageName" : "examples.dao",
+  "annotationStyle" : "CONSTANT",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/samples/s2dao/s2-dao-examples/src/main/java/examples/dao/NoPkTableDao.java",
+  "beanClassName" : "examples.dao.NoPkTable",
+  "entity" : {
+    "className" : "examples.dao.NoPkTable",
+    "simpleName" : "NoPkTable",
+    "tableName" : "NoPkTable",
+    "tableNameSource" : "DEFAULT_CLASSNAME",
+    "properties" : [ {
+      "propertyName" : "aaa",
+      "javaType" : "String",
+      "columnName" : "aaa",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : true,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "bbb",
+      "javaType" : "Integer",
+      "columnName" : "bbb",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    } ],
+    "relations" : [ ],
+    "primaryKeyColumns" : [ "aaa" ],
+    "primaryKeySource" : "HEURISTIC_FIRST"
+  },
+  "methods" : [ {
+    "name" : "selectAll",
+    "returnType" : "NoPkTable[]",
+    "parameters" : [ ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_ARGS",
+      "rawSql" : "SELECT NoPkTable.aaa, NoPkTable.bbb FROM NoPkTable",
+      "twoWay" : false,
+      "bindVariables" : [ ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "SELECT NoPkTable.aaa, NoPkTable.bbb FROM NoPkTable",
+      "expandedBindOrder" : [ ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "NoPkTable" ],
+        "selectColumns" : [ "NoPkTable.aaa", "NoPkTable.bbb" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  } ],
+  "notes" : [ ]
+}

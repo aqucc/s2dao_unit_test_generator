@@ -1,0 +1,435 @@
+{
+  "daoClassName" : "examples.dao.EmployeeAutoDao",
+  "daoSimpleName" : "EmployeeAutoDao",
+  "packageName" : "examples.dao",
+  "annotationStyle" : "CONSTANT",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/samples/s2dao/s2-dao-examples/src/main/java/examples/dao/EmployeeAutoDao.java",
+  "beanClassName" : "examples.dao.Employee",
+  "entity" : {
+    "className" : "examples.dao.Employee",
+    "simpleName" : "Employee",
+    "tableName" : "EMP",
+    "tableNameSource" : "ANNOTATION",
+    "properties" : [ {
+      "propertyName" : "empno",
+      "javaType" : "long",
+      "columnName" : "empno",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : true,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "ename",
+      "javaType" : "java.lang.String",
+      "columnName" : "ename",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "job",
+      "javaType" : "java.lang.String",
+      "columnName" : "job",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "mgr",
+      "javaType" : "Short",
+      "columnName" : "mgr",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "hiredate",
+      "javaType" : "java.util.Date",
+      "columnName" : "hiredate",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "sal",
+      "javaType" : "Float",
+      "columnName" : "sal",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "comm",
+      "javaType" : "Float",
+      "columnName" : "comm",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "deptno",
+      "javaType" : "int",
+      "columnName" : "deptno",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "timestamp",
+      "javaType" : "Timestamp",
+      "columnName" : "tstamp",
+      "columnNameSource" : "ANNOTATION",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : true,
+      "access" : "GETTER"
+    } ],
+    "relations" : [ {
+      "propertyName" : "department",
+      "targetType" : "Department",
+      "relationNo" : 0
+    } ],
+    "primaryKeyColumns" : [ "empno" ],
+    "timestampProperty" : "timestamp",
+    "primaryKeySource" : "HEURISTIC_FIRST"
+  },
+  "methods" : [ {
+    "name" : "getAllEmployees",
+    "returnType" : "List",
+    "parameters" : [ ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_ARGS",
+      "rawSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP",
+      "twoWay" : false,
+      "bindVariables" : [ ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP",
+      "expandedBindOrder" : [ ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMP.empno", "EMP.ename", "EMP.job", "EMP.mgr", "EMP.hiredate", "EMP.sal", "EMP.comm", "EMP.deptno", "EMP.tstamp" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  }, {
+    "name" : "getEmployeeByJobDeptno",
+    "returnType" : "List",
+    "parameters" : [ {
+      "name" : "job",
+      "type" : "String"
+    }, {
+      "name" : "deptno",
+      "type" : "Integer"
+    } ],
+    "argNames" : [ "job", "deptno" ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_ARGS",
+      "rawSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP/*BEGIN*/ WHERE /*IF job != null*/ EMP.job = /*job*/null/*END*//*IF deptno != null*/ AND EMP.deptno = /*deptno*/null/*END*//*END*/",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "job",
+        "rootParam" : "job",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "job != null", "deptno != null" ],
+      "hasBegin" : true,
+      "expandedSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP WHERE  EMP.job = ? AND EMP.deptno = ?",
+      "expandedBindOrder" : [ "job", "deptno" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMP.empno", "EMP.ename", "EMP.job", "EMP.mgr", "EMP.hiredate", "EMP.sal", "EMP.comm", "EMP.deptno", "EMP.tstamp" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "EMP.job",
+          "bindExpression" : "job",
+          "operator" : "="
+        }, {
+          "column" : "EMP.deptno",
+          "bindExpression" : "deptno",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "getEmployeeByEmpno",
+    "returnType" : "Employee",
+    "parameters" : [ {
+      "name" : "empno",
+      "type" : "int"
+    } ],
+    "argNames" : [ "empno" ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_ARGS",
+      "rawSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP/*BEGIN*/ WHERE /*IF empno != null*/ EMP.empno = /*empno*/null/*END*//*END*/",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "empno",
+        "rootParam" : "empno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "empno != null" ],
+      "hasBegin" : true,
+      "expandedSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP WHERE  EMP.empno = ?",
+      "expandedBindOrder" : [ "empno" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMP.empno", "EMP.ename", "EMP.job", "EMP.mgr", "EMP.hiredate", "EMP.sal", "EMP.comm", "EMP.deptno", "EMP.tstamp" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "EMP.empno",
+          "bindExpression" : "empno",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "getEmployeesBySal",
+    "returnType" : "List",
+    "parameters" : [ {
+      "name" : "minSal",
+      "type" : "float"
+    }, {
+      "name" : "maxSal",
+      "type" : "float"
+    } ],
+    "argNames" : [ ],
+    "query" : "sal BETWEEN ? AND ? ORDER BY empno",
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_QUERY",
+      "rawSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP WHERE sal BETWEEN ? AND ? ORDER BY empno",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "$1",
+        "rootParam" : "$1",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "$2",
+        "rootParam" : "$2",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP WHERE sal BETWEEN ? AND ? ORDER BY empno",
+      "expandedBindOrder" : [ "$1", "$2" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMP.empno", "EMP.ename", "EMP.job", "EMP.mgr", "EMP.hiredate", "EMP.sal", "EMP.comm", "EMP.deptno", "EMP.tstamp" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  }, {
+    "name" : "getEmployeeByDname",
+    "returnType" : "List",
+    "parameters" : [ {
+      "name" : "dname",
+      "type" : "String"
+    } ],
+    "argNames" : [ "dname_0" ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_ARGS",
+      "rawSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP/*BEGIN*/ WHERE /*IF dname_0 != null*/ dname_0 = /*dname_0*/null/*END*//*END*/",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "dname_0",
+        "rootParam" : "dname_0",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "dname_0 != null" ],
+      "hasBegin" : true,
+      "expandedSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP WHERE  dname_0 = ?",
+      "expandedBindOrder" : [ "dname_0" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMP.empno", "EMP.ename", "EMP.job", "EMP.mgr", "EMP.hiredate", "EMP.sal", "EMP.comm", "EMP.deptno", "EMP.tstamp" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "dname_0",
+          "bindExpression" : "dname_0",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "getEmployeesBySearchCondition",
+    "returnType" : "List",
+    "parameters" : [ {
+      "name" : "dto",
+      "type" : "EmployeeSearchCondition"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_DTO",
+      "rawSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP/*BEGIN*/ WHERE /*IF dto.job != null*/ EMP.job = /*dto.job*/null/*END*//*END*/",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "dto.job",
+        "rootParam" : "dto",
+        "propertyPath" : "job",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "dto.job != null" ],
+      "hasBegin" : true,
+      "expandedSql" : "SELECT EMP.empno, EMP.ename, EMP.job, EMP.mgr, EMP.hiredate, EMP.sal, EMP.comm, EMP.deptno, EMP.tstamp FROM EMP WHERE  EMP.job = ?",
+      "expandedBindOrder" : [ "dto.job" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMP.empno", "EMP.ename", "EMP.job", "EMP.mgr", "EMP.hiredate", "EMP.sal", "EMP.comm", "EMP.deptno", "EMP.tstamp" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "EMP.job",
+          "bindExpression" : "dto.job",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "update",
+    "returnType" : "void",
+    "parameters" : [ {
+      "name" : "employee",
+      "type" : "Employee"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "AUTO_UPDATE",
+      "rawSql" : "UPDATE EMP SET ename = ?, job = ?, mgr = ?, hiredate = ?, sal = ?, comm = ?, deptno = ?, tstamp = ? WHERE empno = ? AND tstamp = ?",
+      "twoWay" : false,
+      "bindVariables" : [ {
+        "expression" : "ename",
+        "rootParam" : "ename",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "job",
+        "rootParam" : "job",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "mgr",
+        "rootParam" : "mgr",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "hiredate",
+        "rootParam" : "hiredate",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "sal",
+        "rootParam" : "sal",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "comm",
+        "rootParam" : "comm",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "timestamp",
+        "rootParam" : "timestamp",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "empno",
+        "rootParam" : "empno",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "timestamp",
+        "rootParam" : "timestamp",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "UPDATE EMP SET ename = ?, job = ?, mgr = ?, hiredate = ?, sal = ?, comm = ?, deptno = ?, tstamp = ? WHERE empno = ? AND tstamp = ?",
+      "expandedBindOrder" : [ "ename", "job", "mgr", "hiredate", "sal", "comm", "deptno", "timestamp", "empno", "timestamp" ],
+      "structure" : {
+        "statementType" : "UPDATE",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "empno",
+          "bindExpression" : "empno",
+          "operator" : "="
+        }, {
+          "column" : "tstamp",
+          "bindExpression" : "timestamp",
+          "operator" : "="
+        } ]
+      }
+    }
+  } ],
+  "notes" : [ ]
+}

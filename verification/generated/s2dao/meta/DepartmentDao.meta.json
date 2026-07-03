@@ -1,0 +1,219 @@
+{
+  "daoClassName" : "examples.dao.DepartmentDao",
+  "daoSimpleName" : "DepartmentDao",
+  "packageName" : "examples.dao",
+  "annotationStyle" : "CONSTANT",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/samples/s2dao/s2-dao-examples/src/main/java/examples/dao/DepartmentDao.java",
+  "beanClassName" : "examples.dao.Department",
+  "entity" : {
+    "className" : "examples.dao.Department",
+    "simpleName" : "Department",
+    "tableName" : "DEPT",
+    "tableNameSource" : "ANNOTATION",
+    "properties" : [ {
+      "propertyName" : "deptno",
+      "javaType" : "int",
+      "columnName" : "deptno",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : true,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "dname",
+      "javaType" : "java.lang.String",
+      "columnName" : "dname",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "loc",
+      "javaType" : "java.lang.String",
+      "columnName" : "loc",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "versionNo",
+      "javaType" : "int",
+      "columnName" : "versionNo",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : true,
+      "timestamp" : false,
+      "access" : "GETTER"
+    } ],
+    "relations" : [ ],
+    "primaryKeyColumns" : [ "deptno" ],
+    "versionNoProperty" : "versionNo",
+    "primaryKeySource" : "HEURISTIC_FIRST"
+  },
+  "methods" : [ {
+    "name" : "insert",
+    "returnType" : "void",
+    "parameters" : [ {
+      "name" : "department",
+      "type" : "Department"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "INSERT",
+    "sql" : {
+      "resolutionType" : "AUTO_INSERT",
+      "rawSql" : "INSERT INTO DEPT (deptno, dname, loc, versionNo) VALUES (?, ?, ?, ?)",
+      "twoWay" : false,
+      "bindVariables" : [ {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "dname",
+        "rootParam" : "dname",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "loc",
+        "rootParam" : "loc",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "versionNo",
+        "rootParam" : "versionNo",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "INSERT INTO DEPT (deptno, dname, loc, versionNo) VALUES (?, ?, ?, ?)",
+      "expandedBindOrder" : [ "deptno", "dname", "loc", "versionNo" ],
+      "structure" : {
+        "statementType" : "INSERT",
+        "tables" : [ "DEPT" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  }, {
+    "name" : "update",
+    "returnType" : "void",
+    "parameters" : [ {
+      "name" : "department",
+      "type" : "Department"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "AUTO_UPDATE",
+      "rawSql" : "UPDATE DEPT SET dname = ?, loc = ?, versionNo = ? WHERE deptno = ? AND versionNo = ?",
+      "twoWay" : false,
+      "bindVariables" : [ {
+        "expression" : "dname",
+        "rootParam" : "dname",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "loc",
+        "rootParam" : "loc",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "versionNo",
+        "rootParam" : "versionNo",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "versionNo",
+        "rootParam" : "versionNo",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "UPDATE DEPT SET dname = ?, loc = ?, versionNo = ? WHERE deptno = ? AND versionNo = ?",
+      "expandedBindOrder" : [ "dname", "loc", "versionNo", "deptno", "versionNo" ],
+      "structure" : {
+        "statementType" : "UPDATE",
+        "tables" : [ "DEPT" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "deptno",
+          "bindExpression" : "deptno",
+          "operator" : "="
+        }, {
+          "column" : "versionNo",
+          "bindExpression" : "versionNo",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "delete",
+    "returnType" : "void",
+    "parameters" : [ {
+      "name" : "department",
+      "type" : "Department"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "DELETE",
+    "sql" : {
+      "resolutionType" : "AUTO_DELETE",
+      "rawSql" : "DELETE FROM DEPT WHERE deptno = ? AND versionNo = ?",
+      "twoWay" : false,
+      "bindVariables" : [ {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      }, {
+        "expression" : "versionNo",
+        "rootParam" : "versionNo",
+        "propertyPath" : "",
+        "kind" : "STATIC"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "DELETE FROM DEPT WHERE deptno = ? AND versionNo = ?",
+      "expandedBindOrder" : [ "deptno", "versionNo" ],
+      "structure" : {
+        "statementType" : "DELETE",
+        "tables" : [ "DEPT" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "deptno",
+          "bindExpression" : "deptno",
+          "operator" : "="
+        }, {
+          "column" : "versionNo",
+          "bindExpression" : "versionNo",
+          "operator" : "="
+        } ]
+      }
+    }
+  } ],
+  "notes" : [ ]
+}

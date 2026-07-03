@@ -147,6 +147,13 @@ public final class TestClassGenerator {
             String entityTable, List parentTables, List genMethods, Set constrained) {
         sb.append("    protected void setUp() throws Exception {\n");
         sb.append("        super.setUp();\n");
+        // 生成可能なテストメソッドが 0 件のプレースホルダクラスでは、
+        // S2Container・DB 接続を用意しない(getComponent が bean 解決不能で失敗するのを避ける)。
+        if (genMethods.isEmpty()) {
+            sb.append("        // 自動生成可能なテストメソッドが無いため、コンテナ/DB は初期化しない\n");
+            sb.append("    }\n\n");
+            return;
+        }
         sb.append("        ctx = new S2TestContext();\n");
         sb.append("        dao = (").append(daoFq).append(") ctx.getComponent(")
           .append(daoFq).append(".class);\n");

@@ -1,0 +1,256 @@
+{
+  "daoClassName" : "examples.dao.DepartmentManager",
+  "daoSimpleName" : "DepartmentManager",
+  "packageName" : "examples.dao",
+  "annotationStyle" : "CONSTANT",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/samples/s2dao/s2-dao-examples/src/main/java/examples/dao/DepartmentManager.java",
+  "beanClassName" : "examples.dao.Department",
+  "entity" : {
+    "className" : "examples.dao.Department",
+    "simpleName" : "Department",
+    "tableName" : "DEPT",
+    "tableNameSource" : "ANNOTATION",
+    "properties" : [ {
+      "propertyName" : "deptno",
+      "javaType" : "int",
+      "columnName" : "deptno",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : true,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "dname",
+      "javaType" : "java.lang.String",
+      "columnName" : "dname",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "loc",
+      "javaType" : "java.lang.String",
+      "columnName" : "loc",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "versionNo",
+      "javaType" : "int",
+      "columnName" : "versionNo",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : true,
+      "timestamp" : false,
+      "access" : "GETTER"
+    } ],
+    "relations" : [ ],
+    "primaryKeyColumns" : [ "deptno" ],
+    "versionNoProperty" : "versionNo",
+    "primaryKeySource" : "HEURISTIC_FIRST"
+  },
+  "methods" : [ {
+    "name" : "generate",
+    "returnType" : "void",
+    "parameters" : [ {
+      "name" : "department",
+      "type" : "Department"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_DTO",
+      "rawSql" : "SELECT DEPT.deptno, DEPT.dname, DEPT.loc, DEPT.versionNo FROM DEPT/*BEGIN*/ WHERE /*IF dto.deptno != null*/ DEPT.deptno = /*dto.deptno*/null/*END*//*IF dto.dname != null*/ AND DEPT.dname = /*dto.dname*/null/*END*//*IF dto.loc != null*/ AND DEPT.loc = /*dto.loc*/null/*END*//*IF dto.versionNo != null*/ AND DEPT.versionNo = /*dto.versionNo*/null/*END*//*END*/",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "dto.deptno",
+        "rootParam" : "dto",
+        "propertyPath" : "deptno",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.dname",
+        "rootParam" : "dto",
+        "propertyPath" : "dname",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.loc",
+        "rootParam" : "dto",
+        "propertyPath" : "loc",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.versionNo",
+        "rootParam" : "dto",
+        "propertyPath" : "versionNo",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "dto.deptno != null", "dto.dname != null", "dto.loc != null", "dto.versionNo != null" ],
+      "hasBegin" : true,
+      "expandedSql" : "SELECT DEPT.deptno, DEPT.dname, DEPT.loc, DEPT.versionNo FROM DEPT WHERE  DEPT.deptno = ? AND DEPT.dname = ? AND DEPT.loc = ? AND DEPT.versionNo = ?",
+      "expandedBindOrder" : [ "dto.deptno", "dto.dname", "dto.loc", "dto.versionNo" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "DEPT" ],
+        "selectColumns" : [ "DEPT.deptno", "DEPT.dname", "DEPT.loc", "DEPT.versionNo" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "DEPT.deptno",
+          "bindExpression" : "dto.deptno",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.dname",
+          "bindExpression" : "dto.dname",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.loc",
+          "bindExpression" : "dto.loc",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.versionNo",
+          "bindExpression" : "dto.versionNo",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "change",
+    "returnType" : "void",
+    "parameters" : [ {
+      "name" : "department",
+      "type" : "Department"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_DTO",
+      "rawSql" : "SELECT DEPT.deptno, DEPT.dname, DEPT.loc, DEPT.versionNo FROM DEPT/*BEGIN*/ WHERE /*IF dto.deptno != null*/ DEPT.deptno = /*dto.deptno*/null/*END*//*IF dto.dname != null*/ AND DEPT.dname = /*dto.dname*/null/*END*//*IF dto.loc != null*/ AND DEPT.loc = /*dto.loc*/null/*END*//*IF dto.versionNo != null*/ AND DEPT.versionNo = /*dto.versionNo*/null/*END*//*END*/",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "dto.deptno",
+        "rootParam" : "dto",
+        "propertyPath" : "deptno",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.dname",
+        "rootParam" : "dto",
+        "propertyPath" : "dname",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.loc",
+        "rootParam" : "dto",
+        "propertyPath" : "loc",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.versionNo",
+        "rootParam" : "dto",
+        "propertyPath" : "versionNo",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "dto.deptno != null", "dto.dname != null", "dto.loc != null", "dto.versionNo != null" ],
+      "hasBegin" : true,
+      "expandedSql" : "SELECT DEPT.deptno, DEPT.dname, DEPT.loc, DEPT.versionNo FROM DEPT WHERE  DEPT.deptno = ? AND DEPT.dname = ? AND DEPT.loc = ? AND DEPT.versionNo = ?",
+      "expandedBindOrder" : [ "dto.deptno", "dto.dname", "dto.loc", "dto.versionNo" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "DEPT" ],
+        "selectColumns" : [ "DEPT.deptno", "DEPT.dname", "DEPT.loc", "DEPT.versionNo" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "DEPT.deptno",
+          "bindExpression" : "dto.deptno",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.dname",
+          "bindExpression" : "dto.dname",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.loc",
+          "bindExpression" : "dto.loc",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.versionNo",
+          "bindExpression" : "dto.versionNo",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "destory",
+    "returnType" : "void",
+    "parameters" : [ {
+      "name" : "department",
+      "type" : "Department"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "AUTO_SELECT_BY_DTO",
+      "rawSql" : "SELECT DEPT.deptno, DEPT.dname, DEPT.loc, DEPT.versionNo FROM DEPT/*BEGIN*/ WHERE /*IF dto.deptno != null*/ DEPT.deptno = /*dto.deptno*/null/*END*//*IF dto.dname != null*/ AND DEPT.dname = /*dto.dname*/null/*END*//*IF dto.loc != null*/ AND DEPT.loc = /*dto.loc*/null/*END*//*IF dto.versionNo != null*/ AND DEPT.versionNo = /*dto.versionNo*/null/*END*//*END*/",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "dto.deptno",
+        "rootParam" : "dto",
+        "propertyPath" : "deptno",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.dname",
+        "rootParam" : "dto",
+        "propertyPath" : "dname",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.loc",
+        "rootParam" : "dto",
+        "propertyPath" : "loc",
+        "kind" : "BIND"
+      }, {
+        "expression" : "dto.versionNo",
+        "rootParam" : "dto",
+        "propertyPath" : "versionNo",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "dto.deptno != null", "dto.dname != null", "dto.loc != null", "dto.versionNo != null" ],
+      "hasBegin" : true,
+      "expandedSql" : "SELECT DEPT.deptno, DEPT.dname, DEPT.loc, DEPT.versionNo FROM DEPT WHERE  DEPT.deptno = ? AND DEPT.dname = ? AND DEPT.loc = ? AND DEPT.versionNo = ?",
+      "expandedBindOrder" : [ "dto.deptno", "dto.dname", "dto.loc", "dto.versionNo" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "DEPT" ],
+        "selectColumns" : [ "DEPT.deptno", "DEPT.dname", "DEPT.loc", "DEPT.versionNo" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "DEPT.deptno",
+          "bindExpression" : "dto.deptno",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.dname",
+          "bindExpression" : "dto.dname",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.loc",
+          "bindExpression" : "dto.loc",
+          "operator" : "="
+        }, {
+          "column" : "DEPT.versionNo",
+          "bindExpression" : "dto.versionNo",
+          "operator" : "="
+        } ]
+      }
+    }
+  } ],
+  "notes" : [ ]
+}

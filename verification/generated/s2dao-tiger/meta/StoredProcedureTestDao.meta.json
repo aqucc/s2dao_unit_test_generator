@@ -1,0 +1,163 @@
+{
+  "daoClassName" : "examples.dao.tiger.StoredProcedureTestDao",
+  "daoSimpleName" : "StoredProcedureTestDao",
+  "packageName" : "examples.dao.tiger",
+  "annotationStyle" : "TIGER",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java/examples/dao/tiger/StoredProcedureTestDao.java",
+  "beanClassName" : "examples.dao.tiger.Employee",
+  "entity" : {
+    "className" : "examples.dao.tiger.Employee",
+    "simpleName" : "Employee",
+    "tableName" : "EMP",
+    "tableNameSource" : "ANNOTATION",
+    "properties" : [ {
+      "propertyName" : "empno",
+      "javaType" : "long",
+      "columnName" : "empno",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : true,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "ename",
+      "javaType" : "java.lang.String",
+      "columnName" : "ename",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "job",
+      "javaType" : "java.lang.String",
+      "columnName" : "job",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "mgr",
+      "javaType" : "Short",
+      "columnName" : "mgr",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "hiredate",
+      "javaType" : "java.util.Date",
+      "columnName" : "hiredate",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "sal",
+      "javaType" : "Float",
+      "columnName" : "sal",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "comm",
+      "javaType" : "Float",
+      "columnName" : "comm",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "deptno",
+      "javaType" : "int",
+      "columnName" : "deptno",
+      "columnNameSource" : "DEFAULT_PROPERTYNAME",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : false,
+      "access" : "GETTER"
+    }, {
+      "propertyName" : "timestamp",
+      "javaType" : "Timestamp",
+      "columnName" : "tstamp",
+      "columnNameSource" : "ANNOTATION",
+      "persistent" : true,
+      "primaryKey" : false,
+      "versionNo" : false,
+      "timestamp" : true,
+      "access" : "GETTER"
+    } ],
+    "relations" : [ {
+      "propertyName" : "department",
+      "targetType" : "Department",
+      "relationNo" : 0
+    } ],
+    "primaryKeyColumns" : [ "empno" ],
+    "timestampProperty" : "timestamp",
+    "primaryKeySource" : "HEURISTIC_FIRST"
+  },
+  "methods" : [ {
+    "name" : "getSalesTax",
+    "returnType" : "double",
+    "parameters" : [ {
+      "name" : "subtotal",
+      "type" : "double"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "PROCEDURE",
+    "procedureName" : "SALES_TAX"
+  }, {
+    "name" : "getSalesTax2",
+    "returnType" : "double",
+    "parameters" : [ {
+      "name" : "subtotal",
+      "type" : "double"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "PROCEDURE",
+    "procedureName" : "SALES_TAX2"
+  }, {
+    "name" : "getSalesTax3",
+    "returnType" : "double",
+    "parameters" : [ {
+      "name" : "subtotal",
+      "type" : "double"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "PROCEDURE",
+    "procedureName" : "SALES_TAX3"
+  }, {
+    "name" : "getSalesTax4",
+    "returnType" : "Map",
+    "parameters" : [ {
+      "name" : "subtotal",
+      "type" : "double"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "PROCEDURE",
+    "procedureName" : "SALES_TAX4"
+  } ],
+  "notes" : [ ]
+}

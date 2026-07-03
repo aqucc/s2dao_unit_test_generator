@@ -1,0 +1,126 @@
+Picked up JAVA_TOOL_OPTIONS: 
+Note: /home/user/s2dao_unit_test_generator/verification/runner/RunGeneratedTests.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+==== [NEW(PostgreSQL16)] sample=s2dao-tiger dialect=postgre ====
+Picked up JAVA_TOOL_OPTIONS: 
+==== schema ready (jdbc:postgresql://127.0.0.1:5432/s2daogen) ====
+==== running 4 test class(es), 20 test case(s) ====
+.---- evidence: EmployeeDao_getAllEmployeeNumbers_return.csv ----
+VALUE
+1001
+---- evidence: EmployeeDao_getAllEmployeeNumbers_dataset_emp.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeDao_getAllEmployees_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALES, TOKYO, 0",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: EmployeeDao_getAllEmployees_dataset_emp.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+---- evidence: EmployeeDao_getAllEmployees_dataset_dept.csv ----
+DEPTNO,DNAME,LOC,VERSIONNO
+50,SALES,TOKYO,NULL
+.---- evidence: EmployeeDao_getCount_return.csv ----
+VALUE
+1
+---- evidence: EmployeeDao_getCount_dataset_emp.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeDao_getEmployee_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALES, TOKYO, 0",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: EmployeeDao_getEmployee_dataset_emp.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+---- evidence: EmployeeDao_getEmployee_dataset_dept.csv ----
+DEPTNO,DNAME,LOC,VERSIONNO
+50,SALES,TOKYO,NULL
+.---- evidence: EmployeeDao_getEmployeeByJobDeptno_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,NULL,50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: EmployeeDao_getEmployeeByJobDeptno_dataset_emp.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeDao_getValueLabel_return.csv ----
+VALUE,LABEL
+1001,TESTA
+---- evidence: EmployeeDao_getValueLabel_dataset_emp.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeDao_update_return.csv ----
+VALUE
+1
+---- evidence: EmployeeDao_update_dataset_emp.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTAU,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: DepartmentDao_delete_dataset_DEPT.csv ----
+
+.---- evidence: DepartmentDao_insert_dataset_DEPT.csv ----
+DEPTNO,DNAME,LOC,VERSIONNO
+50,SALES,TOKYO,0
+51,SALES,TOKYO,0
+.---- evidence: DepartmentDao_update_dataset_DEPT.csv ----
+DEPTNO,DNAME,LOC,VERSIONNO
+50,SALESU,TOKYOU,1
+.---- evidence: EmployeeAutoDao_getAllEmployees_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALESU, TOKYOU, 1",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: EmployeeAutoDao_getAllEmployees_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeAutoDao_getEmployeeByDname_return.csv ----
+
+---- evidence: EmployeeAutoDao_getEmployeeByDname_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeAutoDao_getEmployeeByEmpno_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALESU, TOKYOU, 1",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: EmployeeAutoDao_getEmployeeByEmpno_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeAutoDao_getEmployeeByJobDeptno_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALESU, TOKYOU, 1",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: EmployeeAutoDao_getEmployeeByJobDeptno_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeAutoDao_getEmployeesBySal_return.csv ----
+
+---- evidence: EmployeeAutoDao_getEmployeesBySal_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeAutoDao_getEmployeesBySearchCondition_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALESU, TOKYOU, 1",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: EmployeeAutoDao_getEmployeesBySearchCondition_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: EmployeeAutoDao_update_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTAU,CLERKU,7901,1982-01-23 00:00:00,3001,501,51,2026-07-03 22:45:47
+.---- evidence: Employee2Dao_getEmployee_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALESU, TOKYOU, 1",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: Employee2Dao_getEmployee_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: Employee2Dao_getEmployees_return.csv ----
+COMM,DEPARTMENT,DEPTNO,EMPNO,ENAME,HIREDATE,JOB,MGR,MODIFIEDPROPERTYNAMES,SAL,TIMESTAMP
+500,"50, SALESU, TOKYOU, 1",50,1001,TESTA,1980-12-17 00:00:00,CLERK,7900,[],3000,2001-01-01 00:00:00
+---- evidence: Employee2Dao_getEmployees_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTA,CLERK,7900,1980-12-17 00:00:00,3000,500,50,2001-01-01 00:00:00
+.---- evidence: Employee2Dao_update_return.csv ----
+VALUE
+1
+---- evidence: Employee2Dao_update_dataset_EMP.csv ----
+EMPNO,ENAME,JOB,MGR,HIREDATE,SAL,COMM,DEPTNO,TSTAMP
+1001,TESTAU,CLERKU,7901,1982-01-23 00:00:00,3001,501,51,2026-07-03 22:45:47
+
+Time: 2.826
+
+OK (20 tests)
+
+==== RESULT tests=20 run=20 failures=0 errors=0 ====
+==== [NEW(PostgreSQL16)] sample=s2dao-tiger exit=0 ====

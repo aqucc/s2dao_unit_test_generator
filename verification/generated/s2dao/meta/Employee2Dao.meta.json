@@ -1,0 +1,49 @@
+{
+  "daoClassName" : "examples.dao.Employee2Dao",
+  "daoSimpleName" : "Employee2Dao",
+  "packageName" : "examples.dao",
+  "annotationStyle" : "CONSTANT",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/samples/s2dao/s2-dao-examples/src/main/java/examples/dao/Employee2Dao.java",
+  "methods" : [ {
+    "name" : "getEmployees",
+    "returnType" : "List",
+    "parameters" : [ {
+      "name" : "ename",
+      "type" : "String"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "UNRESOLVED",
+      "twoWay" : false,
+      "bindVariables" : [ ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "bean クラス未解決のため自動生成 SQL を構築できません。" ],
+      "hasBegin" : false,
+      "expandedBindOrder" : [ ]
+    }
+  }, {
+    "name" : "getEmployee",
+    "returnType" : "Employee",
+    "parameters" : [ {
+      "name" : "empno",
+      "type" : "int"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "UNRESOLVED",
+      "twoWay" : false,
+      "bindVariables" : [ ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "bean クラス未解決のため自動生成 SQL を構築できません。" ],
+      "hasBegin" : false,
+      "expandedBindOrder" : [ ]
+    }
+  } ],
+  "notes" : [ ]
+}
