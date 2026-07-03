@@ -1,0 +1,310 @@
+S2Dao 変更履歴
+    
+1.0.50
+-------------------------------------------------------------------------------
+** Bug
+    * [DAO-150] - 更新メソッドの初期化時、プロパティが認識されてない場合とテーブルがPrimary Key のみの場合で例外メッセージを区別するようにしました。
+
+** Improvement
+    * [DAO-148] - ページング処理のorder by句を取り除く正規表現で、order by句の2個目以降のカンマの前に空白や改行を認めました。
+    * [DAO-149] - Oracleのページング用SQLのselect句で、行番号を最後に返すようにしました。
+
+** New Feature
+    * [DAO-145] - MySQL専用のSQL_CALC_FOUND_ROWSを使用する、MySQLLimitOffsetPagingSqlRewriter を追加しました。
+    
+1.0.49
+-------------------------------------------------------------------------------
+** Bug
+    * [DAO-140] - OracleRownumPagingSqlRewriter使用時にBooleanToIntStatementFactoryが利用できない問題に対処しました。
+    * [DAO-141] - N:1マッピングで1側のデータが存在しなくても1側のインスタンスが生成されてしまう問題に対処しました[Seasar-user:14866]。
+    * [DAO-142] - Oracleのページング処理でORDER BY句がサブクエリにあるとハングアップする問題に対処しました。[Seasar-user:15211]
+    * [DAO-143] - Java の実装によっては @ProcedureCall で @ProcedureParameter の定義順に引数セットされない問題に対処しました。
+    * [DAO-144] - SelectableDataSourceを使用している場合に、シーケンスを使ったIDの採番のキャッシュが複数DataSourceで共有されてしまう問題に対処しました。
+    * [DAO-147] - BeanクラスにアノテーションId、ValueTypeを設定するとID自動設定でIllegalPropertyRuntimeExceptionが発生する不具合に対処しました。
+
+** New Feature
+    * [DAO-146] - byte配列やSerializable型をPostgresSQLのOID型やBYTEA型にマッピングできるようにしました。
+    
+1.0.48
+-------------------------------------------------------------------------------
+** Improvement
+    * [DAO-138] - 埋め込み変数コメントの使用する値に?を認めるようにしました。
+    
+1.0.48-RC1
+-------------------------------------------------------------------------------
+** Bug
+    * [DAO-129] - Daoメソッドの引数がnullの場合に、PreparedStatementにバインドするSQL型が不適切になる不具合を修正しました。[Seasar-user:12703]
+    * [DAO-130] - RelationRowCreatorを他のフレームワークが拡張した場合の不具合を修正しました。
+    * [DAO-132] - NotSingleRowUpdatedRuntimeException発生時にバージョン番号がインクリメントされる不具合を修正しました。[Seasar-user:13130] 
+    * [DAO-135] - Daoが実装クラスのときに、DaoインタフェースについたS2Daoアノテーションを取得できない不具合を修正しました。[Seasar-User:13943]
+
+** Improvement
+    * [DAO-136] - EntityManagerの利用時に、クエリの結果をDTOやMapで取得できるようにしました。[Seasar-user:13530]
+
+** New Feature
+    * [DAO-133] - 検索処理実行時に１レコードずつ取得する、フェッチ機能を追加しました。
+
+** Task
+    * [DAO-134] - Argumentsアノテーションを省略できる条件を整理してドキュメントに明記しました。
+
+1.0.47
+-------------------------------------------------------------------------------
+** Improvement
+    * [DAO-122] - Daoの検索系メソッドの戻り値としてプリミティブ型の配列やプリミティブ型のラッパー型を要素とするListを定義できるようにしました。
+    * [DAO-123] - Daoメソッドをオーバーロードしたときの例外をわかりやすくしました。
+    * [DAO-125] - SqlFileアノテーションに任意のSQLファイルを指定できるようにしました。
+
+** New Feature
+    * [DAO-126] - CheckSingleRowUpdateアノテーションを追加して、NotSingleRowUpdatedRuntimeExceptionをスローするかどうか制御できるようにしました。
+    * [DAO-127] - SequenceIdentifierGeneratorにallocationSizeを指定できるようにしました。
+    
+1.0.47-RC1
+-------------------------------------------------------------------------------
+** Bug
+    * [DAO-34] - [Seasar-user:4051]SQLServerでストアドプロシージャを利用したときにDBのDatetime型がJavaのDate型にマッピングできない問題を解消しました。
+
+** Improvement
+    * [DAO-106] - [seasar-s2dao-dev:316]ストアドへの型変換にメタデータではなくValueTypeを使用するプロシージャ実行をサポートしました。
+    * [DAO-107] - [Seasar-user:9231] バッチ実行時にStatement#executeBatch()が返すint[]をそのまま返すようにする
+    * [DAO-108] - プロシージャ実行結果をログに採るようにしました。
+    * [DAO-116] - IDアノテーションを一つのBeanに複数指定した場合に複合主キーとして認識するようにしました。
+    * [DAO-118] - 検索結果をMappingする時にMappingに無関係のPropertyを除外し、パフォーマンスを改善しました。
+    * [DAO-119] - PROCEDUREアノテーション使用時、DBのメタデータのINパラメータとメソッドのパラメータの数が異なる場合はわかりやすい例外をスローするようにしました。
+    * [DAO-121] - ModifiedOnly機能をNullBeanEnhancerが設定されているときでも利用できるようにする（[seasar-s2dao-dev:496]）
+
+** New Feature
+    * [DAO-23] - 自動生成のSQLのテーブル名やカラム名を変換可能にしました。
+    * [DAO-103] - S2DaoTestCaseのJUnit4用のクラスを作成しました
+    * [DAO-110] - 設定でメタデータを使わずにプロパティからカラムの名前を決定できるようにしました。
+    * [DAO-117] - Seasar2.4系との組み合わせで、Beanのプロパティにpublicフィールドを使用可能にしました。
+
+1.0.46
+-------------------------------------------------------------------------------
+** Bug
+    * [DAO-31] - Oracle JDBC使用時、QUERYアノテーションのBEGINコメントでSQLRuntimeExceptionが発生しないようにしました。
+    * [DAO-111] - S2JDBCのMapResultSetHandlerではなく、S2DaoのMapResultSetHandlerを使用するようにしました。
+    * [DAO-113] - S2PagerでSQLExceptionが発生しないようにしました
+    * [DAO-114] - UNIX系OSでテストが通るようにしました
+** Improvement
+    * [DAO-18] - SQLが間違っている可能性がある場合に警告をログ出力するようにしました。
+    * [DAO-37] - PROCEDUREアノテーションやSQLファイルを利用するメソッドのみを持つDaoに限りBEANアノテーションの指定を不要にしました。
+    
+1.0.45
+-------------------------------------------------------------------------------
+Dao の初期化と Connection の取得との間でデッドロックが発生する問題を解消しました。[DAO-33]
+OracleのROWNUM疑似列を使ったPager実装を追加しました。[DAO-105]
+Dao初期化時にConnectionPoolから全てのConnectionが貸し出されているとロックされてしまう問題に対応しました。[DAO-33]
+プロシージャー取得時に、DatabaseMetaDataUtil#convertIdentifierを経由したプロシジャー名でプロシジャーを取得できない場合は、convertIdentifierを通さないで再度取得するようにしました。[DAO-104]
+DaoMetaDataFactoryImplのuseDaoClassForLogプロパティがtrueの場合は、Daoのクラスを引数にとってログ出力するようにしました。[DAO-66]
+SQL実行時のログをS2JDBCのBasicHandler#logSql経由で出力するように変更しました。[DAO-102]
+トランザクション外でDaoのメタデータを作成した際に物理的なコネクションを無駄に取得しないようにしました。[DAO-109]
+
+1.0.44
+-------------------------------------------------------------------------------
+DeleteでQueryアノテーションの記述が可能になりました。[DAO-93]
+戻り値にDTOを利用した場合、そのDTOに指定したアノテーションが無視されてBEAN側のアノテーションが有効になってしまう問題に対応しました。[DAO-96]
+戻り値にGenericsなMap(List<Map<String, String>>)を使用するとClassCastExceptionになっていた問題に対応しました。[DAO-97]
+使用できない箇所へQueryアノテーションが指定されている場合は例外にするようになりました。[DAO-95]
+メソッドの戻り値でMapやDTOを個別に指定した場合にアンダースコアを含むカラム名も自動的にマッピングできるようにしました。[DAO-98]
+Beanクラス名からdecamelizeしてアンダースコアを付与した名前がテーブル名と一致するときは、TABLEアノテーションを不要にしました。[DAO-99]
+
+
+1.0.43
+-------------------------------------------------------------------------------
+DBを特定する処理を改善し、DatabaseMetaData#getDatabaseProductName()が"DB2"ではじまっていればDB2と判定するようにしました。[DAO-85]
+S2PagerのgetCountメソッドで、order by句を削除して実行可能にしました。[DAO-88][Seasar-user:7549]
+select系の戻り値で複数のDTO、Mapをサポートしました。[DAO-91][DAO-92]
+Sybaseに対応しました。[Seasar-user:7450][DAO-87]
+PagerS2DaoInterceptorWrapperでpushに失敗した場合でもpopされてしまう問題に対応しました。[DAO-61][Seasar-user:5851]
+Tableに関連付いていないEntityでINSERTした際のエラーメッセージをわかりやすくしました。[DAO-89]
+SqlFileアノテーションを導入し、SQLファイル名が誤っている場合に早期検出できるようにしました。[DAO-90]
+
+
+1.0.42
+-------------------------------------------------------------------------------
+Daoメソッド内からDaoメソッドを呼ぶとNullPointerExceptionになっていた問題に対応しました。[DAO-83]
+Eclipse上で警告が出ていたのを解消しました。[DAO-82]
+
+
+1.0.41
+-------------------------------------------------------------------------------
+SQLのコメント中に?が含まれていると、デバッグログ出力時に例外になる場合があった問題に対応しました。[DAO-72]
+使用できないID取得方法の場合は、例外となるようにしました。[DAO-77]
+PagerContextがWebアプリのUnDeploy時に解放されない問題に対応しました。[DAO-78]
+Oracleにおけるパッケージ化したプロシージャの呼び出しにて、スキーマ名を省略したときにカレントスキーマを優先して検索するようにしました。[DAO-80]
+同梱するHSQLDBを最新版にしました。[DAO-81]
+
+S2Daoの配布プロジェクトをSeasar2.3ベースにし、Seasar2.4との組み合わせをテストするプロジェクトを設けました。これにより、Seasar2のプロジェクトがなくてもS2Daoのプロジェクトをインポート可能になりました。
+
+
+1.0.41-RC1
+-------------------------------------------------------------------------------
+PagerStatementFactoryにbooleanToIntプロパティを追加し、S2PagerとBooleanToIntPreparedStatementを併用可能にしました。[DAO-62]
+IDアノテーションの複数DBに対しての切り替えを可能にしました。[Seasar-user:5797][DAO-60]
+プロダクト名"DB2/AIX64"のデータベースに対応しました。[Seasar-user:6052][DAO-68]
+1.0.40で追加した更新したプロパティのみをUPDATE文に含める機能を、OFFにできるようにしました。[DAO-69]
+Oracleで"パッケージ名.プロシージャ名"形式でPROCEDUREアノテーションを記述できるようにしました。[DAO-65]
+Daoから取得したSerializableなBeanをデシリアライズする際ならびに、finalなBeanを取得する際に例外になっていたため、デフォルトのdao.diconではBeanを拡張しないようにしました。[DAO-71][DAO-74]
+Tigerアノテーションと定数アノテーションを併用可能にしました。[Seasar-user:6203] [DAO-70]
+TigerアノテーションのSQLアノテーションが複数DBの切り替えに対応していなかったため、対応しました。[DAO-75]
+exampleならびにテスト実行時のデータソース設定は、Seasar2.3使用時はj2ee_s23.dicon、Seasar2.4使用時はjdbc.diconに記述するようになりました。[DAO-76]
+
+使用されていないためorg.seasar.dao.node.AddWhereIfNodeを削除しました。
+
+
+1.0.40
+-------------------------------------------------------------------------------
+runHsqldb.batでHSQLDBを起動できなくなっていた問題に対応しました。[DAO-44]
+@Bean(table="テーブル名")のテーブル名を書き換えてもfrom句が書き換わらない問題に対応しました。[DAO-46]
+更新したプロパティのみをUPDATE文に含める機能を追加しました。[seasar-s2dao-dev:40][DAO-48]
+PKのみのテーブルをupdateするとSQL構文エラーでSQLExceptionになっていましたが、SQL発行前に例外を投げるようにしました。[DAO-52]
+BeanMetaDataImplの初期化時に発生する例外メッセージを詳細にしました。[DAO-53]
+S2PagerとFOR UPDATEを併用可能にしました。[DAO-57]
+
+内部的には...
+UpdateAutoDynamicCommandのメソッド名のtypoを修正しました。[DAO-45]
+PagerResultSetFactoryLimitOffsetWrapperTestのクラス名のtypeを修正しました。[DAO-54]
+DaoMetaDataImpl・BeanMetaDataImplまわりをリファクタしました。[DAO-49]
+BeanAnnotationReaderのtypoを修正しました。
+DaoNamingConventionを導入しました。
+
+
+1.0.39
+-------------------------------------------------------------------------------
+SQLiteにてSelectしたEntityインスタンスにプロパティがセットされない問題に対応しました。[Seasar-user:5015][DAO-41]
+S2Pager使用時にFOR UPDATEを含むSQL文で例外が発生する問題に対応しました。[Seasar-user:4647][DAO-42]
+S2Pagerの設定についてのドキュメントが古いままだったのを更新しました。[DAO-40]
+SQL文中のヒント句が消されてしまう問題に対応しました。[DAO-43]
+
+
+1.0.38
+-------------------------------------------------------------------------------
+1.0.37におけるリリース漏れを取り込みました。
+UnlessNullによる更新の際、VersionNo及び、Timestampが、適切に更新されるようにしました。
+DTOを使ってSELECT文を自動生成した時、対応するカラムに_が含まれているが、DTOのプロパティ名には_が含まれていなくてもWHERE句を生成出来る様にしました。
+H2に対応しました。
+
+
+1.0.37
+-------------------------------------------------------------------------------
+更新(UPDATE)処理を行う時、メソッド名の末尾にUnlessNullが付いている時、引数に渡されたDTOのフィールドの内、nullでは無い値のみを更新対象とする様にしました。
+検索(SELECT)処理を行う時、引数に設定されたDTOの型とBEANアノテーションに定義された型に互換性がある場合、BEANアノテーションに定義された型を使用して検索条件を自動的に組み立てる様にしました。
+
+
+1.0.36
+-------------------------------------------------------------------------------
+PKのみのテーブルへINSERTできなくなっていた問題に対応しました。[Seasar-user:3915][DAO-16]
+DaoのReturnTypeがインタフェースの配列で、BEAN定数がそのインタフェースをImplするクラスである場合に、正しく動作していなかった問題に対応しました。[DAO-19]
+自動生成SELECT文にSELECT項目が1つも無い場合は例外を投げるようにしました。[DAO-20]
+HotDeployに対応しました。(DaoMetaDataFactoryが保持するキャッシュをクリアするようにしました)[DAO-17]
+dao.diconをs2-dao-x.x.x.jarへ含めるようにしました。[DAO-21]
+SELECT句のASへBeanのプロパティ名を指定した場合にもBeanへセットできるようにしました。[Seasar-user:4071][DAO-26]
+s2dao-tiger・s2dao-backport175のjarがclasspathにある場合には、自動的にTiger・Backport175側のAnnotationReaderを使用するようにしました。[DAO-22]
+使われていなかったorg.seasar.dao.annotation.tiger.AnnotationReaderFactoryクラスを削除しました。(s2dao-tiger)[DAO-27]
+INSERT文生成時にEntityにPKしかセットされていない場合は例外を出していました(1.0.33から)が、INSERT可能な項目が1つでもあれば例外を投げないことにしました。(例えば、以前はVersionNoだけのINSERTは例外にしていました)[Seasar-user:4164][DAO-29]
+デフォルト設定でS2Pagerを有効にしました。[DAO-28]
+charとCharacter型をEntityで扱えるようにしました。(実際にコードを変更したのはS2Container側。2.3.11以降)[DAO-30]
+Daoの引数がnullの場合にANDやWHEREでSQL文が終わる問題を修正しました。[DAO-32]
+
+※[DAO-22][DAO-28]の対応でdao.diconを変更しています。
+
+
+1.0.35
+-------------------------------------------------------------------------------
+AbstractDaoを継承したクラスでは、Daoインタフェースへ付けたbeanアノテーションを取得できていなかった問題に対応しました。なおs2dao-backport175では https://www.seasar.org/issues/browse/MAVENBACKPORT-2 の問題のため対応できていません。(s2dao-tiger)[Seasar-user:3651]
+パラメータなしのストアドプロシージャでエラーが発生する問題に対応しました。[Seasar-user:3686] 
+SQL文へ使用するカラム名は、DatabaseMetaDataよりもCOLUMNアノテーションを優先するようにしました。[Seasar-user:3693]
+IDアノテーションのSEQUENCEで作成されたIDが、INSERT文に含まれなくなってしまった問題に対応しました。[Seasar-user:3711]
+S2Dao TigerのExampleに置かれていたdao.diconにValueTypeFactoryが抜けていたのを修正しました。
+"スキーマ名.プロシージャ名"形式でPROCEDUREアノテーションを記述した際に、スキーマ名がカタログ名として扱われていたのを修正しました。[DAO-5]
+SelectDynamicCommandからのSELECT時にsetchSizeを変更しないようにしました。fetchSizeを変更するにはS2Container 2.3.11からの機能を使用してください。[DAO-2]
+ResultSetを返すStored Procedureを扱えるようにしました。[DAO-6]
+SELECT文に関連エンティティの記述がない場合は、関連エンティティはnullになるようにしました。[Seasar-user:3605][DAO-7]
+バッチ更新ではINSERT文からnull値のカラムを除外する機能(s2dao-1.0.33で追加)をサポートしないことにしました。[Seasar-user:3815][DAO-9]
+IDアノテーションがあると"_"を含むカラム名を自動解決できない問題に対応しました。[Seasar-user:3806][DAO-8]
+
+ソースコードのエンコーディングをMS932からUTF-8へ変更しました。
+インスタンス変数名を、"_"サフィックス無しで統一しました。
+
+
+1.0.34
+-------------------------------------------------------------------------------
+QUERYアノテーションにBEGINコメントを書けるようにしました。[Seasar-user:3558]
+VALUE_TYPEアノテーションへはコンポーネント名を記述するよう変更しました。[Seasar-user:3556]
+dao.diconへValueTypeFactoryImplとStringClobTypeを追加しました。
+BeanMetaDataImpl, DaoMetaDataImpl, DtoMetaDataImplへデフォルトコンストラクタを追加し、既存のコンストラクタをdeprecatedにしました。
+ID="identity"の場合にバッチ更新でのinsertがエラーになる問題に対応しました。
+s2dao-examplesのEmployeeDaoClientが例外となる問題に対応しました。[Seasar-user:3465]
+
+※dao.diconを変更しています。
+
+
+1.0.33
+-------------------------------------------------------------------------------
+CLOB型をサポートしました。このためにVALUE_TYPEアノテーションを導入しました。
+自動生成されるINSERT文から、beanのプロパティがnullのカラムを除外するようにしました。これにより、Tableへ定義してあるDEFAULT値を活かすことができます。
+更新行数が0件の場合に例外を投げるAssertAtLeastOneRowInterceptorと、更新行数が1件以外の場合に例外を投げるAssertExactlyOneRowInterceptorを追加しました。[Seasar-user:3508]
+UpdateDynamicCommandとUpdateAutoDynamicCommandが同一だったため、UpdateAutoDynamicCommandを削除しました。
+
+S2Dao 1.0.33の動作にはSeasar 2.3.8が必要です。
+(CLOB型サポートを利用しなければ2.3.7でも動作すると思います。)
+
+
+1.0.32
+-------------------------------------------------------------------------------
+DaoのSuffixとinsert,update,delete自動生成のprefixの指定ができるようになりました。　([Seasar-user:3226])
+Sqlファイルの文字コード誤認識回避の実装([Seasar-user:3337])
+
+
+1.0.31
+-------------------------------------------------------------------------------
+PROCEDUREアノテーションを追加しました。
+S2Pagerを組み込みました。
+
+
+1.0.30
+-------------------------------------------------------------------------------
+org.seasar.dao.impl.DaoMetaDataImpl
+daoのインターフェースを継承したインターフェースでも動作するようにしました。
+(thanks to Satoshi Kimura)
+
+
+1.0.29
+-------------------------------------------------------------------------------
+org.seasar.dao.node.BindVariableNode
+* 関連先オブジェクトのプロパティをバインドできるように修正しました。(#6435)
+
+org.seasar.dao.impl パッケージ
+* DaoMetaDataFactoryImplのprivateフィールドをprotectedに変更しました。
+* EntityManager#findへ渡すSELECT文がスペースや改行始まりである場合にSQLが組み立てられなかった問題を修正しました。(#6491)
+
+org.seasar.dao.unit パッケージ
+* S2DaoTestCaseへデフォルトコンストラクタを追加しました。(#6438)
+
+Maven2
+* Maven2に対応しました。
+
+Derby対応
+* Apache Derbyデータベースに対応しました。
+
+
+1.0.28
+-------------------------------------------------------------------------------
+org.seasar.dao.impl.DaoMetaDataImpl
+* アノテーションの読み込みをAnnotationReaderに分離しました。
+* SQLアノテーションを新たに作りました。
+* QUERYアノテーションにSQLコメントの後にORDER BYを記述したときに
+　うまくSQLが組み立てられなかったのを修正しました。
+* DaoインターフェースにBean以外の引数でdeleteやupdateメソッドを
+　作成したときに、DAO を implements した抽象クラスを用意して、
+　該当するメソッドを実装してもExceptionが飛んでいたのを修正しました。 
+* インタセプタを抽象クラスに適用した場合、インタフェースからだけでなく
+　適用先のクラスからもアノテーションを取得できるように変更しました。
+
+
+1.0.27
+-------------------------------------------------------------------------------
+org.seasar.extension.dbcp.impl パッケージ
+* カラム名に_がついているプライマリキーがプライマリキーとして認識されないのを修正しました。
+* DaoMetaDataImpl,BeanMetaDataImpl,DtoMetaDataImplのprivateメソッドをprotectedにかえました。
+* RelationPropertyTypeImplのprivateフィールドをprotectedにかえました。

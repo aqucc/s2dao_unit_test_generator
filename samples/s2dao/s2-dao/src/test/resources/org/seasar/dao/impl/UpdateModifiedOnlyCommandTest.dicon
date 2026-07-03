@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+<!DOCTYPE components PUBLIC "-//SEASAR//DTD S2Container//EN"
+"http://www.seasar.org/dtd/components.dtd">
+<components>
+	<include path="dao-enhance.dicon"/>
+	<component class="org.seasar.dao.impl.UpdateModifiedOnlyCommandTest$EmpDao">
+		<aspect>dao.interceptor</aspect>
+	</component>
+	<component class="org.seasar.dao.impl.UpdateModifiedOnlyCommandTest$Emp2Dao">
+		<aspect>dao.interceptor</aspect>
+	</component>
+	<component class="org.seasar.dao.impl.UpdateModifiedOnlyCommandTest$DeptDao">
+		<aspect>dao.interceptor</aspect>
+	</component>
+	<component class="org.seasar.dao.impl.UpdateModifiedOnlyCommandTest$EmpByReflectionDao">
+		<aspect>dao.interceptor</aspect>
+	</component>
+</components>

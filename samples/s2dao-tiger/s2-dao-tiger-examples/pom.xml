@@ -1,0 +1,37 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
+  <parent>
+    <groupId>org.seasar.dao</groupId>
+    <artifactId>s2-dao-tiger-project</artifactId>
+    <version>1.0.52-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>s2-dao-tiger-examples</artifactId>
+  <packaging>jar</packaging>
+  <name>S2Dao Tiger Examples</name>
+  <description></description>
+  <url>http://s2dao.seasar.org/</url>
+  <build>
+    <testResources>
+      <testResource>
+        <directory>${basedir}/src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>${basedir}/../s2-dao-tiger/src/test/resources</directory>
+        <includes>
+          <include>data-hsqldb/**</include>
+        </includes>
+      </testResource>
+    </testResources>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>s2-dao-tiger</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>

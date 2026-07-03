@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="build/s2-dao/classes" path="s2-dao/src/main/java"/>
+	<classpathentry kind="src" output="build/s2-dao/classes" path="s2-dao/src/main/resources"/>
+	<classpathentry kind="src" output="build/s2-dao/test-classes" path="s2-dao/src/test/java"/>
+	<classpathentry kind="src" output="build/s2-dao/test-classes" path="s2-dao/src/test/resources"/>
+	<classpathentry kind="src" output="build/s2-dao-examples/classes" path="s2-dao-examples/src/main/java"/>
+	<classpathentry kind="src" output="build/s2-dao-examples/classes" path="s2-dao-examples/src/main/resources"/>
+	<classpathentry kind="src" output="build/s2-dao-examples/test-classes" path="s2-dao-examples/src/test/java"/>
+	<classpathentry kind="src" output="build/s2-dao-examples/test-classes" path="s2-dao-examples/src/test/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/aopalliance-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/derby-10.1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/geronimo-j2ee_1.4_spec-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/h2-1.0.20061103.jar" sourcepath="lib/h2-1.0.20061103-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javassist-3.4.ga.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit-3.8.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ognl-2.6.9-patch-20070624.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-3.0-FINAL.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hsqldb.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/s2-extension-2.3.23.jar" sourcepath="lib/s2-extension-2.3.23-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/s2-framework-2.3.23.jar"/>
+	<classpathentry kind="output" path="build/s2-dao/classes"/>
+</classpath>

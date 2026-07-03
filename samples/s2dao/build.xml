@@ -1,0 +1,76 @@
+<project name="s2dao" default="dist" basedir=".">
+	<property name="ver" value="1.0.52-SNAPSHOT"/>
+
+	<target name="fix-site">
+		<mkdir dir="target/site/en"/>
+		<move todir="target/site/en">
+			<fileset dir="target/site">
+				<exclude name="apidocs/**"/>
+				<exclude name="en/**"/>
+				<exclude name="ja/**"/>
+				<exclude name="index.html.en"/>
+				<exclude name="index.html.ja"/>
+			</fileset>
+		</move>
+		<delete file="target/site/ja/index.html.en"/>
+		<delete file="target/site/ja/index.html.ja"/>
+	</target>
+
+	<target name="dist" depends="fix-site">
+		<mkdir dir="target"/>
+
+		<zip zipfile="target/s2-dao-${ver}.zip">
+			<zipfileset prefix="s2dao" dir=".">
+				<exclude name="**/build/**"/>
+				<exclude name="**/target/**"/>
+				<exclude name="*.log"/>
+				<exclude name="**/.settings/**"/>
+				<exclude name="s2-dao/cobertura.ser"/>
+				<exclude name="s2-dao-examples/cobertura.ser"/>
+				<exclude name="s2-dao/*.log"/>
+				<exclude name="s2-dao-examples/*.log"/>
+				<exclude name="copyZip.bat"/>
+			</zipfileset>
+			<zipfileset prefix="s2dao/lib" dir="s2-dao/target">
+				<include name="s2-dao-${ver}.jar"/>
+				<include name="s2-dao-${ver}-sources.jar"/>
+			</zipfileset>
+			<zipfileset prefix="s2dao/resources" dir="s2-dao/src/test/resources">
+				<include name="j2ee.dicon"/>
+				<include name="log4j.properties"/>
+			</zipfileset>
+			<zipfileset prefix="s2dao/resources" dir="s2-dao-s24-test/src/test/resources">
+				<include name="jdbc.dicon"/>
+			</zipfileset>
+			<zipfileset prefix="s2dao-tiger" dir="../s2dao-tiger-1.0.x">
+				<exclude name="**/build/**"/>
+				<exclude name="**/target/**"/>
+				<exclude name="*.log"/>
+				<exclude name="**/.settings/**"/>
+				<exclude name="s2-dao-tiger/cobertura.ser"/>
+				<exclude name="s2-dao-tiger-examples/cobertura.ser"/>
+				<exclude name="s2-dao-tiger/*.log"/>
+				<exclude name="s2-dao-tiger-examples/*.log"/>
+			</zipfileset>
+			<zipfileset prefix="s2dao-tiger/lib" 
+				dir="../s2dao-tiger-1.0.x/s2-dao-tiger/target">
+				<include name="s2-dao-tiger-${ver}.jar"/>
+				<include name="s2-dao-tiger-${ver}-sources.jar"/>
+			</zipfileset>
+			<zipfileset prefix="s2dao-tiger/resources" dir="../s2dao-tiger-1.0.x/s2-dao-tiger/src/test/resources">
+				<include name="j2ee.dicon"/>
+				<include name="s2junit4.dicon"/>				
+				<include name="log4j.properties"/>
+			</zipfileset>
+			<zipfileset prefix="s2dao-tiger/resources" dir="s2-dao-s24-test/src/test/resources">
+				<include name="jdbc.dicon"/>
+			</zipfileset>
+			<zipfileset prefix="doc" dir="../s2dao-www">
+				<exclude name="**/download/**"/>
+				<exclude name=".project"/>
+				<exclude name="**/.settings/**"/>
+			</zipfileset>
+		</zip>
+	</target>
+
+</project>

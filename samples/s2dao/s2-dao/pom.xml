@@ -1,0 +1,88 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+>
+  <parent>
+    <groupId>org.seasar.dao</groupId>
+    <artifactId>s2-dao-project</artifactId>
+    <version>1.0.52-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>s2-dao</artifactId>
+  <packaging>jar</packaging>
+  <name>S2Dao</name>
+  <url>http://s2dao.seasar.org/</url>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prepare-test-jar</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <copy todir="${project.build.directory}/test-jar-staging">
+                  <fileset dir="${project.build.testOutputDirectory}">
+                    <exclude name="**/*.dicon"/>
+                    <exclude name="log4j.properties"/>
+                    <exclude name="data-hsqldb/**"/>
+                    <exclude name="data-derby/**"/>
+                    <exclude name="data-h2/**"/>
+                  </fileset>
+                </copy>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test-jar</id>
+            <phase>package</phase>
+            <configuration>
+              <testClassesDirectory>${project.build.directory}/test-jar-staging</testClassesDirectory>
+            </configuration>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.seasar.container</groupId>
+      <artifactId>s2-extension</artifactId>
+      <version>2.3.23</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-j2ee_1.4_spec</artifactId>
+      <version>1.0</version>
+      <type>jar</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+      <version>1.0</version>
+      <type>jar</type>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+</project>

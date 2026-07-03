@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry output="build/s2-dao-tiger/classes" kind="src" path="s2-dao-tiger/src/main/java"/>
+	<classpathentry output="build/s2-dao-tiger/classes" kind="src" path="s2-dao-tiger/src/main/resources"/>
+	<classpathentry output="build/s2-dao-tiger/test-classes" kind="src" path="s2-dao-tiger/src/test/java"/>
+	<classpathentry output="build/s2-dao-tiger/test-classes" kind="src" path="s2-dao-tiger/src/test/resources"/>
+	<classpathentry output="build/s2-dao-tiger-examples/classes" kind="src" path="s2-dao-tiger-examples/src/main/java"/>
+	<classpathentry output="build/s2-dao-tiger-examples/classes" kind="src" path="s2-dao-tiger-examples/src/main/resources"/>
+	<classpathentry output="build/s2-dao-tiger-examples/test-classes" kind="src" path="s2-dao-tiger-examples/src/test/java"/>
+	<classpathentry output="build/s2-dao-tiger-examples/test-classes" kind="src" path="s2-dao-tiger-examples/src/test/resources"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/s2dao-1.0.x"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="build/s2-dao-tiger/classes"/>
+</classpath>
