@@ -1,34 +1,63 @@
 package com.example.s2daotestgen.cli;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.example.s2daotestgen.dao.DaoAnalyzer;
 import com.example.s2daotestgen.dao.Dialect;
 import com.example.s2daotestgen.dao.SourceRepository;
+import com.example.s2daotestgen.gen.GenerationReport;
+import com.example.s2daotestgen.gen.MetaJsonReader;
+import com.example.s2daotestgen.gen.TestClassGenerator;
 import com.example.s2daotestgen.json.JsonWriter;
 import com.example.s2daotestgen.model.MetaModel.DaoMeta;
 import com.example.s2daotestgen.sql.SqlFileIndex;
 
 /**
- * フェーズ1 CLI。
+ * s2dao-testgen CLI。
  *
  * <pre>
+ * # フェーズ1: 解析(メタ JSON 出力)
  * java -jar s2dao-testgen.jar analyze --src &lt;javaソースdir&gt; --sql &lt;sqldir&gt; \
  *      --out &lt;出力dir&gt; [--dbms oracle|postgre|standard]
- * </pre>
  *
- * --src / --sql は同一ディレクトリでも可。両方とも再帰走査し、複数 DAO を一括処理する。
+ * # フェーズ2: テストコード生成(メタ JSON から)
+ * java -jar s2dao-testgen.jar generate --meta &lt;metaJSONdir&gt; --out &lt;テスト出力dir&gt; \
+ *      [--package &lt;pkg&gt;] [--dbms oracle|postgre]
+ *
+ * # 解析 + 生成 一括
+ * java -jar s2dao-testgen.jar gen-all --src &lt;javaソースdir&gt; --sql &lt;sqldir&gt; \
+ *      --out &lt;テスト出力dir&gt; [--meta &lt;中間metadir&gt;] [--package &lt;pkg&gt;] [--dbms oracle|postgre]
+ * </pre>
  */
 public final class Main {
 
     public static void main(final String[] args) throws Exception {
-        if (args.length == 0 || !args[0].equals("analyze")) {
+        if (args.length == 0) {
             printUsage();
-            System.exit(args.length == 0 ? 1 : 0);
+            System.exit(1);
             return;
         }
+        final String cmd = args[0];
+        if (cmd.equals("analyze")) {
+            analyzeCmd(args);
+        } else if (cmd.equals("generate")) {
+            generateCmd(args);
+        } else if (cmd.equals("gen-all")) {
+            genAllCmd(args);
+        } else {
+            printUsage();
+            System.exit(0);
+        }
+    }
+
+    // ================= analyze =================
+
+    private static void analyzeCmd(final String[] args) throws Exception {
         final List<File> srcDirs = new ArrayList<File>();
         final List<File> sqlDirs = new ArrayList<File>();
         File outDir = null;
@@ -61,13 +90,13 @@ public final class Main {
             sqlDirs.addAll(srcDirs);
         }
 
-        final int count = run(srcDirs, sqlDirs, outDir, dialect);
+        final int count = analyze(srcDirs, sqlDirs, outDir, dialect);
         System.out.println("完了: " + count + " 件の DAO メタ JSON を出力しました → "
                 + outDir.getAbsolutePath());
     }
 
     /** 解析本体。生成したメタ JSON 数を返す。 */
-    public static int run(final List<File> srcDirs, final List<File> sqlDirs,
+    public static int analyze(final List<File> srcDirs, final List<File> sqlDirs,
             final File outDir, final Dialect dialect) throws Exception {
         final SourceRepository repo = new SourceRepository();
         for (final File d : srcDirs) {
@@ -97,15 +126,153 @@ public final class Main {
         return count;
     }
 
+    // ================= generate =================
+
+    private static void generateCmd(final String[] args) throws Exception {
+        File metaDir = null;
+        File outDir = null;
+        String pkg = null;
+        for (int i = 1; i < args.length; i++) {
+            final String a = args[i];
+            if (a.equals("--meta") && i + 1 < args.length) {
+                metaDir = new File(args[++i]);
+            } else if (a.equals("--out") && i + 1 < args.length) {
+                outDir = new File(args[++i]);
+            } else if (a.equals("--package") && i + 1 < args.length) {
+                pkg = args[++i];
+            } else if (a.equals("--dbms") && i + 1 < args.length) {
+                ++i; // 生成側では方言は現状未使用(将来拡張用)
+            } else {
+                System.err.println("不明な引数: " + a);
+                printUsage();
+                System.exit(1);
+                return;
+            }
+        }
+        if (metaDir == null || outDir == null) {
+            System.err.println("--meta と --out は必須です。");
+            printUsage();
+            System.exit(1);
+            return;
+        }
+        final GenerationReport report = generate(metaDir, outDir, pkg);
+        System.out.println("完了: テストコードを生成しました → " + outDir.getAbsolutePath());
+        System.out.println(report.toText());
+    }
+
+    /** メタ JSON ディレクトリからテストコードを生成する。 */
+    public static GenerationReport generate(final File metaDir, final File outDir,
+            final String pkg) throws Exception {
+        final MetaJsonReader reader = new MetaJsonReader();
+        final TestClassGenerator gen = new TestClassGenerator();
+        final GenerationReport report = new GenerationReport();
+        outDir.mkdirs();
+
+        final File[] files = metaDir.listFiles();
+        if (files == null) {
+            throw new IllegalArgumentException("メタディレクトリが読めません: " + metaDir);
+        }
+        // 決定的順序
+        java.util.Arrays.sort(files, new java.util.Comparator<File>() {
+            public int compare(File a, File b) {
+                return a.getName().compareTo(b.getName());
+            }
+        });
+
+        for (int i = 0; i < files.length; i++) {
+            final File f = files[i];
+            if (!f.getName().endsWith(".meta.json")) {
+                continue;
+            }
+            final DaoMeta dao = reader.read(f);
+            final TestClassGenerator.Result r = gen.generate(dao, pkg, report);
+            final File dir = (r.packageName != null && r.packageName.length() > 0)
+                    ? new File(outDir, r.packageName.replace('.', '/')) : outDir;
+            dir.mkdirs();
+            final File out = new File(dir, r.className + ".java");
+            writeUtf8(out, r.source);
+            System.out.println("  " + f.getName() + " → "
+                    + (r.packageName != null ? r.packageName + "." : "") + r.className
+                    + " (tests=" + r.testMethods + ", skipped=" + r.skipped + ")");
+        }
+        return report;
+    }
+
+    // ================= gen-all =================
+
+    private static void genAllCmd(final String[] args) throws Exception {
+        final List<File> srcDirs = new ArrayList<File>();
+        final List<File> sqlDirs = new ArrayList<File>();
+        File outDir = null;
+        File metaDir = null;
+        String pkg = null;
+        Dialect dialect = Dialect.STANDARD;
+
+        for (int i = 1; i < args.length; i++) {
+            final String a = args[i];
+            if (a.equals("--src") && i + 1 < args.length) {
+                srcDirs.add(new File(args[++i]));
+            } else if (a.equals("--sql") && i + 1 < args.length) {
+                sqlDirs.add(new File(args[++i]));
+            } else if (a.equals("--out") && i + 1 < args.length) {
+                outDir = new File(args[++i]);
+            } else if (a.equals("--meta") && i + 1 < args.length) {
+                metaDir = new File(args[++i]);
+            } else if (a.equals("--package") && i + 1 < args.length) {
+                pkg = args[++i];
+            } else if (a.equals("--dbms") && i + 1 < args.length) {
+                dialect = Dialect.fromString(args[++i]);
+            } else {
+                System.err.println("不明な引数: " + a);
+                printUsage();
+                System.exit(1);
+                return;
+            }
+        }
+        if (srcDirs.isEmpty() || outDir == null) {
+            System.err.println("--src と --out は必須です。");
+            printUsage();
+            System.exit(1);
+            return;
+        }
+        if (sqlDirs.isEmpty()) {
+            sqlDirs.addAll(srcDirs);
+        }
+        if (metaDir == null) {
+            metaDir = new File(outDir, "meta");
+        }
+
+        System.out.println("[1/2] 解析(analyze)...");
+        final int n = analyze(srcDirs, sqlDirs, metaDir, dialect);
+        System.out.println("  メタ JSON " + n + " 件 → " + metaDir.getAbsolutePath());
+        System.out.println("[2/2] 生成(generate)...");
+        final GenerationReport report = generate(metaDir, outDir, pkg);
+        System.out.println("完了: gen-all → " + outDir.getAbsolutePath());
+        System.out.println(report.toText());
+    }
+
+    // ================= util =================
+
+    private static void writeUtf8(final File out, final String content) throws Exception {
+        Writer w = null;
+        try {
+            w = new OutputStreamWriter(new FileOutputStream(out), "UTF-8");
+            w.write(content);
+        } finally {
+            if (w != null) {
+                w.close();
+            }
+        }
+    }
+
     private static void printUsage() {
         System.out.println("使い方:");
-        System.out.println("  java -jar s2dao-testgen.jar analyze --src <javaソースdir> "
-                + "--sql <sqldir> --out <出力dir> [--dbms oracle|postgre|standard]");
-        System.out.println();
-        System.out.println("  --src   DAO/エンティティ Java ソースのルート(複数指定可・再帰走査)");
-        System.out.println("  --sql   2-way SQL(.sql)のルート(省略時は --src と同じ)");
-        System.out.println("  --out   メタ JSON の出力先ディレクトリ");
-        System.out.println("  --dbms  DB 方言(既定: standard)");
+        System.out.println("  analyze  --src <javaソースdir> --sql <sqldir> --out <出力dir> "
+                + "[--dbms oracle|postgre|standard]");
+        System.out.println("  generate --meta <metaJSONdir> --out <テスト出力dir> "
+                + "[--package <pkg>] [--dbms oracle|postgre]");
+        System.out.println("  gen-all  --src <javaソースdir> --sql <sqldir> --out <テスト出力dir> "
+                + "[--meta <中間metadir>] [--package <pkg>] [--dbms oracle|postgre]");
     }
 
     private Main() {

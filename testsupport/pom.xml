@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.s2daotestgen</groupId>
+    <artifactId>s2dao-testgen-support</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+
+    <name>s2dao-testgen-support</name>
+    <description>
+        S2Dao ユニットテストコードジェネレーターが生成するテストが実行時に使う
+        小さなランタイム。本体クラスは Java5 互換構文のみ・コンパイル時依存は junit のみ。
+        Seasar2 への依存はリフレクションで解決するためコンパイル時依存に含めない。
+        本体は JDK8 の javac -source 1.6 -target 1.6 でコンパイルする。
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- 本体クラスは Java5 互換世代 (JDK8 で指定可能な下限 1.6) でコンパイルする -->
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <!-- JDK21 から mvn を起動しても JDK8 の javac を強制的に使用する -->
+        <jdk8.home>/usr/lib/jvm/java-8-openjdk-amd64</jdk8.home>
+    </properties>
+
+    <dependencies>
+        <!-- コンパイル時依存は junit 3.8.2 のみ (生成テストが JUnit3 形式であるため) -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.2</version>
+        </dependency>
+
+        <!-- テスト専用: testsupport 自身の検証で H2 メモリ DB を使用する -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.1.214</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>s2dao-testgen-support</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <!-- JDK8 の javac を fork して Java5 互換世代のバイトコードを生成する -->
+                    <fork>true</fork>
+                    <executable>${jdk8.home}/bin/javac</executable>
+                    <compilerArgs>
+                        <!-- 1.6 では bootclasspath 未指定の警告が出るが本環境では許容 -->
+                        <arg>-Xlint:none</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,2 +1,3 @@
 verification/env/smoke/build/
 **/target/
+build/
