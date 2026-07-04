@@ -19,7 +19,13 @@
 	<classpathentry kind="lib" path="lib/javassist-3.18.1-GA.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-jta_1.1_spec-1.0.jar"/>
-	<!-- Oracle JDBC ドライバ(再配布不可のため利用者が配置する。例: ojdbc14.jar / ojdbc6.jar) -->
+	<!-- AOP Alliance(S2AOP の MethodInterceptor 親インタフェース。S2DaoInterceptor の実行に必須) -->
+	<classpathentry kind="lib" path="lib/aopalliance-1.0.jar"/>
+	<!-- J2EE 1.4 spec(javax.servlet 等。S2Container 初期化時にクラス参照されるため実行時必須) -->
+	<classpathentry kind="lib" path="lib/geronimo-j2ee_1.4_spec-1.0.jar"/>
+	<!-- Oracle JDBC ドライバ(再配布不可のため利用者が配置する。
+	     Java5 実行時は ojdbc14.jar(10g/11g用) または ojdbc5.jar(11g用)を使うこと。
+	     ojdbc6.jar は Java6+ 専用(class major50)のため Java5 では動かない) -->
 	<classpathentry kind="lib" path="lib/ojdbc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

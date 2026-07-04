@@ -17,6 +17,10 @@
 	<classpathentry kind="lib" path="lib/javassist-3.18.1-GA.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-jta_1.1_spec-1.0.jar"/>
+	<!-- AOP Alliance(S2AOP の MethodInterceptor 親インタフェース。S2DaoInterceptor の実行に必須) -->
+	<classpathentry kind="lib" path="lib/aopalliance-1.0.jar"/>
+	<!-- J2EE 1.4 spec(javax.servlet 等。S2Container 初期化時にクラス参照されるため実行時必須) -->
+	<classpathentry kind="lib" path="lib/geronimo-j2ee_1.4_spec-1.0.jar"/>
 	<!-- PostgreSQL JDBC ドライバ(Maven Central 入手可。例: postgresql-42.2.27.jar) -->
 	<classpathentry kind="lib" path="lib/postgresql-42.2.27.jar"/>
 	<classpathentry kind="output" path="bin"/>

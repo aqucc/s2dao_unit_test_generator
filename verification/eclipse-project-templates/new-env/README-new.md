@@ -28,7 +28,10 @@
 3. `lib/` に以下の jar を配置する（本リポジトリの `verification/lib/` からコピー可）：
    - `junit-3.8.2.jar`
    - `s2dao-testgen-support.jar`
-   - Seasar2 / S2Dao 一式
+   - Seasar2 / S2Dao 一式（`s2-framework` / `s2-extension` / `s2-dao` / `s2-dao-tiger` /
+     `ognl` / `javassist` / `commons-logging` / `geronimo-jta` /
+     **`aopalliance-1.0`（S2AOP の MethodInterceptor 親。S2DaoInterceptor 実行に必須）** /
+     **`geronimo-j2ee_1.4_spec-1.0`（javax.servlet 等。S2Container 初期化に必須）**）
    - **PostgreSQL JDBC ドライバ** `postgresql-42.2.27.jar`（Maven Central 入手可）
 4. 実行時設定：`s2daotest.properties`（`dialect=postgre` / PostgreSQL の `jdbc.url` 等）と
    PostgreSQL 用 `*.dicon` をクラスパスルートに配置。

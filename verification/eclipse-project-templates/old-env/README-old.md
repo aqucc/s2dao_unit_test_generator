@@ -35,15 +35,21 @@
    - `junit-3.8.2.jar`
    - `s2dao-testgen-support.jar`（`testsupport` を `mvn package` して得られる。Java5 世代 major49）
    - Seasar2 / S2Dao 一式（`s2-framework` / `s2-extension` / `s2-dao` / `s2-dao-tiger` /
-     `ognl` / `javassist` / `commons-logging` / `geronimo-jta` …）
-   - **Oracle JDBC ドライバ**を `lib/ojdbc.jar` として配置（`ojdbc14.jar` / `ojdbc6.jar` を
-     リネーム、または `.classpath` のファイル名を実物に合わせて修正）。Oracle ドライバは
-     再配布不可のため本リポジトリには含みません。
+     `ognl` / `javassist` / `commons-logging` / `geronimo-jta` /
+     **`aopalliance-1.0`（S2AOP の MethodInterceptor 親。S2DaoInterceptor 実行に必須）** /
+     **`geronimo-j2ee_1.4_spec-1.0`（javax.servlet 等。S2Container 初期化に必須）**）
+   - **Oracle JDBC ドライバ**を `lib/ojdbc.jar` として配置（リネーム、または `.classpath` の
+     ファイル名を実物に合わせて修正）。Oracle ドライバは再配布不可のため本リポジトリには
+     含みません。**Java5 で実行する場合は `ojdbc14.jar`（10.2 系。11g にも接続可）か
+     `ojdbc5.jar`（11g 系の Java5 用）**を使うこと。`ojdbc6.jar` は Java6+ 用
+     クラスファイル（major50）のため Java5 の JVM ではロードできません。
 4. 実行時設定：クラスパスのルート（`src` か `bin`）に
    - `s2daotest.properties`（`jdbc.url` / `jdbc.driver` / `jdbc.user` / `jdbc.password` /
      `dialect=oracle` / `dicon=...`）
    - `*.dicon`（Oracle 接続用 DataSource 定義）
-   を置く。テンプレートは `verification/dicon/` と `testsupport/s2daotest.properties.example` を参照。
+   を置く。実 Oracle 用のひな形は `verification/oracle/`（`s2dao-oracle.dicon` /
+   `s2daotest-oracle.properties.example` / `schema-oracle.sql`)を参照。
+   詳細手順は `docs/ORACLE_MIGRATION_CHECKLIST.md`。
 5. `src` 上で右クリック > 実行 > JUnit テスト。
 
 ## 文字コードについて（重要）
