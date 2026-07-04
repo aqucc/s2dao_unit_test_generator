@@ -14,14 +14,14 @@
 #
 # 使い方:
 #   docker compose up -d で起動し、healthy になってから
-#     ./charset-ja16sjis.sh                # 既定 JA16SJISTILDE
-#     ./charset-ja16sjis.sh JA16SJIS       # 旧本番が JA16SJIS の場合
+#     ./charset-ja16sjis.sh                  # 既定 JA16SJIS(チルダ無し)
+#     ./charset-ja16sjis.sh JA16SJISTILDE    # 旧本番が TILDE 版の場合
 #   ※ 旧本番実機で確認して合わせること:
 #     SELECT value FROM nls_database_parameters WHERE parameter='NLS_CHARACTERSET';
 # =====================================================================
 set -euo pipefail
 
-CHARSET="${1:-JA16SJISTILDE}"
+CHARSET="${1:-JA16SJIS}"
 CONTAINER="${2:-old-db-oracle11g}"
 
 case "$CHARSET" in

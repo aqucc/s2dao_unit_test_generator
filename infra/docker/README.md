@@ -69,13 +69,13 @@ Windows 側の Eclipse からは WSL2 の localhost 転送により
 - `gvenzl/oracle-xe:11` の DB キャラクタセットは **AL32UTF8 固定**で、
   正攻法(CSALTER / DB 再作成)では JA16SJIS にできない。
 - **採用した妥協策**: 初回起動直後(データ辞書が ASCII のみ・日本語データ投入前)に
-  `ALTER DATABASE CHARACTER SET INTERNAL_USE JA16SJISTILDE` で
+  `ALTER DATABASE CHARACTER SET INTERNAL_USE JA16SJIS` で
   **キャラクタセットを張り替える**(同梱の `charset-ja16sjis.sh` を一度だけ実行)。
 
   ```bash
   cd /opt/docker/old-db-oracle11g
   docker compose up -d          # healthy になるまで待つ
-  ./charset-ja16sjis.sh         # 既定 JA16SJISTILDE(引数で JA16SJIS も可)
+  ./charset-ja16sjis.sh         # 既定 JA16SJIS(引数で JA16SJISTILDE も可)
   ```
 
   - 初期化直後なら辞書は実質 ASCII のみで、ASCII 域は AL32UTF8/JA16SJIS で
