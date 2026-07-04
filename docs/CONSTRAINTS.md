@@ -20,16 +20,42 @@
 ## 2. Java 5 JVM 実物が使用不可
 
 - Ubuntu 24.04 に導入可能な最古の JDK は OpenJDK 8。
-- **代替**:
-  - 生成コードは Java5 互換構文のみ使用(ジェネリクスは可、
+- **代替(Java5 世代を厳格に検証)**:
+  - 生成コード・testsupport 本体は Java5 互換構文のみ使用(ジェネリクスは可、
     ダイヤモンド演算子・try-with-resources・マルチキャッチ・
     String switch・インタフェース実装メソッドへの @Override は不使用)
-  - JDK8 の `javac -source 1.6 -target 1.6` でコンパイル検証
-    (JDK8 で指定可能な最古のソースレベル。Java5 と 1.6 の構文差は
-    ほぼ無いため、Java5 構文互換の実質的な検証となる)
+  - **`-source 1.5 -target 1.5` で厳格コンパイル**:JDK8 の javac は
+    `-source/-target 1.5` を obsolete 警告付きで受理し、バイトコード
+    **major version 49(= Java5 世代)**を生成する。testsupport の pom も
+    `maven.compiler.source/target=1.5` に設定し、生成テストは
+    `scripts/verify-generated-compile.sh` が両サンプルとも 1.5 でエラーゼロを確認。
+  - **API レベルの Java5 互換を機械検証(animal-sniffer)**:testsupport 本体クラス
+    (`target/classes`)を `animal-sniffer-maven-plugin` +
+    `org.codehaus.mojo.signature:java15:1.0` シグネチャで検査し、
+    Java6+ の API(`String.isEmpty()` 等)を使用していないことを保証する
+    (`mvn test` 実行時に自動チェック。違反ゼロ)。生成コードは junit3 +
+    testsupport + dao/entity しか呼ばず、`Integer.valueOf` 等 Java5 API のみを
+    出力する(下記 VERIFICATION_JAVA5_ECLIPSE.md にパターン網羅レビューあり)。
+  - **ECJ(Eclipse JDT バッチコンパイラ)での検証**:Eclipse/Pleiades が実際に
+    使うコンパイラ ECJ(`org.eclipse.jdt.core.compiler:ecj:4.6.1`)で
+    `-1.5` コンパイルし、エラーゼロ・警告一覧を確認(`scripts/verify-eclipse-compile.sh`)。
   - JUnit は 3.8.x 形式(`junit.framework.TestCase`)で生成し、
     Java5 時代のランナーでも動作する形とする
-- 影響: 実 Java5 VM 上での実行確認は利用者環境での実施が必要。
+- 影響: 実 Java5 VM 上での実行確認のみ利用者環境での実施が必要
+  (構文・API・バイトコード世代・Eclipse 実コンパイラの各観点は本環境で検証済み)。
+
+## 2b. Pleiades(日本語 Eclipse・Windows)の文字コード
+
+- Java5 世代の Pleiades/Eclipse(Windows)はソース既定エンコーディングが
+  **MS932(Windows-31J)**のことが多く、UTF-8 の日本語コメント入り `.java` は
+  文字化け・コンパイルエラーの原因になりうる。
+- **対応**: ジェネレーターに `--encoding <charset>`(既定 UTF-8)を追加。
+  `--encoding MS932`(Shift_JIS / Windows-31J も可)で生成でき、生成コードの
+  日本語コメントは**すべて MS932 で表現可能な文字のみ**を使用していることを検証済み
+  (UTF-8→MS932 の無損失往復確認 + ECJ `-encoding MS932 -1.5` でエラーゼロ)。
+- Eclipse へ即インポートできるプロジェクトテンプレートを
+  `verification/eclipse-project-templates/{old-env,new-env}/` に用意
+  (old=J2SE-1.5/MS932、new=JavaSE-1.8/UTF-8)。
 
 ## 3. PostgreSQL のバージョン
 

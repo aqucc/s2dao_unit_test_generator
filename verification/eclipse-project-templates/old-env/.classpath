@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<!-- 生成テスト + サンプルの entity/DAO ソースを配置する(パッケージ構成のまま) -->
+	<classpathentry kind="src" path="src"/>
+	<!-- Java5 実行環境コンテナ(J2SE-1.5 = Java 5.0)。
+	     Pleiades All in One (Java5 世代) にバンドルされた JRE、または
+	     ウィンドウ > 設定 > Java > インストール済み JRE で登録した Java5 を割り当てる -->
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<!-- JUnit 3.8.2(生成テストは junit.framework.TestCase 形式) -->
+	<classpathentry kind="lib" path="lib/junit-3.8.2.jar"/>
+	<!-- 本ジェネレーターのランタイム(testsupport, Java5 世代 major49) -->
+	<classpathentry kind="lib" path="lib/s2dao-testgen-support.jar"/>
+	<!-- Seasar2 / S2Dao ランタイム一式 -->
+	<classpathentry kind="lib" path="lib/s2-framework-2.3.23.jar"/>
+	<classpathentry kind="lib" path="lib/s2-extension-2.3.23.jar"/>
+	<classpathentry kind="lib" path="lib/s2-dao-1.0.52.jar"/>
+	<classpathentry kind="lib" path="lib/s2-dao-tiger-1.0.52.jar"/>
+	<classpathentry kind="lib" path="lib/ognl-2.6.9.jar"/>
+	<classpathentry kind="lib" path="lib/javassist-3.18.1-GA.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/geronimo-jta_1.1_spec-1.0.jar"/>
+	<!-- Oracle JDBC ドライバ(再配布不可のため利用者が配置する。例: ojdbc14.jar / ojdbc6.jar) -->
+	<classpathentry kind="lib" path="lib/ojdbc.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

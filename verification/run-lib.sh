@@ -3,7 +3,8 @@
 # 生成テストの実行共通ロジック(run-old-env.sh / run-new-env.sh から source して使う)。
 #
 # 旧環境相当 = H2 Oracle互換モード、新環境 = PostgreSQL16。いずれも JDK8 で
-#   1) sample の entity/DAO ソース + 生成テスト + ランナーを -source 1.6 でコンパイル
+#   1) sample の entity/DAO ソース + 生成テスト + ランナーを -source 1.5 でコンパイル
+#      (生成テストは Java5 互換。バイトコード major49 = Java5 世代)
 #   2) .sql / dicon / s2daotest.properties をクラスパスに配置
 #   3) RunGeneratedTests(DDL 流し込み + JUnit3 実行)
 # を行う。エビデンス CSV と実行ログを verification/<envdir>/ に残す。
@@ -54,7 +55,7 @@ run_sample() {
     done
 
     # 1) コンパイル(sample ソースは -sourcepath 経由で必要分のみ取り込む)
-    javac -encoding UTF-8 -source 1.6 -target 1.6 -nowarn \
+    javac -encoding UTF-8 -source 1.5 -target 1.5 -nowarn \
         -cp "$CP_LIB:$SUPPORT_JAR" \
         -sourcepath "$javadir:$gendir" \
         -d "$build" \

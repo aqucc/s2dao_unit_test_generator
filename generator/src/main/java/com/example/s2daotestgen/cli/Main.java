@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +28,15 @@ import com.example.s2daotestgen.sql.SqlFileIndex;
  *
  * # フェーズ2: テストコード生成(メタ JSON から)
  * java -jar s2dao-testgen.jar generate --meta &lt;metaJSONdir&gt; --out &lt;テスト出力dir&gt; \
- *      [--package &lt;pkg&gt;] [--dbms oracle|postgre]
+ *      [--package &lt;pkg&gt;] [--encoding &lt;charset&gt;] [--dbms oracle|postgre]
  *
  * # 解析 + 生成 一括
  * java -jar s2dao-testgen.jar gen-all --src &lt;javaソースdir&gt; --sql &lt;sqldir&gt; \
- *      --out &lt;テスト出力dir&gt; [--meta &lt;中間metadir&gt;] [--package &lt;pkg&gt;] [--dbms oracle|postgre]
+ *      --out &lt;テスト出力dir&gt; [--meta &lt;中間metadir&gt;] [--package &lt;pkg&gt;] \
+ *      [--encoding &lt;charset&gt;] [--dbms oracle|postgre]
+ *
+ * --encoding は生成する .java の文字コード(既定 UTF-8)。Pleiades/旧 Eclipse(Windows)の
+ * MS932 環境向けに MS932 / Shift_JIS / Windows-31J を指定できる。
  * </pre>
  */
 public final class Main {
@@ -132,6 +137,7 @@ public final class Main {
         File metaDir = null;
         File outDir = null;
         String pkg = null;
+        String encoding = DEFAULT_ENCODING;
         for (int i = 1; i < args.length; i++) {
             final String a = args[i];
             if (a.equals("--meta") && i + 1 < args.length) {
@@ -140,6 +146,8 @@ public final class Main {
                 outDir = new File(args[++i]);
             } else if (a.equals("--package") && i + 1 < args.length) {
                 pkg = args[++i];
+            } else if (a.equals("--encoding") && i + 1 < args.length) {
+                encoding = args[++i];
             } else if (a.equals("--dbms") && i + 1 < args.length) {
                 ++i; // 生成側では方言は現状未使用(将来拡張用)
             } else {
@@ -155,14 +163,22 @@ public final class Main {
             System.exit(1);
             return;
         }
-        final GenerationReport report = generate(metaDir, outDir, pkg);
+        final Charset charset = resolveCharset(encoding);
+        final GenerationReport report = generate(metaDir, outDir, pkg, charset);
+        System.out.println("出力エンコーディング: " + charset.name());
         System.out.println("完了: テストコードを生成しました → " + outDir.getAbsolutePath());
         System.out.println(report.toText());
     }
 
-    /** メタ JSON ディレクトリからテストコードを生成する。 */
+    /** メタ JSON ディレクトリからテストコードを生成する(UTF-8)。 */
     public static GenerationReport generate(final File metaDir, final File outDir,
             final String pkg) throws Exception {
+        return generate(metaDir, outDir, pkg, java.nio.charset.Charset.forName(DEFAULT_ENCODING));
+    }
+
+    /** メタ JSON ディレクトリからテストコードを指定エンコーディングで生成する。 */
+    public static GenerationReport generate(final File metaDir, final File outDir,
+            final String pkg, final Charset charset) throws Exception {
         final MetaJsonReader reader = new MetaJsonReader();
         final TestClassGenerator gen = new TestClassGenerator();
         final GenerationReport report = new GenerationReport();
@@ -190,7 +206,7 @@ public final class Main {
                     ? new File(outDir, r.packageName.replace('.', '/')) : outDir;
             dir.mkdirs();
             final File out = new File(dir, r.className + ".java");
-            writeUtf8(out, r.source);
+            writeText(out, r.source, charset);
             System.out.println("  " + f.getName() + " → "
                     + (r.packageName != null ? r.packageName + "." : "") + r.className
                     + " (tests=" + r.testMethods + ", skipped=" + r.skipped + ")");
@@ -206,6 +222,7 @@ public final class Main {
         File outDir = null;
         File metaDir = null;
         String pkg = null;
+        String encoding = DEFAULT_ENCODING;
         Dialect dialect = Dialect.STANDARD;
 
         for (int i = 1; i < args.length; i++) {
@@ -220,6 +237,8 @@ public final class Main {
                 metaDir = new File(args[++i]);
             } else if (a.equals("--package") && i + 1 < args.length) {
                 pkg = args[++i];
+            } else if (a.equals("--encoding") && i + 1 < args.length) {
+                encoding = args[++i];
             } else if (a.equals("--dbms") && i + 1 < args.length) {
                 dialect = Dialect.fromString(args[++i]);
             } else {
@@ -246,17 +265,39 @@ public final class Main {
         final int n = analyze(srcDirs, sqlDirs, metaDir, dialect);
         System.out.println("  メタ JSON " + n + " 件 → " + metaDir.getAbsolutePath());
         System.out.println("[2/2] 生成(generate)...");
-        final GenerationReport report = generate(metaDir, outDir, pkg);
+        final Charset charset = resolveCharset(encoding);
+        final GenerationReport report = generate(metaDir, outDir, pkg, charset);
+        System.out.println("出力エンコーディング: " + charset.name());
         System.out.println("完了: gen-all → " + outDir.getAbsolutePath());
         System.out.println(report.toText());
     }
 
     // ================= util =================
 
-    private static void writeUtf8(final File out, final String content) throws Exception {
+    /** 既定の出力エンコーディング。 */
+    private static final String DEFAULT_ENCODING = "UTF-8";
+
+    /**
+     * エンコーディング名を {@link Charset} に解決する。
+     * Pleiades/Eclipse(Windows・Java5 世代)向けに MS932 / Shift_JIS / Windows-31J を含む
+     * JVM がサポートする任意の文字セットを指定できる。未知/未サポート名はエラー終了する。
+     */
+    private static Charset resolveCharset(final String encoding) {
+        try {
+            return Charset.forName(encoding);
+        } catch (final Exception e) {
+            System.err.println("サポートされていないエンコーディングです: " + encoding
+                    + " (例: UTF-8, MS932, Shift_JIS, Windows-31J)");
+            System.exit(1);
+            throw new IllegalArgumentException(encoding, e);
+        }
+    }
+
+    private static void writeText(final File out, final String content, final Charset charset)
+            throws Exception {
         Writer w = null;
         try {
-            w = new OutputStreamWriter(new FileOutputStream(out), "UTF-8");
+            w = new OutputStreamWriter(new FileOutputStream(out), charset);
             w.write(content);
         } finally {
             if (w != null) {
@@ -270,9 +311,12 @@ public final class Main {
         System.out.println("  analyze  --src <javaソースdir> --sql <sqldir> --out <出力dir> "
                 + "[--dbms oracle|postgre|standard]");
         System.out.println("  generate --meta <metaJSONdir> --out <テスト出力dir> "
-                + "[--package <pkg>] [--dbms oracle|postgre]");
+                + "[--package <pkg>] [--encoding <charset>] [--dbms oracle|postgre]");
         System.out.println("  gen-all  --src <javaソースdir> --sql <sqldir> --out <テスト出力dir> "
-                + "[--meta <中間metadir>] [--package <pkg>] [--dbms oracle|postgre]");
+                + "[--meta <中間metadir>] [--package <pkg>] [--encoding <charset>] "
+                + "[--dbms oracle|postgre]");
+        System.out.println("    --encoding: 生成 .java の文字コード(既定 UTF-8。"
+                + "Pleiades/旧Eclipse 向けは MS932 等)");
     }
 
     private Main() {

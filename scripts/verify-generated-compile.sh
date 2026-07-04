@@ -1,12 +1,14 @@
 #!/bin/sh
 # =============================================================================
-# 生成テストコードの -source 1.6 コンパイル検証スクリプト(フェーズ2の統合検証)
+# 生成テストコードの -source 1.5 コンパイル検証スクリプト(フェーズ2の統合検証)
 #
 # samples/s2dao/s2-dao-examples と samples/s2dao-tiger/s2-dao-tiger-examples に
 # 対して gen-all を実行し、生成された <Dao>Test.java を JDK8 の
-#   javac -source 1.6 -target 1.6
+#   javac -source 1.5 -target 1.5
 # で junit-3.8.2 + testsupport + サンプルの dao/entity ソースと共にコンパイルし、
 # エラーゼロであることを確認する。
+# (JDK8 の javac は -source/-target 1.5 を obsolete 警告付きで受理し、
+#  バイトコード major version 49 = Java5 を生成する。Java5 実VMで動作する世代。)
 #
 # 実行(DB 接続)までは行わない。それは後続の検証フェーズが担当する。
 #
@@ -100,9 +102,9 @@ verify() {
 
     SAMPLE_SOURCES=$(find "$SRC" -name '*.java' | sort)
 
-    echo "=== [$NAME] javac -source 1.6 -target 1.6 でコンパイル ==="
-    # 注: -source/-target 1.6 では bootclasspath 警告が出るが許容(CONSTRAINTS.md)
-    "$JAVAC" -source 1.6 -target 1.6 -encoding UTF-8 \
+    echo "=== [$NAME] javac -source 1.5 -target 1.5 でコンパイル ==="
+    # 注: -source/-target 1.5 では bootclasspath 未指定 / obsolete 警告が出るが許容(CONSTRAINTS.md)
+    "$JAVAC" -source 1.5 -target 1.5 -encoding UTF-8 \
         -cp "$JUNIT_JAR:$SUP_JAR$S2_CP" \
         -d "$CLASSES" \
         $SAMPLE_SOURCES $GENERATED 2> "$OUT/javac.log"
@@ -117,12 +119,15 @@ verify() {
     NUM_CLASS=$(find "$CLASSES" -name '*Test.class' | wc -l)
     echo "[$NAME] OK: エラーゼロ (Test クラス $NUM_CLASS 件を含む全ソースをコンパイル)"
 
-    # 生成物のバイトコード世代を確認 (major 50 = Java 6)
+    # 生成物のバイトコード世代を確認 (major 49 = Java 5)
     ONE=$(find "$CLASSES" -name '*Test.class' | head -1)
     MAJOR=$("$JDK8_HOME/bin/javap" -verbose -cp "$CLASSES" \
         "$(echo "$ONE" | sed "s|$CLASSES/||; s|\.class$||; s|/|.|g")" \
         | grep 'major version' | awk '{print $3}')
-    echo "[$NAME] バイトコード major version: $MAJOR (50 = -target 1.6)"
+    echo "[$NAME] バイトコード major version: $MAJOR (49 = -target 1.5 = Java5)"
+    if [ "$MAJOR" != "49" ]; then
+        echo "[$NAME] 警告: 期待した major version 49 と異なります: $MAJOR" >&2
+    fi
 }
 
 echo "[3/4] s2dao (定数アノテーション) サンプルを検証..."
@@ -137,7 +142,7 @@ verify tiger \
 
 echo ""
 if [ "$TOTAL_ERRORS" -eq 0 ]; then
-    echo "==== 検証 OK: 両サンプルとも生成テストが -source 1.6 でエラーゼロでコンパイルできました ===="
+    echo "==== 検証 OK: 両サンプルとも生成テストが -source 1.5 でエラーゼロでコンパイルできました ===="
     exit 0
 else
     echo "==== 検証 NG: コンパイルエラーがあります ($TOTAL_ERRORS) ===="

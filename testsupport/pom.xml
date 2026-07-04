@@ -14,14 +14,16 @@
         S2Dao ユニットテストコードジェネレーターが生成するテストが実行時に使う
         小さなランタイム。本体クラスは Java5 互換構文のみ・コンパイル時依存は junit のみ。
         Seasar2 への依存はリフレクションで解決するためコンパイル時依存に含めない。
-        本体は JDK8 の javac -source 1.6 -target 1.6 でコンパイルする。
+        本体は JDK8 の javac -source 1.5 -target 1.5 でコンパイルし、
+        animal-sniffer(java15 signature)で Java5 API のみ使用していることを機械検証する。
     </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- 本体クラスは Java5 互換世代 (JDK8 で指定可能な下限 1.6) でコンパイルする -->
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+        <!-- 本体クラスは Java5 世代でコンパイルする(JDK8 の javac は -source/-target 1.5 を
+             obsolete 警告付きで受理し、バイトコード major version 49 = Java5 を生成する) -->
+        <maven.compiler.source>1.5</maven.compiler.source>
+        <maven.compiler.target>1.5</maven.compiler.target>
         <!-- JDK21 から mvn を起動しても JDK8 の javac を強制的に使用する -->
         <jdk8.home>/usr/lib/jvm/java-8-openjdk-amd64</jdk8.home>
     </properties>
@@ -51,13 +53,13 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <!-- JDK8 の javac を fork して Java5 互換世代のバイトコードを生成する -->
+                    <source>1.5</source>
+                    <target>1.5</target>
+                    <!-- JDK8 の javac を fork して Java5 世代(major 49)のバイトコードを生成する -->
                     <fork>true</fork>
                     <executable>${jdk8.home}/bin/javac</executable>
                     <compilerArgs>
-                        <!-- 1.6 では bootclasspath 未指定の警告が出るが本環境では許容 -->
+                        <!-- 1.5 では bootclasspath 未指定 / source|target obsolete の警告が出るが本環境では許容 -->
                         <arg>-Xlint:none</arg>
                     </compilerArgs>
                 </configuration>
@@ -66,6 +68,32 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
+            </plugin>
+            <!-- Java5 API 互換の機械検証: 本体クラス(target/classes)が
+                 Java5 の公開 API シグネチャ(org.codehaus.mojo.signature:java15)のみを
+                 参照していることを検査する。String.isEmpty()/Arrays.copyOf 等の Java6+ API を
+                 誤用した場合はビルドが失敗する。 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+                <version>1.23</version>
+                <configuration>
+                    <signature>
+                        <groupId>org.codehaus.mojo.signature</groupId>
+                        <artifactId>java15</artifactId>
+                        <version>1.0</version>
+                    </signature>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-java15-api</id>
+                        <!-- mvn test でも走るよう test フェーズに束縛する -->
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
