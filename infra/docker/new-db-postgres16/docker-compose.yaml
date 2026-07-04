@@ -1,0 +1,37 @@
+# =====================================================================
+# 新DB: PostgreSQL 16.8(ja_JP.utf8 ロケール)
+# 配置想定: WSL2 の /opt/docker/new-db-postgres16/
+# 起動:      docker compose up -d --build
+# 接続:      jdbc:postgresql://localhost:5432/s2daogen
+#            ユーザー s2daotest / s2daotest(下の環境変数で変更可)
+# =====================================================================
+services:
+  postgres16:
+    build: .
+    image: local/postgres:16.8-ja
+    container_name: new-db-postgres16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: s2daotest
+      POSTGRES_PASSWORD: s2daotest
+      POSTGRES_DB: s2daogen
+      # DB クラスタを ja_JP.utf8 / UTF8 で初期化(初回起動時のみ有効)
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=ja_JP.utf8"
+      TZ: Asia/Tokyo
+      PGTZ: Asia/Tokyo
+    command: postgres -c timezone=Asia/Tokyo
+    volumes:
+      # データ永続化(初期化をやり直す場合は `docker compose down -v`)
+      - pg16-data:/var/lib/postgresql/data
+      # 初回起動時に実行される DDL
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U s2daotest -d s2daogen"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  pg16-data:

@@ -1,0 +1,42 @@
+# =====================================================================
+# 旧DB: Oracle XE 11g 相当(gvenzl/oracle-xe:11)
+# 配置想定: WSL2 の /opt/docker/old-db-oracle11g/
+# 起動:      docker compose up -d
+# 接続:      jdbc:oracle:thin:@//localhost:1521/XE
+#            ユーザー S2DAOTEST / s2daotest(下の環境変数で変更可)
+#
+# 【重要/文字コードについて】
+#   gvenzl/oracle-xe:11 の DB キャラクタセットは AL32UTF8 固定であり、
+#   旧環境の Shift_JIS(JA16SJIS)には変更できない(XE はビルド済み DB を
+#   同梱しており再作成不可。JA16SJIS が必要な場合は正規ライセンスの
+#   11g SE/EE + oracle/docker-images でのカスタムビルドが必要)。
+#   影響と回避策は ../README.md の「文字コードの制約」を参照。
+# =====================================================================
+services:
+  oracle11g:
+    image: gvenzl/oracle-xe:11          # = Oracle Database XE 11.2.0.2
+    container_name: old-db-oracle11g
+    ports:
+      - "1521:1521"
+    environment:
+      # SYS / SYSTEM のパスワード
+      ORACLE_PASSWORD: oracle
+      # テスト用アプリユーザー(初回起動時に自動作成される)
+      APP_USER: S2DAOTEST
+      APP_USER_PASSWORD: s2daotest
+      TZ: Asia/Tokyo
+    volumes:
+      # データ永続化(初期化をやり直す場合は `docker compose down -v`)
+      - oracle11g-data:/u01/app/oracle/oradata
+      # 初回起動時に実行される DDL(SYS で実行されるため CURRENT_SCHEMA を切替済み)
+      - ./initdb:/container-entrypoint-initdb.d:ro
+    shm_size: 1g                        # XE はある程度の共有メモリが必要
+    restart: unless-stopped
+    healthcheck:                        # イメージ同梱の healthcheck.sh を利用
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  oracle11g-data:
