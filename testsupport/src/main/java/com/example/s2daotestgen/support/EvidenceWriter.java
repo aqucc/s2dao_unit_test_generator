@@ -100,6 +100,11 @@ public final class EvidenceWriter {
         if (n instanceof BigDecimal) {
             bd = (BigDecimal) n;
         } else if (n instanceof Double || n instanceof Float) {
+            double d = n.doubleValue();
+            if (Double.isNaN(d) || Double.isInfinite(d)) {
+                // BigDecimal に変換できない特殊値はそのまま文字列化
+                return n.toString();
+            }
             bd = new BigDecimal(n.toString());
         } else {
             // 整数系はそのまま
@@ -121,7 +126,7 @@ public final class EvidenceWriter {
             }
             sb.append(Integer.toHexString(x));
         }
-        return sb.toString().toUpperCase();
+        return sb.toString().toUpperCase(java.util.Locale.ENGLISH);
     }
 
     // ---- 戻り値 → 行(Map)列への変換 ----
@@ -163,7 +168,7 @@ public final class EvidenceWriter {
             Iterator it = m.keySet().iterator();
             while (it.hasNext()) {
                 Object k = it.next();
-                row.put(String.valueOf(k).toUpperCase(), m.get(k));
+                row.put(String.valueOf(k).toUpperCase(java.util.Locale.ENGLISH), m.get(k));
             }
             return row;
         }
@@ -184,7 +189,7 @@ public final class EvidenceWriter {
         Iterator it = names.iterator();
         while (it.hasNext()) {
             String prop = (String) it.next();
-            row.put(prop.toUpperCase(), invokeGetter(element, prop));
+            row.put(prop.toUpperCase(java.util.Locale.ENGLISH), invokeGetter(element, prop));
         }
         if (row.isEmpty()) {
             row.put("VALUE", element);

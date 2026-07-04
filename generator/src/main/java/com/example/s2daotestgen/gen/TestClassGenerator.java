@@ -37,6 +37,30 @@ public final class TestClassGenerator {
             "([A-Za-z_][A-Za-z0-9_]*)\\.([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*"
                     + "([A-Za-z_][A-Za-z0-9_]*)\\.([A-Za-z_][A-Za-z0-9_]*)");
 
+    /**
+     * エンティティ単純名(小文字)→ {@link EntityMeta}。
+     * リレーション(_RELNO/@Relation)先エンティティの解決に使う全 DAO 横断レジストリ。
+     * 未設定でも動作する(SQL の JOIN 検出のみに縮退)。
+     */
+    private Map entityRegistry = new LinkedHashMap();
+
+    /** 全 DAO のエンティティレジストリを設定する(gen-all/generate 実行時に CLI が設定)。 */
+    public void setEntityRegistry(Map registry) {
+        this.entityRegistry = (registry != null) ? registry : new LinkedHashMap();
+    }
+
+    private EntityMeta lookupEntity(String typeName) {
+        if (typeName == null) {
+            return null;
+        }
+        String t = typeName;
+        int dot = t.lastIndexOf('.');
+        if (dot >= 0) {
+            t = t.substring(dot + 1);
+        }
+        return (EntityMeta) entityRegistry.get(t.toLowerCase(java.util.Locale.ENGLISH));
+    }
+
     /** 1 クラス分の生成結果。 */
     public static final class Result {
         public String packageName;
@@ -79,16 +103,19 @@ public final class TestClassGenerator {
         }
 
         Set constrained = constrainedColumns(dao, genMethods);
+        Set fkCols = fkColumns(entity, genMethods, entityTable);
+        List relationParents = relationParentEntities(entity, entityTable);
 
         StringBuffer sb = new StringBuffer();
         emitHeader(sb, pkg, className, daoFq);
-        emitSetUp(sb, dao, daoFq, entity, entityTable, parentTables, genMethods, constrained);
+        emitSetUp(sb, dao, daoFq, entity, entityTable, parentTables, relationParents,
+                genMethods, constrained);
         emitTearDown(sb);
 
         int testCount = 0;
         for (int i = 0; i < genMethods.size(); i++) {
             MethodMeta m = (MethodMeta) genMethods.get(i);
-            emitTestMethod(sb, dao, entity, entityTable, m);
+            emitTestMethod(sb, dao, entity, entityTable, m, fkCols);
             testCount++;
         }
         // スキップコメント
@@ -144,7 +171,8 @@ public final class TestClassGenerator {
     }
 
     private void emitSetUp(StringBuffer sb, DaoMeta dao, String daoFq, EntityMeta entity,
-            String entityTable, List parentTables, List genMethods, Set constrained) {
+            String entityTable, List parentTables, List relationParents,
+            List genMethods, Set constrained) {
         sb.append("    protected void setUp() throws Exception {\n");
         sb.append("        super.setUp();\n");
         // 生成可能なテストメソッドが 0 件のプレースホルダクラスでは、
@@ -158,7 +186,22 @@ public final class TestClassGenerator {
         sb.append("        dao = (").append(daoFq).append(") ctx.getComponent(")
           .append(daoFq).append(".class);\n");
 
-        boolean hasTables = entityTable != null || !parentTables.isEmpty();
+        // SQL 由来の親テーブル + リレーション(_RELNO/@Relation)由来の親テーブルを統合
+        List allParents = new ArrayList(parentTables);
+        Set parentUpper = new LinkedHashSet();
+        for (int i = 0; i < parentTables.size(); i++) {
+            parentUpper.add(((String) parentTables.get(i)).toUpperCase(java.util.Locale.ENGLISH));
+        }
+        for (int i = 0; i < relationParents.size(); i++) {
+            EntityMeta rp = (EntityMeta) relationParents.get(i);
+            String up = rp.tableName.toUpperCase(java.util.Locale.ENGLISH);
+            if (!parentUpper.contains(up)) {
+                parentUpper.add(up);
+                allParents.add(rp.tableName);
+            }
+        }
+
+        boolean hasTables = entityTable != null || !allParents.isEmpty();
         if (!hasTables) {
             sb.append("        // 参照テーブルが特定できないため投入は行わない\n");
             sb.append("    }\n\n");
@@ -167,20 +210,41 @@ public final class TestClassGenerator {
 
         sb.append("        java.sql.Connection conn = ctx.getConnection();\n");
         sb.append("        try {\n");
-        // クリーンアップ: 対象テーブル → 親テーブル(子から削除)
+        // クリーンアップ: 対象テーブルを参照する子テーブル → 対象テーブル → 親テーブル
+        // (FK 制約のある実 DB で親を先に消すと外部キー違反になるため子から削除する)
+        List childTables = referencingChildTables(entity, entityTable, allParents);
+        for (int i = 0; i < childTables.size(); i++) {
+            sb.append("            WriteDbUtil.deleteAll(conn, \"")
+              .append(childTables.get(i))
+              .append("\"); // 対象テーブルを参照する子テーブル(FK対策で先に削除)\n");
+        }
         if (entityTable != null) {
             sb.append("            WriteDbUtil.deleteAll(conn, \"").append(entityTable).append("\");\n");
         }
-        for (int i = 0; i < parentTables.size(); i++) {
+        for (int i = 0; i < allParents.size(); i++) {
             sb.append("            WriteDbUtil.deleteAll(conn, \"")
-              .append(parentTables.get(i)).append("\");\n");
+              .append(allParents.get(i)).append("\");\n");
         }
         // 投入: 親テーブル → 対象テーブル(親から投入)
-        for (int i = 0; i < parentTables.size(); i++) {
-            emitParentSeed(sb, dao, entity, genMethods, (String) parentTables.get(i));
+        for (int i = 0; i < allParents.size(); i++) {
+            String pt = (String) allParents.get(i);
+            EntityMeta rp = relationParentByTable(relationParents, pt);
+            if (rp != null) {
+                // リレーション先エンティティのメタが分かる場合は全永続カラムを投入
+                // (実 DB の NOT NULL/FK 制約に耐える完全な親行を作る)
+                Set pc = new LinkedHashSet(constrained);
+                for (int j = 0; j < rp.primaryKeyColumns.size(); j++) {
+                    pc.add(TestValues.canonical((String) rp.primaryKeyColumns.get(j)));
+                }
+                emitEntityRowSeed(sb, rp, pt, pc,
+                        "親/リレーション先テーブル " + pt + " の行(FK/JOIN 整合用)");
+            } else {
+                emitParentSeed(sb, dao, entity, genMethods, pt);
+            }
         }
         if (entityTable != null && entity != null) {
-            emitEntitySeed(sb, entity, entityTable, constrained);
+            emitEntityRowSeed(sb, entity, entityTable, constrained,
+                    "対象テーブル " + entityTable + " の決定的テストデータ");
         }
         sb.append("        } finally {\n");
         sb.append("            conn.close();\n");
@@ -188,7 +252,92 @@ public final class TestClassGenerator {
         sb.append("    }\n\n");
     }
 
-    private void emitEntitySeed(StringBuffer sb, EntityMeta entity, String table, Set constrained) {
+    /** リレーション親エンティティのうちテーブル名が一致するものを返す(無ければ null)。 */
+    private EntityMeta relationParentByTable(List relationParents, String table) {
+        for (int i = 0; i < relationParents.size(); i++) {
+            EntityMeta rp = (EntityMeta) relationParents.get(i);
+            if (rp.tableName.equalsIgnoreCase(table)) {
+                return rp;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * レジストリ内で「このエンティティをリレーション先として参照している」
+     * エンティティのテーブル一覧を返す(削除順対策)。自身・親テーブルは除く。
+     */
+    private List referencingChildTables(EntityMeta entity, String entityTable, List allParents) {
+        List out = new ArrayList();
+        if (entity == null || entityTable == null || entity.simpleName == null) {
+            return out;
+        }
+        Set skip = new LinkedHashSet();
+        skip.add(entityTable.toUpperCase(java.util.Locale.ENGLISH));
+        for (int i = 0; i < allParents.size(); i++) {
+            skip.add(((String) allParents.get(i)).toUpperCase(java.util.Locale.ENGLISH));
+        }
+        String targetSimple = entity.simpleName.toLowerCase(java.util.Locale.ENGLISH);
+        java.util.Iterator it = entityRegistry.values().iterator();
+        while (it.hasNext()) {
+            EntityMeta child = (EntityMeta) it.next();
+            if (child.tableName == null) {
+                continue;
+            }
+            String up = child.tableName.toUpperCase(java.util.Locale.ENGLISH);
+            if (skip.contains(up)) {
+                continue;
+            }
+            for (int i = 0; i < child.relations.size(); i++) {
+                com.example.s2daotestgen.model.MetaModel.RelationMeta rel =
+                        (com.example.s2daotestgen.model.MetaModel.RelationMeta) child.relations.get(i);
+                String tt = nz(rel.targetType);
+                int dot = tt.lastIndexOf('.');
+                if (dot >= 0) {
+                    tt = tt.substring(dot + 1);
+                }
+                if (tt.toLowerCase(java.util.Locale.ENGLISH).equals(targetSimple)) {
+                    skip.add(up);
+                    out.add(child.tableName);
+                    break;
+                }
+            }
+        }
+        return out;
+    }
+
+    /**
+     * リレーション(_RELNO/@Relation)先として解決できる親エンティティ一覧を返す。
+     * レジストリ未設定・解決不能・自テーブルと同一の場合は含めない。
+     */
+    private List relationParentEntities(EntityMeta entity, String entityTable) {
+        List out = new ArrayList();
+        if (entity == null) {
+            return out;
+        }
+        Set seen = new LinkedHashSet();
+        for (int i = 0; i < entity.relations.size(); i++) {
+            com.example.s2daotestgen.model.MetaModel.RelationMeta rel =
+                    (com.example.s2daotestgen.model.MetaModel.RelationMeta) entity.relations.get(i);
+            EntityMeta target = lookupEntity(rel.targetType);
+            if (target == null || target.tableName == null) {
+                continue;
+            }
+            String up = target.tableName.toUpperCase(java.util.Locale.ENGLISH);
+            if (entityTable != null && up.equals(entityTable.toUpperCase(java.util.Locale.ENGLISH))) {
+                continue;
+            }
+            if (!seen.contains(up)) {
+                seen.add(up);
+                out.add(target);
+            }
+        }
+        return out;
+    }
+
+    /** エンティティメタに基づき全永続カラムの 1 行を投入するコードを出力する。 */
+    private void emitEntityRowSeed(StringBuffer sb, EntityMeta entity, String table,
+            Set constrained, String label) {
         List cols = new ArrayList();
         List vals = new ArrayList();
         List notes = new ArrayList();
@@ -207,7 +356,7 @@ public final class TestClassGenerator {
                 notes.add(p.columnName + " (埋め草:ValueFactory決定値)");
             }
         }
-        sb.append("            // 対象テーブル ").append(table).append(" の決定的テストデータ\n");
+        sb.append("            // ").append(label).append("\n");
         emitInsert(sb, table, cols, vals, notes);
     }
 
@@ -267,7 +416,7 @@ public final class TestClassGenerator {
     // ================= テストメソッド本体 =================
 
     private void emitTestMethod(StringBuffer sb, DaoMeta dao, EntityMeta entity,
-            String entityTable, MethodMeta m) {
+            String entityTable, MethodMeta m, Set fkCols) {
         String kind = nz(m.methodKind);
         sb.append("    /** ").append(m.name).append(" : ").append(kind)
           .append(" (").append(nz(m.sql != null ? m.sql.resolutionType : "")).append(") */\n");
@@ -277,11 +426,11 @@ public final class TestClassGenerator {
         sb.append("            EvidenceWriter ev = ctx.newEvidenceWriter();\n");
 
         if (kind.equals("INSERT")) {
-            emitMutation(sb, dao, entity, entityTable, m, "INSERT");
+            emitMutation(sb, dao, entity, entityTable, m, "INSERT", fkCols);
         } else if (kind.equals("UPDATE")) {
-            emitMutation(sb, dao, entity, entityTable, m, "UPDATE");
+            emitMutation(sb, dao, entity, entityTable, m, "UPDATE", fkCols);
         } else if (kind.equals("DELETE")) {
-            emitMutation(sb, dao, entity, entityTable, m, "DELETE");
+            emitMutation(sb, dao, entity, entityTable, m, "DELETE", fkCols);
         } else {
             emitSelect(sb, dao, entity, entityTable, m);
         }
@@ -366,7 +515,7 @@ public final class TestClassGenerator {
     // ---- INSERT / UPDATE / DELETE ----
 
     private void emitMutation(StringBuffer sb, DaoMeta dao, EntityMeta entity, String entityTable,
-            MethodMeta m, String op) {
+            MethodMeta m, String op, Set fkCols) {
         // 対象は単一のエンティティ引数を想定
         ParamMeta beanParam = firstBeanParam(m);
         if (beanParam == null || entity == null) {
@@ -404,19 +553,26 @@ public final class TestClassGenerator {
             boolean isPk = p.primaryKey;
             boolean isVer = p.versionNo;
             boolean isTs = p.timestamp;
+            // JOIN/FK キー列(親テーブルと結合する列)は、更新で値を変えると
+            // FK 制約のある実 DB で外部キー違反になるため BASE(親行に一致)を維持する
+            boolean isFk = fkCols.contains(TestValues.canonical(p.columnName));
             int variant;
             if (op.equals("INSERT")) {
                 variant = isPk ? TestValues.ALT : TestValues.BASE; // 新規PKは既存と別値
             } else {
-                // UPDATE/DELETE: PK・楽観ロック列は既存行に一致させる。他は変更(ALT)
-                variant = (isPk || isVer || isTs) ? TestValues.BASE : TestValues.ALT;
+                // UPDATE/DELETE: PK・楽観ロック列・FK列は既存行/親行に一致させる。他は変更(ALT)
+                variant = (isPk || isVer || isTs || isFk) ? TestValues.BASE : TestValues.ALT;
             }
             TestValues.Value v = TestValues.of(p.javaType, p.columnName, variant);
             sb.append("            ").append(var).append(".set").append(cap(p.propertyName))
               .append("(").append(v.expr).append(");");
-            sb.append(" // ").append(p.columnName).append("=").append(v.display).append("\n");
+            sb.append(" // ").append(p.columnName).append("=").append(v.display);
+            if (isFk && !op.equals("INSERT")) {
+                sb.append(" (JOIN/FKキーのため親行に一致するBASE値を維持)");
+            }
+            sb.append("\n");
 
-            if (op.equals("UPDATE") && assertCol == null && !isPk && !isVer && !isTs) {
+            if (op.equals("UPDATE") && assertCol == null && !isPk && !isVer && !isTs && !isFk) {
                 assertCol = p.columnName;
                 assertColAltExpr = v.expr;
             }
@@ -448,7 +604,7 @@ public final class TestClassGenerator {
         }
 
         // データセット assert
-        String pkUpper = (pkCol != null) ? pkCol.toUpperCase() : null;
+        String pkUpper = (pkCol != null) ? pkCol.toUpperCase(java.util.Locale.ENGLISH) : null;
         String basePkExpr = (pkProp != null)
                 ? TestValues.of(pkProp.javaType, pkProp.columnName, TestValues.BASE).expr : null;
         String altPkExpr = (pkProp != null)
@@ -467,14 +623,14 @@ public final class TestClassGenerator {
             if (entity.versionNoProperty != null) {
                 PropertyMeta vp = propByName(entity, entity.versionNoProperty);
                 if (vp != null) {
-                    ma.verColUpper = vp.columnName.toUpperCase();
+                    ma.verColUpper = vp.columnName.toUpperCase(java.util.Locale.ENGLISH);
                     ma.verBaseExpr = TestValues.of(vp.javaType, vp.columnName, TestValues.BASE).expr;
                 }
             }
             if (entity.timestampProperty != null) {
                 PropertyMeta tp = propByName(entity, entity.timestampProperty);
                 if (tp != null) {
-                    ma.tsColUpper = tp.columnName.toUpperCase();
+                    ma.tsColUpper = tp.columnName.toUpperCase(java.util.Locale.ENGLISH);
                     ma.tsBaseExpr = TestValues.of(tp.javaType, tp.columnName, TestValues.BASE).expr;
                 }
             }
@@ -506,7 +662,7 @@ public final class TestClassGenerator {
         Set done = new LinkedHashSet();
         for (int i = 0; i < tables.size(); i++) {
             String t = (String) tables.get(i);
-            String up = t.toUpperCase();
+            String up = t.toUpperCase(java.util.Locale.ENGLISH);
             if (done.contains(up)) {
                 continue;
             }
@@ -538,7 +694,7 @@ public final class TestClassGenerator {
                     if (ma.assertCol != null) {
                         sb.append("            assertEquals(\"更新後の値が反映されていること\", EvidenceWriter.normalize(")
                           .append(ma.assertColAltExpr).append("), EvidenceWriter.normalize(updated.get(\"")
-                          .append(ma.assertCol.toUpperCase()).append("\")));\n");
+                          .append(ma.assertCol.toUpperCase(java.util.Locale.ENGLISH)).append("\")));\n");
                     }
                     if (ma.verColUpper != null) {
                         sb.append("            // versionNo は S2Dao が自動更新するため「変化したこと」のみ確認\n");
@@ -758,7 +914,7 @@ public final class TestClassGenerator {
             }
             for (int j = 0; j < st.tables.size(); j++) {
                 String t = (String) st.tables.get(j);
-                String up = t.toUpperCase();
+                String up = t.toUpperCase(java.util.Locale.ENGLISH);
                 if (!seen.contains(up)) {
                     seen.add(up);
                     out.add(t);
@@ -768,11 +924,91 @@ public final class TestClassGenerator {
         return out;
     }
 
+    /**
+     * エンティティテーブル側の JOIN/FK キー列(正準化名)を収集する。
+     * <ul>
+     *   <li>(a) エンティティのリレーション定義(_RELNO/@Relation)から:
+     *       relationKey("CHILD:PARENT" 形式)の子側カラム。relationKey 省略時は
+     *       S2Dao の既定規則(リレーション先の主キーと同名の子カラム)に従い、
+     *       レジストリで解決したリレーション先エンティティの PK 名と同名の
+     *       子プロパティカラムを FK とみなす。</li>
+     *   <li>(b) 各メソッドの SQL 中の {@code a.col = b.col} 形式の結合条件のうち、
+     *       片側がエンティティテーブル・他側が別テーブルのもの
+     *       ({@link #inferParentColumns} と同じ規則。エイリアス解決は行わない)。</li>
+     * </ul>
+     * これらの列は UPDATE 系テストで値を変えると FK 制約違反になりうるため
+     * BASE(親行に一致する値)を維持する。
+     */
+    private Set fkColumns(EntityMeta entity, List genMethods, String entityTable) {
+        Set s = new LinkedHashSet();
+        // (a) リレーション定義由来
+        if (entity != null) {
+            for (int i = 0; i < entity.relations.size(); i++) {
+                com.example.s2daotestgen.model.MetaModel.RelationMeta rel =
+                        (com.example.s2daotestgen.model.MetaModel.RelationMeta)
+                                entity.relations.get(i);
+                String key = nz(rel.relationKey);
+                if (key.length() > 0) {
+                    // "CHILDCOL:PARENTCOL[, ...]"(単一名なら両側同名)
+                    String[] pairs = key.split(",");
+                    for (int j = 0; j < pairs.length; j++) {
+                        String pair = pairs[j].trim();
+                        int colon = pair.indexOf(':');
+                        String child = (colon >= 0) ? pair.substring(0, colon) : pair;
+                        if (child.trim().length() > 0) {
+                            s.add(TestValues.canonical(child.trim()));
+                        }
+                    }
+                } else {
+                    // relationKey 省略時: リレーション先 PK と同名の子カラム
+                    EntityMeta target = lookupEntity(rel.targetType);
+                    if (target != null) {
+                        for (int j = 0; j < target.primaryKeyColumns.size(); j++) {
+                            String pkCanon = TestValues.canonical(
+                                    (String) target.primaryKeyColumns.get(j));
+                            if (propByColumn(entity, pkCanon) != null) {
+                                s.add(pkCanon);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // (b) SQL の JOIN 条件由来
+        if (entityTable == null) {
+            return s;
+        }
+        for (int i = 0; i < genMethods.size(); i++) {
+            MethodMeta m = (MethodMeta) genMethods.get(i);
+            if (m.sql == null) {
+                continue;
+            }
+            String sql = nz(m.sql.expandedSql);
+            if (sql.length() == 0) {
+                sql = nz(m.sql.rawSql);
+            }
+            Matcher mm = JOIN.matcher(sql);
+            while (mm.find()) {
+                String ta = mm.group(1);
+                String ca = mm.group(2);
+                String tb = mm.group(3);
+                String cb = mm.group(4);
+                if (ta.equalsIgnoreCase(entityTable) && !tb.equalsIgnoreCase(entityTable)) {
+                    s.add(TestValues.canonical(ca));
+                }
+                if (tb.equalsIgnoreCase(entityTable) && !ta.equalsIgnoreCase(entityTable)) {
+                    s.add(TestValues.canonical(cb));
+                }
+            }
+        }
+        return s;
+    }
+
     /** 親テーブルのカラム名→javaType を推定する(JOIN キー + SELECT 参照カラム)。 */
     private Map inferParentColumns(DaoMeta dao, EntityMeta entity, List genMethods,
             String parentTable) {
         Map colType = new LinkedHashMap();
-        String pUp = parentTable.toUpperCase();
+        String pUp = parentTable.toUpperCase(java.util.Locale.ENGLISH);
         for (int i = 0; i < genMethods.size(); i++) {
             MethodMeta m = (MethodMeta) genMethods.get(i);
             if (m.sql == null) {
@@ -1045,7 +1281,7 @@ public final class TestClassGenerator {
             return false;
         }
         for (int i = 0; i < selectColumns.size(); i++) {
-            String c = ((String) selectColumns.get(i)).toLowerCase();
+            String c = ((String) selectColumns.get(i)).toLowerCase(java.util.Locale.ENGLISH);
             if (c.indexOf("count(") >= 0) {
                 return true;
             }

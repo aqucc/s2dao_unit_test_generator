@@ -23,6 +23,7 @@ public class DepartmentDaoTest extends TestCase {
         dao = (examples.dao.DepartmentDao) ctx.getComponent(examples.dao.DepartmentDao.class);
         java.sql.Connection conn = ctx.getConnection();
         try {
+            WriteDbUtil.deleteAll(conn, "EMP"); // 対象テーブルを参照する子テーブル(FK対策で先に削除)
             WriteDbUtil.deleteAll(conn, "DEPT");
             // 対象テーブル DEPT の決定的テストデータ
             WriteDbUtil.write(conn, new TestDataParam("DEPT",

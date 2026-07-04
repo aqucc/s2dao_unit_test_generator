@@ -30,9 +30,18 @@ import java.util.Properties;
  * <p>Seasar2 クラスへのコンパイル時依存を持たないため、S2Container の生成・初期化・
  * コンポーネント取得は<b>リフレクション</b>で行う(実行時に classpath へ seasar jar を置く前提)。</p>
  *
+ * <p>S2Container の生成(dicon パース+AOP 織り込み)は高コストのため、
+ * <b>dicon パス単位で JVM プロセス内に静的キャッシュ</b>して全テストで共有する
+ * (大量の DAO テストを一括実行する際の起動コスト削減)。破棄は JVM 終了時の
+ * shutdown hook で行い、{@link #close()} はこのインスタンスの参照を手放すのみ。</p>
+ *
  * <p>Java5 互換構文のみ。</p>
  */
 public final class S2TestContext {
+
+    /** dicon パス → 初期化済み S2Container(プロセス内共有)。 */
+    private static final java.util.Map CONTAINERS = new java.util.HashMap();
+    private static boolean shutdownHookRegistered = false;
 
     private final Properties props;
     private final DbDialect dialect;
@@ -136,19 +145,53 @@ public final class S2TestContext {
         if (dicon == null || dicon.length() == 0) {
             throw new IllegalStateException("dicon が設定されていません(s2daotest.properties)");
         }
-        try {
-            Class factory = Class.forName(
-                    "org.seasar.framework.container.factory.S2ContainerFactory");
-            Method create = factory.getMethod("create", new Class[] { String.class });
-            Object c = create.invoke(null, new Object[] { dicon });
-            Method init = c.getClass().getMethod("init", new Class[0]);
-            init.invoke(c, new Object[0]);
-            container = c;
-            return container;
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "S2Container の生成に失敗しました(seasar jar が classpath にあるか確認): dicon=" + dicon, e);
+        synchronized (CONTAINERS) {
+            Object cached = CONTAINERS.get(dicon);
+            if (cached != null) {
+                container = cached;
+                return container;
+            }
+            try {
+                Class factory = Class.forName(
+                        "org.seasar.framework.container.factory.S2ContainerFactory");
+                Method create = factory.getMethod("create", new Class[] { String.class });
+                Object c = create.invoke(null, new Object[] { dicon });
+                Method init = c.getClass().getMethod("init", new Class[0]);
+                init.invoke(c, new Object[0]);
+                CONTAINERS.put(dicon, c);
+                registerShutdownHook();
+                container = c;
+                return container;
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "S2Container の生成に失敗しました(seasar jar が classpath にあるか確認): dicon=" + dicon, e);
+            }
         }
+    }
+
+    /** JVM 終了時に共有コンテナを destroy する(初回生成時に一度だけ登録)。 */
+    private static void registerShutdownHook() {
+        if (shutdownHookRegistered) {
+            return;
+        }
+        shutdownHookRegistered = true;
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                synchronized (CONTAINERS) {
+                    java.util.Iterator it = CONTAINERS.values().iterator();
+                    while (it.hasNext()) {
+                        Object c = it.next();
+                        try {
+                            Method destroy = c.getClass().getMethod("destroy", new Class[0]);
+                            destroy.invoke(c, new Object[0]);
+                        } catch (Exception e) {
+                            // 破棄失敗は無視
+                        }
+                    }
+                    CONTAINERS.clear();
+                }
+            }
+        });
     }
 
     // ---- その他 ----
@@ -169,17 +212,12 @@ public final class S2TestContext {
         return new EvidenceWriter(new File(dir));
     }
 
-    /** コンテナを破棄する(生成済みの場合のみ)。 */
+    /**
+     * このインスタンスのコンテナ参照を手放す。
+     * コンテナ本体はプロセス内で共有・再利用されるため、ここでは destroy しない
+     * (destroy は JVM 終了時の shutdown hook で行う)。
+     */
     public void close() {
-        if (container != null) {
-            try {
-                Method destroy = container.getClass().getMethod("destroy", new Class[0]);
-                destroy.invoke(container, new Object[0]);
-            } catch (Exception e) {
-                // 破棄失敗は無視
-            } finally {
-                container = null;
-            }
-        }
+        container = null;
     }
 }

@@ -25,6 +25,10 @@ public final class TestValues {
     /** 更新後値 / 新規PK など「基準と異なる」値。 */
     public static final int ALT = 1;
 
+    // 【重要】このシード表と canonical()/派生値の規則は、実行時側
+    // testsupport の com.example.s2daotestgen.support.ValueFactory と
+    // 完全に一致させること(ずれると「投入データに引数がヒットする」保証が壊れる)。
+    // 片方を変更する場合は必ず両方を同時に変更する。
     private static final Map SEED_NUM = new HashMap();
     private static final Map SEED_STR = new HashMap();
     static {
@@ -59,7 +63,7 @@ public final class TestValues {
 
     /** カラム名の正準化(testsupport.ValueFactory と同一規則)。 */
     public static String canonical(String columnName) {
-        String c = columnName.toLowerCase().trim();
+        String c = columnName.toLowerCase(java.util.Locale.ENGLISH).trim();
         int dot = c.lastIndexOf('.');
         if (dot >= 0) {
             c = c.substring(dot + 1);
@@ -189,7 +193,7 @@ public final class TestValues {
         if (v instanceof String) {
             return (String) v;
         }
-        String base = canon.toUpperCase();
+        String base = canon.toUpperCase(java.util.Locale.ENGLISH);
         if (base.length() > 6) {
             base = base.substring(0, 6);
         }

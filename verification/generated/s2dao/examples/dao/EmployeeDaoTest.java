@@ -25,13 +25,14 @@ public class EmployeeDaoTest extends TestCase {
         try {
             WriteDbUtil.deleteAll(conn, "EMP");
             WriteDbUtil.deleteAll(conn, "dept");
-            // 親/JOIN先テーブル dept の行(FK/JOIN 整合用)
+            // 親/リレーション先テーブル dept の行(FK/JOIN 整合用)
             WriteDbUtil.write(conn, new TestDataParam("dept",
-                new String[] { "deptno", "dname", "loc" },
+                new String[] { "deptno", "dname", "loc", "versionNo" },
                 new Object[] {
-                    Integer.valueOf(50), // deptno=50
-                    "SALES", // dname=SALES
-                    "TOKYO" // loc=TOKYO
+                    Integer.valueOf(50), // deptno=50 (照合対象:固定値)
+                    ValueFactory.forColumn("java.lang.String", "dname"), // dname (埋め草:ValueFactory決定値)
+                    ValueFactory.forColumn("java.lang.String", "loc"), // loc (埋め草:ValueFactory決定値)
+                    ValueFactory.forColumn("int", "versionNo") // versionNo (埋め草:ValueFactory決定値)
                 }));
             // 対象テーブル EMP の決定的テストデータ
             WriteDbUtil.write(conn, new TestDataParam("EMP",
@@ -199,7 +200,7 @@ public class EmployeeDaoTest extends TestCase {
             employee.setHiredate(java.sql.Date.valueOf("1982-01-23")); // hiredate=1982-01-23
             employee.setSal(Float.valueOf(3001.0f)); // sal=3001
             employee.setComm(Float.valueOf(501.0f)); // comm=501
-            employee.setDeptno(Integer.valueOf(51)); // deptno=51
+            employee.setDeptno(Integer.valueOf(50)); // deptno=50 (JOIN/FKキーのため親行に一致するBASE値を維持)
             employee.setTimestamp(java.sql.Timestamp.valueOf("2001-01-01 00:00:00")); // tstamp=2001-01-01 00:00:00
             // --- DAO 実行 ---
             int result = dao.update(employee);

@@ -64,7 +64,7 @@ public final class GetDatasetUtil {
                     if (name == null) {
                         name = md.getColumnName(i);
                     }
-                    row.put(name.toUpperCase(), rs.getObject(i));
+                    row.put(name.toUpperCase(java.util.Locale.ENGLISH), rs.getObject(i));
                 }
                 result.add(row);
             }
@@ -81,7 +81,7 @@ public final class GetDatasetUtil {
      * DB 実装差(Integer/BigDecimal/Long 等)を吸収するため {@link EvidenceWriter#normalize} で比較する。
      */
     public static Map find(List dataset, String column, Object expected) {
-        String col = column.toUpperCase();
+        String col = column.toUpperCase(java.util.Locale.ENGLISH);
         String want = EvidenceWriter.normalize(expected);
         for (int i = 0; i < dataset.size(); i++) {
             Map row = (Map) dataset.get(i);
@@ -94,7 +94,7 @@ public final class GetDatasetUtil {
 
     /** 指定カラムが指定値に一致する行数を返す(正規化比較)。 */
     public static int count(List dataset, String column, Object expected) {
-        String col = column.toUpperCase();
+        String col = column.toUpperCase(java.util.Locale.ENGLISH);
         String want = EvidenceWriter.normalize(expected);
         int n = 0;
         for (int i = 0; i < dataset.size(); i++) {

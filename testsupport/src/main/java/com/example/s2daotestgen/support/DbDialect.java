@@ -40,7 +40,7 @@ public final class DbDialect {
         if (s == null) {
             return ORACLE;
         }
-        String v = s.trim().toLowerCase();
+        String v = s.trim().toLowerCase(java.util.Locale.ENGLISH);
         if (v.equals("postgre") || v.equals("postgres") || v.equals("postgresql")) {
             return POSTGRE;
         }

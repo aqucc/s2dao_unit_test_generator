@@ -195,19 +195,33 @@ public final class Main {
             }
         });
 
+        // 1パス目: 全 DAO のエンティティを収集(リレーション先の解決用レジストリ)
+        final java.util.List<DaoMeta> daos = new java.util.ArrayList<DaoMeta>();
         for (int i = 0; i < files.length; i++) {
             final File f = files[i];
             if (!f.getName().endsWith(".meta.json")) {
                 continue;
             }
-            final DaoMeta dao = reader.read(f);
+            daos.add(reader.read(f));
+        }
+        final java.util.Map<String, Object> registry =
+                new java.util.LinkedHashMap<String, Object>();
+        for (final DaoMeta d : daos) {
+            if (d.entity != null && d.entity.simpleName != null) {
+                registry.put(d.entity.simpleName.toLowerCase(java.util.Locale.ENGLISH),
+                        d.entity);
+            }
+        }
+        gen.setEntityRegistry(registry);
+
+        for (final DaoMeta dao : daos) {
             final TestClassGenerator.Result r = gen.generate(dao, pkg, report);
             final File dir = (r.packageName != null && r.packageName.length() > 0)
                     ? new File(outDir, r.packageName.replace('.', '/')) : outDir;
             dir.mkdirs();
             final File out = new File(dir, r.className + ".java");
             writeText(out, r.source, charset);
-            System.out.println("  " + f.getName() + " → "
+            System.out.println("  " + dao.daoSimpleName + " → "
                     + (r.packageName != null ? r.packageName + "." : "") + r.className
                     + " (tests=" + r.testMethods + ", skipped=" + r.skipped + ")");
         }

@@ -22,7 +22,13 @@ public final class ValueFactory {
     private ValueFactory() {
     }
 
-    /** カラム名から既定シード値を引くための表(正準化カラム名 → 値)。 */
+    /**
+     * カラム名から既定シード値を引くための表(正準化カラム名 → 値)。
+     * 【重要】この表と canonical()/派生値の規則は、ジェネレーター側
+     * com.example.s2daotestgen.gen.TestValues と完全に一致させること
+     * (ずれると生成テストの「投入データに引数がヒットする」保証が壊れる)。
+     * 片方を変更する場合は必ず両方を同時に変更する。
+     */
     private static final Map SEED = new HashMap();
     static {
         SEED.put("empno", Long.valueOf(1001));
@@ -77,7 +83,7 @@ public final class ValueFactory {
 
     /** カラム名の正準化: 小文字化 → 最後の '.' 以降 → 末尾別名 {@code _数字} を除去。 */
     static String canonical(String columnName) {
-        String c = columnName.toLowerCase().trim();
+        String c = columnName.toLowerCase(java.util.Locale.ENGLISH).trim();
         int dot = c.lastIndexOf('.');
         if (dot >= 0) {
             c = c.substring(dot + 1);
@@ -138,7 +144,7 @@ public final class ValueFactory {
     }
 
     private static String deriveString(String canon) {
-        String base = canon.toUpperCase();
+        String base = canon.toUpperCase(java.util.Locale.ENGLISH);
         if (base.length() > 6) {
             base = base.substring(0, 6);
         }
