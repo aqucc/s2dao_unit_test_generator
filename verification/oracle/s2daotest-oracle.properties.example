@@ -1,0 +1,31 @@
+# =====================================================================
+# s2daotest.properties の【実 Oracle 11g 用】記入例
+#
+# 使い方: このファイルを s2daotest.properties にリネームして
+#   ・クラスパスのルート(Eclipse なら src/ か bin/)に置く、または
+#   ・-Ds2daotest.config=<このファイルのパス> で明示指定する
+#
+# 注意:
+#   ・jdbc.* は「素の JDBC 接続」(テストデータ投入・データセット取得用)。
+#     dicon(DAO 実行側)と【必ず同一の DB・同一スキーマ】を指すこと。
+#   ・Java5 で実行する場合のドライバ jar は ojdbc14.jar(10.2 系)か
+#     ojdbc5.jar(11g 系)。ojdbc6.jar は Java6+ 専用。
+#   ・ドライバクラス名は ojdbc14/ojdbc5/ojdbc6 いずれも oracle.jdbc.OracleDriver でよい。
+# =====================================================================
+
+# --- 素の JDBC 接続(dicon の xaDataSource と同じ接続先にする) ---
+jdbc.driver=oracle.jdbc.OracleDriver
+# SID 指定の書式。サービス名なら jdbc:oracle:thin:@//<host>:1521/<service_name>
+jdbc.url=jdbc:oracle:thin:@127.0.0.1:1521:ORCL
+jdbc.user=scott
+jdbc.password=tiger
+
+# --- 方言(oracle / postgre / h2-oracle) ---
+dialect=oracle
+
+# --- S2Container 設定(クラスパス上のパス)。verification/oracle/ のひな形を
+#     app.dicon 等の名前でクラスパスルートへコピーして使う ---
+dicon=s2dao-oracle.dicon
+
+# --- エビデンス CSV 出力先(省略時 ./evidence。-Ds2daotest.evidence.dir が優先) ---
+evidence.dir=./evidence
