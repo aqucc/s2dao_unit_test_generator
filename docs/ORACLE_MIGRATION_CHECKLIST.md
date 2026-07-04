@@ -156,3 +156,19 @@ java -cp "<上記jar一式>:build" \
 旧(実 Oracle)・新(PostgreSQL 16)それぞれのエビデンスディレクトリを
 `verification/compare/compare.py <oldDir> <newDir>` に渡す
 (自動更新カラム TIMESTAMP/TSTAMP/VERSIONNO/VERSION_NO は既定で除外)。
+
+## 3. DB キャラクタセットを SJIS 系にする場合(テスト用コンテナの張り替え運用)
+
+旧本番が JA16SJIS / JA16SJISTILDE の場合、テスト用 Oracle XE 11g コンテナは
+初回起動直後に `infra/docker/old-db-oracle11g/charset-ja16sjis.sh` で
+キャラクタセットを張り替える(非サポート操作。詳細・条件は
+`infra/docker/README.md` の「文字コードの制約」を参照)。
+
+| 項目 | 内容 |
+|---|---|
+| 効果 | VARCHAR2 のバイト長セマンティクス(全角2バイト)・ORA-12899 の出方・LENGTHB/SUBSTRB・BINARY ソート順が旧本番と一致する |
+| 実施時期 | 初回起動直後・日本語データ投入前に一度だけ |
+| charset の選定 | 旧本番実機の `SELECT value FROM nls_database_parameters WHERE parameter='NLS_CHARACTERSET';` に合わせる(TILDE 差に注意) |
+| **classpath 追加** | **ojdbc と同版の `orai18n.jar` が必須**(thin 組み込み変換は ASCII/ISO8859-1/UTF-8 系のみ。無いと「Non supported character set」)。Eclipse テンプレートの `.classpath` にコメントアウト済みエントリあり |
+| 禁止事項 | props$ の直接 UPDATE / NLS_NCHAR_CHARACTERSET の変更 / 本番系への適用 |
+| やり直し | `docker compose down -v` で作り直し |

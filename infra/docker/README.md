@@ -66,19 +66,36 @@ Windows 側の Eclipse からは WSL2 の localhost 転送により
 
 ### 文字コードの制約(旧DB shiftjis について)【重要】
 
-- `gvenzl/oracle-xe:11` の DB キャラクタセットは **AL32UTF8 固定**。
-  XE はビルド済みデータベース同梱型のため **JA16SJIS には変更できない**。
-- 影響: VARCHAR2 のバイト長セマンティクスが変わる
-  (SJIS=全角2バイト、UTF-8=全角3バイト)。全角文字を桁いっぱいに入れる
-  データでは、実 SJIS DB では入るがコンテナ(UTF-8)では ORA-12899 になる、
-  という差が出うる。
-- 回避策(いずれか):
-  1. テストデータの全角文字列を「SJIS 想定桁の 2/3 以下」に抑える
-     (本ジェネレーターの既定シードは ASCII のみなので影響なし)
-  2. 検証用 DDL の該当列を `VARCHAR2(n CHAR)`(文字セマンティクス)にする
-  3. 厳密に JA16SJIS が必要なら、正規ライセンスの Oracle 11g SE/EE
-     インストーラ + [oracle/docker-images](https://github.com/oracle/docker-images)
-     で `CHARACTER SET JA16SJISTILDE` を指定したカスタムイメージを作る
+- `gvenzl/oracle-xe:11` の DB キャラクタセットは **AL32UTF8 固定**で、
+  正攻法(CSALTER / DB 再作成)では JA16SJIS にできない。
+- **採用した妥協策**: 初回起動直後(データ辞書が ASCII のみ・日本語データ投入前)に
+  `ALTER DATABASE CHARACTER SET INTERNAL_USE JA16SJISTILDE` で
+  **キャラクタセットを張り替える**(同梱の `charset-ja16sjis.sh` を一度だけ実行)。
+
+  ```bash
+  cd /opt/docker/old-db-oracle11g
+  docker compose up -d          # healthy になるまで待つ
+  ./charset-ja16sjis.sh         # 既定 JA16SJISTILDE(引数で JA16SJIS も可)
+  ```
+
+  - 初期化直後なら辞書は実質 ASCII のみで、ASCII 域は AL32UTF8/JA16SJIS で
+    バイト表現が同一のため、張り替えによる既存データ不整合は実質発生しない。
+  - 張り替え後は VARCHAR2 が SJIS バイト列になり、旧環境の本質的な挙動差
+    (**バイト長セマンティクス=全角2バイト、ORA-12899 の出方、LENGTHB/SUBSTRB、
+    BINARY ソートの SJIS バイト順**)が忠実に再現される。JDBC 取得後の Java 側は
+    従来どおり Unicode(String)であり、テストコードへの影響はない。
+  - **条件**: (1) props$ の直接 UPDATE は使わない(INTERNAL_USE 版を使う)
+    (2) JA16SJIS / JA16SJISTILDE は旧本番実機の
+    `SELECT value FROM nls_database_parameters WHERE parameter='NLS_CHARACTERSET';`
+    に合わせる (3) NLS_NCHAR_CHARACTERSET は触らない
+    (4) **thin JDBC には ojdbc と同版の `orai18n.jar` を classpath に追加**
+    (thin 組み込み変換は ASCII/ISO8859-1/UTF-8 系のみ。無いと
+    「Non supported character set」エラー)。
+  - Oracle 非サポート操作のため**このテスト用コンテナ限定**。やり直しは
+    `docker compose down -v` で作り直す。
+- 張り替えをしない場合の代替(参考): テストデータの全角文字列を SJIS 想定桁の
+  2/3 以下に抑える/DDL を `VARCHAR2(n CHAR)` にする/正規ライセンスの 11g SE/EE +
+  [oracle/docker-images](https://github.com/oracle/docker-images) でカスタムビルド。
 - なお新DB側は要件どおり **ja_JP.utf8**(Dockerfile で localedef 済み)。
   PostgreSQL の `VARCHAR(n)` は文字数セマンティクスなので桁差問題は起きない。
 

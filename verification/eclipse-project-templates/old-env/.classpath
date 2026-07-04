@@ -27,5 +27,11 @@
 	     Java5 実行時は ojdbc14.jar(10g/11g用) または ojdbc5.jar(11g用)を使うこと。
 	     ojdbc6.jar は Java6+ 専用(class major50)のため Java5 では動かない) -->
 	<classpathentry kind="lib" path="lib/ojdbc.jar"/>
+	<!-- DB キャラクタセットが JA16SJIS / JA16SJISTILDE の場合は、ojdbc と同版の
+	     orai18n.jar も lib/ に配置し、次の 1 行のコメントを外すこと
+	     (thin ドライバ組み込みの変換は ASCII/ISO8859-1/UTF-8 系のみのため。
+	      無いと「Non supported character set」エラーになる)
+	<classpathentry kind="lib" path="lib/orai18n.jar"/>
+	-->
 	<classpathentry kind="output" path="bin"/>
 </classpath>
