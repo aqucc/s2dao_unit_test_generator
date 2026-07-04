@@ -33,6 +33,23 @@ public class ValueFactoryTest extends TestCase {
         assertEquals("job", ValueFactory.canonical("job"));
     }
 
+    /**
+     * Oracle は空文字列 '' を NULL として格納するため、生成する String 値が
+     * 空文字だと新旧環境(Oracle / PostgreSQL)でエビデンスが食い違う。
+     * ValueFactory が空文字を返さないことを、シード表のカラム・未知カラム・
+     * 極端なカラム名(空文字/記号のみ)について確認する。
+     */
+    public void testStringValuesNeverEmpty() {
+        String[] cols = new String[] { "ename", "job", "dname", "loc", "aaa",
+                "unknown_column", "x", "_", "emp.dname_0", "a1", "" };
+        for (int i = 0; i < cols.length; i++) {
+            Object v = ValueFactory.forColumn("java.lang.String", cols[i]);
+            assertTrue("String 値は非null: col=" + cols[i], v instanceof String);
+            assertTrue("String 値は空文字禁止(Oracle ''=NULL): col=" + cols[i],
+                    ((String) v).length() > 0);
+        }
+    }
+
     public void testUnknownColumnStillDeterministic() {
         Object a = ValueFactory.forColumn("int", "someRandomColumn");
         Object b = ValueFactory.forColumn("int", "someRandomColumn");

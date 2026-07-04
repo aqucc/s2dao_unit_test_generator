@@ -71,7 +71,15 @@ public final class WriteDbUtil {
         try {
             ps = conn.prepareStatement(sql.toString());
             for (int i = 0; i < vals.length; i++) {
-                ps.setObject(i + 1, vals[i]);
+                if (vals[i] == null) {
+                    // Oracle JDBC(ojdbc14 等)は型無しの setObject(i, null) を
+                    // ORA-17004 (Invalid column type) で拒否するため setNull を使う。
+                    // Types.NULL は Oracle / PostgreSQL / H2 いずれも「型未指定の NULL」
+                    // として受理する(JDBC3 API)。
+                    ps.setNull(i + 1, java.sql.Types.NULL);
+                } else {
+                    ps.setObject(i + 1, vals[i]);
+                }
             }
             return ps.executeUpdate();
         } finally {

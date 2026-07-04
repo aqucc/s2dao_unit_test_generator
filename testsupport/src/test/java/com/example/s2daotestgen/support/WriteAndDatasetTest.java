@@ -92,4 +92,23 @@ public class WriteAndDatasetTest extends TestCase {
         Map row = (Map) ds.get(0);
         assertEquals("NULL", EvidenceWriter.normalize(row.get("DNAME")));
     }
+
+    /**
+     * null 値は setObject(i, null) ではなく setNull(i, Types.NULL) でバインドされる
+     * (Oracle ojdbc は型無し setObject(null) を ORA-17004 で拒否するため)。
+     * 文字列カラム・数値カラム双方の null が INSERT でき、NULL として読み戻せること。
+     */
+    public void testNullBindingOnStringAndNumericColumns() throws Exception {
+        int n = WriteDbUtil.write(conn, new TestDataParam("DEPT",
+                new String[] { "deptno", "dname", "loc", "versionNo" },
+                new Object[] { Integer.valueOf(70), null, null, null }));
+        assertEquals(1, n);
+        List ds = GetDatasetUtil.getDataset(conn, "DEPT", new String[] { "deptno" });
+        Map row = GetDatasetUtil.find(ds, "DEPTNO", Integer.valueOf(70));
+        assertNotNull(row);
+        assertNull(row.get("DNAME"));
+        assertNull(row.get("LOC"));
+        assertNull(row.get("VERSIONNO"));
+        assertEquals("NULL", EvidenceWriter.normalize(row.get("VERSIONNO")));
+    }
 }
