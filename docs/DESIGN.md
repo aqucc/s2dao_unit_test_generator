@@ -19,17 +19,25 @@ Seasar2 / S2Dao で実装されたアプリケーションの Oracle11g → Post
 │   ├── DESIGN.md             … 本書
 │   ├── CONSTRAINTS.md        … 本開発環境での検証上の制約
 │   └── VERIFICATION.md       … 検証結果レポート
-├── generator/                … ジェネレーター本体 (Maven プロジェクト, Java8 で動作)
+├── generator/                … 【製品】ジェネレーター本体 (Maven, Java8 で動作)
 │   ├── pom.xml
 │   └── src/main/java/...
-├── testsupport/              … 生成テストが使う実行時ユーティリティ (Java5 互換構文)
+├── testsupport/              … 【製品】生成テストが使う実行時ランタイム (Java5 互換構文)
 │   └── src/main/java/...
-├── samples/                  … インターネット上の実 S2Dao ソース(検証対象)
-│   └── <project>/...
-└── verification/             … 検証環境スクリプト・実行結果・比較レポート
-    ├── env/                  … DB 起動/スキーマ投入スクリプト
-    ├── old-env/              … 旧環境相当での実行 (Oracle互換 + -source 1.6)
+├── vendor/                   … 【参照】ベンダリングした Seasar2/S2Dao ソース (Apache-2.0)
+├── infra/                    … 【利用者向け】テスト用 DB 環境 (docker-compose)
+│   ├── old-db-oracle11g/     … Oracle XE 11g (+JA16SJIS 張り替えスクリプト)
+│   └── new-db-postgres16/    … PostgreSQL 16.8 (ja_JP.utf8)
+└── verification/             … 本リポジトリで行った検証作業一式
+    ├── samples/              … インターネット上の実 S2Dao ソース(検証対象)
+    ├── scripts/              … 生成コードのコンパイル検証 (javac 1.5 / ECJ)
+    ├── env/                  … Seasar2 ビルド・スモーク・DB 起動スクリプト
+    ├── lib/                  … Seasar2 ランタイム jar 一式
+    ├── generated/            … 生成テスト(検証時点の成果物)
+    ├── old-env/              … 旧環境相当での実行 (H2 Oracle互換 + -source 1.5)
     ├── new-env/              … 新環境での実行 (PostgreSQL16 + Java8)
+    ├── oracle/               … 実 Oracle 用 DDL/dicon/properties
+    ├── eclipse-project-templates/ … Eclipse(Pleiades) 用プロジェクト雛形
     └── compare/              … 結果・データセット突き合わせ
 ```
 
@@ -149,7 +157,7 @@ dao 1 つにつき 1 つのメタ情報 JSON(`<Dao>.meta.json`)。フェーズ2�
 ## 4. 検証計画
 
 ### 4.1 検証対象の実ソース
-インターネット上で公開されている実 S2Dao ソースを samples/ に取得する。
+インターネット上で公開されている実 S2Dao ソースを verification/samples/ に取得する。
 候補(リサーチで確定):
 - seasarorg 系ミラー(s2dao 本体の examples / テスト用 dao)
 - s2dao-tutorial / sa-struts examples 系
@@ -158,7 +166,7 @@ dao 1 つにつき 1 つのメタ情報 JSON(`<Dao>.meta.json`)。フェーズ2�
 ### 4.2 本環境の制約(docs/CONSTRAINTS.md に詳述)
 - Oracle11g 実物・Java5 JVM 実物・Docker イメージ取得は本環境では不可
 - 代替: 旧環境相当 = **H2 Database の Oracle 互換モード** + JDK8 の
-  `-source/-target 1.6`(Java5 互換構文チェック)
+  `-source/-target 1.5`(Java5 世代の厳格コンパイル)
 - 新環境 = **PostgreSQL 16.13(apt 版)** + Java8(OpenJDK 1.8.0_492)
 - 生成コード自体は実 Oracle11g/実 Java5 で動作する設計とする
   (ドライバ・dicon の差し替えのみで移行可能)

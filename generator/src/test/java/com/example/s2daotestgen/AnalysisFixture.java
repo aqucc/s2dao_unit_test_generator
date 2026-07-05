@@ -17,13 +17,13 @@ import com.example.s2daotestgen.sql.SqlFileIndex;
 public final class AnalysisFixture {
 
     public static final String S2DAO_SRC =
-            "../samples/s2dao/s2-dao-examples/src/main/java";
+            "../verification/samples/s2dao/s2-dao-examples/src/main/java";
     public static final String S2DAO_SQL =
-            "../samples/s2dao/s2-dao-examples/src/main/resources";
+            "../verification/samples/s2dao/s2-dao-examples/src/main/resources";
     public static final String TIGER_SRC =
-            "../samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java";
+            "../verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java";
     public static final String TIGER_SQL =
-            "../samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources";
+            "../verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources";
 
     private AnalysisFixture() {
     }

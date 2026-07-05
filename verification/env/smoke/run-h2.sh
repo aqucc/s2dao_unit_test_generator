@@ -14,8 +14,8 @@ export JAVA_TOOL_OPTIONS=""   # keep smoke output clean (no proxy noise); smoke 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../../.." && pwd)"
 LIB="$ROOT/verification/lib"
-EX="$ROOT/samples/s2dao/s2-dao-examples/src/main/java"
-EXRES="$ROOT/samples/s2dao/s2-dao-examples/src/main/resources/examples/dao"
+EX="$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/java"
+EXRES="$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/resources/examples/dao"
 BUILD="$HERE/build"
 
 # runtime classpath = every jar under verification/lib (postgresql jar is harmless for H2)

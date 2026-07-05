@@ -34,7 +34,7 @@ Maven 3.9.11。実 Java5 VM は本環境に導入不可のため、後述の代�
   ビルド成功・単体テスト **14 件すべて成功**。本体 7 クラスすべて major 49 を確認:
   `DbDialect / EvidenceWriter / GetDatasetUtil / S2TestContext / TestDataParam /
   ValueFactory / WriteDbUtil`。
-- **生成テスト**: `scripts/verify-generated-compile.sh` を **1.5** に強化。
+- **生成テスト**: `verification/scripts/verify-generated-compile.sh` を **1.5** に強化。
   両サンプルを `gen-all` で再生成し `javac -source 1.5 -target 1.5` でコンパイル:
   - s2dao(定数アノテーション): テストクラス **8 件**、エラーゼロ、major 49
   - s2dao-tiger(Tiger アノテーション): テストクラス **5 件**、エラーゼロ、major 49
@@ -88,7 +88,7 @@ Java6+ でしか使えない API(`String.isEmpty()`、`Arrays.copyOf`、`Deque`�
 
 Eclipse/Pleiades が実際に使うコンパイラは javac ではなく **ECJ** である。
 `org.eclipse.jdt.core.compiler:ecj:4.6.1`(Maven Central、JDK8 で動作し `-1.5` 対応)を
-用い、`scripts/verify-eclipse-compile.sh` で検証した。
+用い、`verification/scripts/verify-eclipse-compile.sh` で検証した。
 
 - **testsupport 本体**: ECJ `-1.5` で **エラーゼロ**(警告 77 件、すべて raw type /
   未使用要素のスタイル警告)。
@@ -158,8 +158,8 @@ verify スクリプト 1.5 化、run-lib.sh 1.5 化)後の回帰:
 |------|------|
 | `generator` `mvn test` | **21 件成功** |
 | `testsupport` `mvn test`(animal-sniffer 込み) | **14 件成功 / 違反ゼロ** |
-| `scripts/verify-generated-compile.sh`(1.5) | **OK**(s2dao 8 + tiger 5、major 49) |
-| `scripts/verify-eclipse-compile.sh`(ECJ 1.5、UTF-8/MS932) | **OK**(エラーゼロ) |
+| `verification/scripts/verify-generated-compile.sh`(1.5) | **OK**(s2dao 8 + tiger 5、major 49) |
+| `verification/scripts/verify-eclipse-compile.sh`(ECJ 1.5、UTF-8/MS932) | **OK**(エラーゼロ) |
 | `verification/run-old-env.sh`(H2 Oracle 互換、-source 1.5) | **PASS**(21 + 20) |
 | `verification/run-new-env.sh`(PostgreSQL16) | **PASS**(21 + 20) |
 | `verification/compare/compare.sh` | **PASS**(比較 75 / 一致 75 / 不一致 0) |

@@ -21,7 +21,7 @@
 # =============================================================================
 set -u
 
-ROOT=$(cd "$(dirname "$0")/.." && pwd)
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 JDK8_HOME=${JDK8_HOME:-/usr/lib/jvm/java-8-openjdk-amd64}
 JAVA="$JDK8_HOME/bin/java"
 JAVAP="$JDK8_HOME/bin/javap"
@@ -163,20 +163,20 @@ rm -rf "$WORK_DIR/s2dao-UTF-8" "$WORK_DIR/tiger-UTF-8" \
 
 echo "[4/5] UTF-8(新環境 Pleiades/Java8 相当)で ECJ 検証..."
 verify_ecj s2dao \
-    "$ROOT/samples/s2dao/s2-dao-examples/src/main/java" \
-    "$ROOT/samples/s2dao/s2-dao-examples/src/main/resources" UTF-8
+    "$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/java" \
+    "$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/resources" UTF-8
 verify_ecj tiger \
-    "$ROOT/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java" \
-    "$ROOT/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources" UTF-8
+    "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java" \
+    "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources" UTF-8
 
 echo ""
 echo "[5/5] MS932(旧環境 Pleiades/Windows/Java5 相当)で ECJ 検証..."
 verify_ecj s2dao \
-    "$ROOT/samples/s2dao/s2-dao-examples/src/main/java" \
-    "$ROOT/samples/s2dao/s2-dao-examples/src/main/resources" MS932
+    "$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/java" \
+    "$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/resources" MS932
 verify_ecj tiger \
-    "$ROOT/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java" \
-    "$ROOT/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources" MS932
+    "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java" \
+    "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources" MS932
 
 echo ""
 if [ "$TOTAL_ERRORS" -eq 0 ]; then

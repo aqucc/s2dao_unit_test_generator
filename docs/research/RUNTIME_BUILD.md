@@ -23,14 +23,14 @@ H2(Oracle 互換モード)・PostgreSQL 16 でのスモークテスト結果を�
 **実行時ランタイムは s2-framework / s2-extension = 2.3.23、s2-dao / s2-dao-tiger = 1.0.52 の
 一貫スタックである。** 2.4.x ではなく 2.3.23 を採用したのは次の技術的理由による。
 
-- `samples/s2dao/s2-dao`(= s2-dao **1.0.52**)の `pom.xml` は `org.seasar.container:s2-extension:**2.3.23**`
+- `verification/samples/s2dao/s2-dao`(= s2-dao **1.0.52**)の `pom.xml` は `org.seasar.container:s2-extension:**2.3.23**`
   に依存する。s2-dao 1.0.52 は 2.3.23 の API に対して書かれている。
 - s2-extension の `ValueType` インタフェースは 2.3 → 2.4 で拡張されており(`toText(Object)` 追加ほか、
   procedure ハンドラの API 変更)、**s2-dao 1.0.52 のソースは 2.4.48 の s2-extension に対して
   コンパイルできない**(`BytesType is not abstract and does not override abstract method toText(Object)` 等)。
   仮にリフレクションで動かしても実行時に `AbstractMethodError` になる。
 - したがって「動く S2Dao ランタイム」を成立させるには、s2-dao 1.0.52 と versionを揃えた
-  s2-framework / s2-extension **2.3.23** が正しい組合せである。これは `samples/s2dao/lib/` に
+  s2-framework / s2-extension **2.3.23** が正しい組合せである。これは `verification/samples/s2dao/lib/` に
   当初から `s2-framework-2.3.23.jar` / `s2-extension-2.3.23.jar` が同梱されている事実とも一致する。
 
 タスク指定の **s2-framework / s2-extension / s2-tiger 2.4.48 も GitHub タグ `Seasar2.4.48` から
@@ -51,10 +51,10 @@ s2-extension の `SqlParserImpl` が担っており、その挙動は 2.3.23 と
 
 | jar | 由来 | 入手/ビルド方法 |
 |---|---|---|
-| `s2-framework-2.3.23.jar` | Seasar2 2.3.23 | `samples/s2dao/lib/` 同梱の既存ビルド済み jar(旧 JDK でビルド済・JDK8 で動作) |
+| `s2-framework-2.3.23.jar` | Seasar2 2.3.23 | `verification/samples/s2dao/lib/` 同梱の既存ビルド済み jar(旧 JDK でビルド済・JDK8 で動作) |
 | `s2-extension-2.3.23.jar` | Seasar2 2.3.23 | 同上 |
-| `s2-dao-1.0.52.jar` | S2Dao 1.0.52 | `samples/s2dao/s2-dao/src` から **本環境で javac ビルド**(2.3.23 スタックに対して) |
-| `s2-dao-tiger-1.0.52.jar` | S2Dao-Tiger 1.0.52 | `samples/s2dao-tiger/s2-dao-tiger/src` から **本環境で javac ビルド** |
+| `s2-dao-1.0.52.jar` | S2Dao 1.0.52 | `verification/samples/s2dao/s2-dao/src` から **本環境で javac ビルド**(2.3.23 スタックに対して) |
+| `s2-dao-tiger-1.0.52.jar` | S2Dao-Tiger 1.0.52 | `verification/samples/s2dao-tiger/s2-dao-tiger/src` から **本環境で javac ビルド** |
 | `ognl-2.6.9.jar` | Maven Central | `ognl:ognl:2.6.9` |
 | `javassist-3.18.1-GA.jar` | Maven Central | `org.javassist:javassist:3.18.1-GA` |
 | `commons-logging-1.1.1.jar` | Maven Central | |
@@ -65,7 +65,7 @@ s2-extension の `SqlParserImpl` が担っており、その挙動は 2.3.23 と
 | `junit-3.8.2.jar` | Maven Central | 生成テスト(JUnit3 形式)実行用 |
 | `h2-1.4.199.jar` | Maven Central | **旧環境 Oracle 互換モード用** |
 | `postgresql-42.2.27.jar` | Maven Central | 新環境用 JDBC ドライバ |
-| `poi-3.0-FINAL.jar` | `samples/s2dao/lib/` | s2-extension の Excel DataSet 用(**DAO 実行には不要**、同梱のみ) |
+| `poi-3.0-FINAL.jar` | `verification/samples/s2dao/lib/` | s2-extension の Excel DataSet 用(**DAO 実行には不要**、同梱のみ) |
 | `portlet-api-1.0.jar` | Maven Central | s2-framework の portlet 外部コンテキストのコンパイル用(実行時は未使用) |
 
 > **ognl / javassist について**: 2.3.23 は本来 seasar パッチ版 ognl(`2.6.9-patch-*`)と
@@ -159,7 +159,7 @@ Seasar2 2.4.x / S2Dao 1.0.x は **JDBC3 世代(Java 1.4)**のコードであり�
 
 1. dicon で S2Container を起動し `dao.dicon` 相当のコンポーネント群 + `S2DaoInterceptor` を構成
 2. `container.getComponent(EmployeeDao.class)` で AOP 適用済み DAO を取得
-3. Oracle 方言 DDL(`samples/s2dao/hsql/sql/demo-oracle.sql` = scott/EMP・DEPT, `TO_DATE`)で
+3. Oracle 方言 DDL(`verification/samples/s2dao/hsql/sql/demo-oracle.sql` = scott/EMP・DEPT, `TO_DATE`)で
    テーブル作成 + 14 行投入
 4. `getAllEmployees()`(明示 SQL + N:1 リレーション dept)/
    `getEmployeeByJobDeptno("CLERK", 20)`(2-way SQL `/*BEGIN//IF//bindVar/*/`)/

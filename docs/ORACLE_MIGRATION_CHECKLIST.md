@@ -160,9 +160,9 @@ java -cp "<上記jar一式>:build" \
 ## 3. DB キャラクタセットを SJIS 系にする場合(テスト用コンテナの張り替え運用)
 
 旧本番が JA16SJIS / JA16SJISTILDE の場合、テスト用 Oracle XE 11g コンテナは
-初回起動直後に `infra/docker/old-db-oracle11g/charset-ja16sjis.sh` で
+初回起動直後に `infra/old-db-oracle11g/charset-ja16sjis.sh` で
 キャラクタセットを張り替える(非サポート操作。詳細・条件は
-`infra/docker/README.md` の「文字コードの制約」を参照)。
+`infra/README.md` の「文字コードの制約」を参照)。
 
 | 項目 | 内容 |
 |---|---|

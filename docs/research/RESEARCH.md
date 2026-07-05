@@ -4,7 +4,7 @@
 担当: リサーチ(調達)エージェント
 
 本レポートは `docs/DESIGN.md` の要求に基づき、(1) 実際に S2Dao 規約で書かれた Java
-ソース(samples/)の調達、(2) Seasar2/S2Dao 依存 jar の入手経路確定、(3) 2-way SQL
+ソース(verification/samples/)の調達、(2) Seasar2/S2Dao 依存 jar の入手経路確定、(3) 2-way SQL
 パーサ・S2Dao 本体コアソースのベンダリング(vendor/)を行った結果をまとめる。
 
 ## 0. 環境上の制約(重要)
@@ -28,9 +28,9 @@
   S2Dao 本体付属サンプル・チュートリアル**であり、これは DESIGN.md がそもそも
   「有力候補」として挙げているものと合致する。
 
-## 1. 取得した samples/ 一覧と評価
+## 1. 取得した verification/samples/ 一覧と評価
 
-### 1.1 `samples/s2dao/` (推薦・本命)
+### 1.1 `verification/samples/s2dao/` (推薦・本命)
 
 - 取得元: `https://github.com/seasarorg/s2dao.git` (Apache-2.0, `master` ブランチ、
   タグなし。pom.xml のバージョンは `1.0.52-SNAPSHOT`。changelog_ja.txt の最新確定版は
@@ -71,7 +71,7 @@
   さらに `s2-dao` コア本体も同梱されているため、フェーズ1解析結果と
   `DaoMetaDataImpl` 実物の突き合わせ(クロスチェック)も同一リポジトリ内で可能。
 
-### 1.2 `samples/s2dao-tiger/` (推薦・補完)
+### 1.2 `verification/samples/s2dao-tiger/` (推薦・補完)
 
 - 取得元: `https://github.com/seasarorg/s2dao-tiger.git` (Apache-2.0, タグなし)
 - Maven モジュール構成:
@@ -109,16 +109,16 @@
   `"S2Dao" "_ARGS"` 等での検索や `seasar-user` ML 界隈のプロジェクト
   (DBFlute系、SAStruts系実アプリ)を追加調査することを推奨する。
 
-### 1.4 samples/ 配置サマリ
+### 1.4 verification/samples/ 配置サマリ
 
 | ディレクトリ | dao数 | .sql数 | .dicon数 | アノテーション方式 | DDL |
 |---|---|---|---|---|---|
-| `samples/s2dao/s2-dao-examples` | 7 | 6 | 8 | 定数アノテーション(`BEAN`/`_ARGS`/`_QUERY`/`_SQL`) | あり(Oracle/HSQLDB/Derby) |
-| `samples/s2dao-tiger/s2-dao-tiger-examples` | 5 | 5 | 同梱dicon複数 | s2dao-tiger(`@S2Dao`/`@Arguments`/`@Sql`) | あり(Oracle/HSQLDB) |
+| `verification/samples/s2dao/s2-dao-examples` | 7 | 6 | 8 | 定数アノテーション(`BEAN`/`_ARGS`/`_QUERY`/`_SQL`) | あり(Oracle/HSQLDB/Derby) |
+| `verification/samples/s2dao-tiger/s2-dao-tiger-examples` | 5 | 5 | 同梱dicon複数 | s2dao-tiger(`@S2Dao`/`@Arguments`/`@Sql`) | あり(Oracle/HSQLDB) |
 
 各リポジトリは `.git` を削除した上でリポジトリ全体(コア本体・examples・s24-test・
 lib(jarバイナリ含む)・hsql/derbyスクリプト一式)をそのまま配置している
-(`samples/s2dao` 16MB, `samples/s2dao-tiger` 1.6MB)。
+(`verification/samples/s2dao` 16MB, `verification/samples/s2dao-tiger` 1.6MB)。
 
 ## 2. 依存 jar の入手可否
 
@@ -269,9 +269,9 @@ jar 自体の入手可否とは無関係。generator/testsupport のビルドで
    実ビルドまで検証していない(pom.xml の存在とリポジトリ実在は確認済みだが、
    `seasar2` リポジトリは157MBと大きく、`aopalliance`/`jboss:*` 等の追加依存が
    Central に揃っているかは未確認。ビルド時に個別調査が必要)。
-3. **`samples/s2dao` には S2Dao 本体ソース(`s2-dao` モジュール)がそのまま
+3. **`verification/samples/s2dao` には S2Dao 本体ソース(`s2-dao` モジュール)がそのまま
    同梱されている**ため、これを `vendor/s2dao-core` と重複して保持している。
-   意図的な重複であり(samples/ = 検証対象の実プロジェクト一式、vendor/ =
+   意図的な重複であり(verification/samples/ = 検証対象の実プロジェクト一式、vendor/ =
    generator が実際にビルド時参照する切り出し済みソース)、generator 実装時は
    `vendor/` 側を正とすること。
 4. **javassist の `mvn dependency:get` は JDK21 環境で失敗しうる**(前述、
@@ -290,8 +290,8 @@ jar 自体の入手可否とは無関係。generator/testsupport のビルドで
 
 ## 5. 成果物一覧
 
-- `samples/s2dao/`(旧 `seasarorg/s2dao`、.git削除済み、16MB)
-- `samples/s2dao-tiger/`(旧 `seasarorg/s2dao-tiger`、.git削除済み、1.6MB)
+- `verification/samples/s2dao/`(旧 `seasarorg/s2dao`、.git削除済み、16MB)
+- `verification/samples/s2dao-tiger/`(旧 `seasarorg/s2dao-tiger`、.git削除済み、1.6MB)
 - `vendor/s2-extension-sql/`(`org.seasar.extension.sql` 2-way SQLパーサ一式 + LICENSE、292KB)
 - `vendor/s2dao-core/`(`org.seasar.dao` S2Dao本体コア一式 + LICENSE、1.3MB)
 - `vendor/s2dao-tiger-annotations/`(`org.seasar.dao.annotation.tiger` / `org.seasar.dao.tiger` 一式 + LICENSE、200KB)

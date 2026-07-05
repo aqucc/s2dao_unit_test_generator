@@ -34,7 +34,7 @@ ROOT="$(cd "$HERE/../.." && pwd)"
 WORK="${WORK:-$HERE/build-work}"
 OUT="$HERE/build-out"
 STUBSRC="$HERE/jdbc3-stub/src"
-SLIB="$ROOT/samples/s2dao/lib"            # patched-ognl / javassist-3.4 / 2.3.23 jars live here
+SLIB="$ROOT/verification/samples/s2dao/lib"            # patched-ognl / javassist-3.4 / 2.3.23 jars live here
 CLIB="$ROOT/verification/lib"             # Central deps already vendored into the repo
 TAG=Seasar2.4.48
 
@@ -103,7 +103,7 @@ echo "== [6] s2-dao 1.0.52 =="
 # NOTE: s2-dao 1.0.52 (its pom declares s2-extension 2.3.23) is built and RUN against the
 # 2.3.23 stack. Its ValueType/procedure APIs diverge from 2.4.x, so the 2.4.48 jars above are
 # archival only (see RUNTIME_BUILD.md).
-DAO="$ROOT/samples/s2dao/s2-dao"
+DAO="$ROOT/verification/samples/s2dao/s2-dao"
 CP323="$CLIB/s2-framework-2.3.23.jar:$CLIB/s2-extension-2.3.23.jar:$SLIB/ognl-2.6.9-patch-20070624.jar:$SLIB/javassist-3.4.ga.jar:$CLIB/commons-logging-1.1.1.jar:$CLIB/geronimo-j2ee_1.4_spec-1.0.jar:$CLIB/aopalliance-1.0.jar:$CLIB/poi-3.0-FINAL.jar:$CLIB/junit-3.8.2.jar"
 rm -rf "$WORK/dao"; mkdir -p "$WORK/dao"
 find "$DAO/src/main/java" -name '*.java' | grep -v '/unit/' > "$WORK/dao_srcs.txt"
@@ -112,7 +112,7 @@ jarmod "$WORK/dao" "$DAO/src/main/resources" "$OUT/s2-dao-1.0.52.jar"
 
 # --- 7. s2-dao-tiger 1.0.52 -----------------------------------------------------------------
 echo "== [7] s2-dao-tiger 1.0.52 =="
-DT="$ROOT/samples/s2dao-tiger/s2-dao-tiger"
+DT="$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger"
 rm -rf "$WORK/daotiger"; mkdir -p "$WORK/daotiger"
 find "$DT/src/main/java" -name '*.java' | grep -v '/dao/unit/' > "$WORK/dt_srcs.txt"
 javac -encoding UTF-8 -source 1.6 -target 1.6 -nowarn -Xbootclasspath/p:"$STUB" \

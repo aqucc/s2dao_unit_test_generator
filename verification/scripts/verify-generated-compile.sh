@@ -23,7 +23,7 @@
 # =============================================================================
 set -u
 
-ROOT=$(cd "$(dirname "$0")/.." && pwd)
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 JDK8_HOME=${JDK8_HOME:-/usr/lib/jvm/java-8-openjdk-amd64}
 JAVAC="$JDK8_HOME/bin/javac"
 S2_LIB_DIR=${S2_LIB_DIR:-$ROOT/verification/lib}
@@ -132,13 +132,13 @@ verify() {
 
 echo "[3/4] s2dao (定数アノテーション) サンプルを検証..."
 verify s2dao \
-    "$ROOT/samples/s2dao/s2-dao-examples/src/main/java" \
-    "$ROOT/samples/s2dao/s2-dao-examples/src/main/resources"
+    "$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/java" \
+    "$ROOT/verification/samples/s2dao/s2-dao-examples/src/main/resources"
 
 echo "[4/4] s2dao-tiger (Tiger アノテーション) サンプルを検証..."
 verify tiger \
-    "$ROOT/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java" \
-    "$ROOT/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources"
+    "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java" \
+    "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources"
 
 echo ""
 if [ "$TOTAL_ERRORS" -eq 0 ]; then

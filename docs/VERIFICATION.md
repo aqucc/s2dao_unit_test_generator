@@ -5,8 +5,8 @@
 生成した JUnit3 テストの、**旧環境相当**と**新環境**での実行結果と一致検証。
 
 - 検証対象サンプル
-  - 定数アノテーション方式: `samples/s2dao/s2-dao-examples`(パッケージ `examples.dao`)
-  - Tiger アノテーション方式: `samples/s2dao-tiger/s2-dao-tiger-examples`(パッケージ `examples.dao.tiger`)
+  - 定数アノテーション方式: `verification/samples/s2dao/s2-dao-examples`(パッケージ `examples.dao`)
+  - Tiger アノテーション方式: `verification/samples/s2dao-tiger/s2-dao-tiger-examples`(パッケージ `examples.dao.tiger`)
 - 生成テスト: `verification/generated/<sample>/`(`gen-all` で生成)
 - 再現スクリプト: `verification/run-old-env.sh` / `verification/run-new-env.sh` / `verification/compare/compare.sh`
 - 実行ログ: `verification/{old-env,new-env}/log/`、エビデンス CSV: `verification/{old-env,new-env}/evidence/`
@@ -190,12 +190,12 @@ DAO 挙動検証の過程で判明した**ジェネレーターのバグ 1 件�
 # 0) 生成(JDK21 で可)
 cd generator && mvn -q package && cd ..
 java -jar generator/target/s2dao-testgen.jar gen-all \
-  --src samples/s2dao/s2-dao-examples/src/main/java \
-  --sql samples/s2dao/s2-dao-examples/src/main/resources \
+  --src verification/samples/s2dao/s2-dao-examples/src/main/java \
+  --sql verification/samples/s2dao/s2-dao-examples/src/main/resources \
   --out verification/generated/s2dao --dbms oracle
 java -jar generator/target/s2dao-testgen.jar gen-all \
-  --src samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java \
-  --sql samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources \
+  --src verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java \
+  --sql verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources \
   --out verification/generated/s2dao-tiger --dbms oracle
 
 # 1) 旧環境相当(H2 Oracle モード)

@@ -25,14 +25,16 @@ Oracle → PostgreSQL 移行時に「同一 dao/sql に対して新旧環境で�
 
 | パス | 内容 |
 |---|---|
-| `generator/` | ジェネレーター本体(Maven)。`analyze` / `generate` / `gen-all` CLI |
-| `testsupport/` | 生成テスト用ランタイム(Java5 互換、junit3 のみ依存) |
-| `samples/` | 検証に使用した実 S2Dao ソース(seasarorg 由来) |
-| `vendor/` | ベンダリングした Seasar2/S2Dao ソース(Apache-2.0) |
-| `verification/` | 検証環境一式: Seasar2 ランタイム jar、dicon、DDL、実行スクリプト、エビデンス |
+| `generator/` | 【製品】ジェネレーター本体(Maven)。`analyze` / `generate` / `gen-all` CLI |
+| `testsupport/` | 【製品】生成テスト用ランタイム(Java5 互換、junit3 のみ依存。実行時に jar を classpath へ) |
+| `vendor/` | 【参照】ベンダリングした Seasar2/S2Dao ソース(Apache-2.0) |
+| `infra/` | 【利用者向け】テスト用 DB 環境の docker-compose 一式(旧: Oracle XE 11g、新: PostgreSQL 16.8) |
+| `verification/` | 本リポジトリで行った検証作業一式(samples=実 S2Dao ソース、scripts=コンパイル検証、Seasar2 ランタイム jar、dicon、DDL、実行スクリプト、エビデンス) |
 | `docs/DESIGN.md` | 設計書 |
 | `docs/CONSTRAINTS.md` | 本開発環境での検証上の制約(Oracle/Java5 の代替方法) |
 | `docs/VERIFICATION.md` | 新旧環境での実行・一致検証レポート |
+| `docs/SENIOR_REVIEW.md` | 上級レビュー結果(発見問題と修正) |
+| `docs/ORACLE_MIGRATION_CHECKLIST.md` | 実 Oracle で動かす際のチェックリスト |
 | `docs/research/` | 調査レポート(サンプル調達・jar 入手・ランタイムビルド) |
 
 ## 使い方
@@ -106,7 +108,7 @@ S2Dao が自動更新するカラム(TSTAMP/VERSIONNO 等)は比較から除外�
 
 | 項目 | 結果 |
 |---|---|
-| 旧環境相当(H2 Oracleモード + `-source 1.6`) | **41/41 テスト成功** |
+| 旧環境相当(H2 Oracleモード + `-source 1.5`) | **41/41 テスト成功** |
 | 新環境(PostgreSQL 16 + Java8) | **41/41 テスト成功** |
 | エビデンス CSV 突き合わせ | **75/75 ファイル完全一致** |
 
@@ -115,5 +117,5 @@ S2Dao が自動更新するカラム(TSTAMP/VERSIONNO 等)は比較から除外�
 
 ## ライセンス
 
-`vendor/` および `samples/` 配下の Seasar プロジェクト由来コードは
+`vendor/` および `verification/samples/` 配下の Seasar プロジェクト由来コードは
 Apache License 2.0(各ディレクトリの LICENSE 参照)。
