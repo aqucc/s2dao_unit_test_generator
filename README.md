@@ -44,6 +44,10 @@ cd generator  && mvn package     # → target/s2dao-testgen.jar (実行可能 fa
 cd testsupport && mvn package    # → target/s2dao-testgen-support.jar
 ```
 
+- 対応ビルド環境: **JDK 8〜21 + Maven 3.9.x**(Maven 3.9.16 + JDK8 で検証済み)。
+  generator の pom は `maven.compiler.source/target=8` 指定のため
+  JDK8 の javac でもそのままビルドできる(Maven 4 系は未検証)。
+
 ### 2. テストコード生成
 
 ```bash

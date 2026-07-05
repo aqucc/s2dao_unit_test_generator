@@ -18,7 +18,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>8</maven.compiler.release>
+        <!-- JDK8 の javac には release オプションが無いため source/target 指定とする
+             (JDK8〜21 のどの JDK + Maven 3.9.x でもビルド可能) -->
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <javaparser.version>3.25.10</javaparser.version>
         <jackson.version>2.13.5</jackson.version>
         <ognl.version>2.6.9</ognl.version>
