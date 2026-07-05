@@ -19,7 +19,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LIB="$ROOT/verification/lib"
 DDL="$ROOT/verification/ddl/schema.sql"
 RUNNER="$ROOT/verification/runner/RunGeneratedTests.java"
-SUPPORT_JAR="$ROOT/testsupport/target/s2dao-testgen-support.jar"
+SUPPORT_JAR="$ROOT/runtime/testsupport/target/s2dao-testgen-support.jar"
 CP_LIB="$(find "$LIB" -maxdepth 1 -name '*.jar' | tr '\n' ':')"
 
 # run_sample <envdir> <envlabel> <dialect> <jdbc.driver> <jdbc.url> <jdbc.user> <jdbc.password> \

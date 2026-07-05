@@ -24,7 +24,7 @@ export JAVA_TOOL_OPTIONS=""
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../../.." && pwd)"
 LIB="$ROOT/verification/lib"
-SUPPORT_JAR="$ROOT/testsupport/target/s2dao-testgen-support.jar"
+SUPPORT_JAR="$ROOT/runtime/testsupport/target/s2dao-testgen-support.jar"
 
 if [ ! -f "$SUPPORT_JAR" ]; then
     echo "testsupport が未ビルドです: cd testsupport && mvn -q package" >&2

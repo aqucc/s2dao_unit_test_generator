@@ -26,9 +26,10 @@ Oracle → PostgreSQL 移行時に「同一 dao/sql に対して新旧環境で�
 | パス | 内容 |
 |---|---|
 | `generator/` | 【製品】ジェネレーター本体(Maven)。`analyze` / `generate` / `gen-all` CLI |
-| `testsupport/` | 【製品】生成テスト用ランタイム(Java5 互換、junit3 のみ依存。実行時に jar を classpath へ) |
+| `runtime/` | 【生成後に必要なもの】生成テストの実行環境 |
+| `runtime/testsupport/` | テスト実行時ライブラリ(Java5 互換、junit3 のみ依存。実行時に jar を classpath へ) |
+| `runtime/infra/` | テスト用 DB 環境の docker-compose 一式(DB が無い人向け。旧: Oracle XE 11g、新: PostgreSQL 16.8) |
 | `vendor/` | 【参照】ベンダリングした Seasar2/S2Dao ソース(Apache-2.0) |
-| `infra/` | 【利用者向け】テスト用 DB 環境の docker-compose 一式(旧: Oracle XE 11g、新: PostgreSQL 16.8) |
 | `verification/` | 本リポジトリで行った検証作業一式(samples=実 S2Dao ソース、scripts=コンパイル検証、Seasar2 ランタイム jar、dicon、DDL、実行スクリプト、エビデンス) |
 | `docs/DESIGN.md` | 設計書 |
 | `docs/CONSTRAINTS.md` | 本開発環境での検証上の制約(Oracle/Java5 の代替方法) |
@@ -43,7 +44,7 @@ Oracle → PostgreSQL 移行時に「同一 dao/sql に対して新旧環境で�
 
 ```bash
 cd generator  && mvn package     # → target/s2dao-testgen.jar (実行可能 fat-jar)
-cd testsupport && mvn package    # → target/s2dao-testgen-support.jar
+cd runtime/testsupport && mvn package    # → target/s2dao-testgen-support.jar
 ```
 
 - 対応ビルド環境: **JDK 8〜21 + Maven 3.9.x**(Maven 3.9.16 + JDK8 で検証済み)。
@@ -76,7 +77,7 @@ java -jar generator/target/s2dao-testgen.jar generate --meta ./meta --out ./gene
 1. **classpath**: 生成テスト+DAO/エンティティのクラス、`s2dao-testgen-support.jar`、
    junit 3.8.2、Seasar2 ランタイム一式(`verification/lib/` に同梱)、JDBC ドライバ、
    dicon と `.sql`(DAO と同一パッケージパスに配置必須)
-2. **接続設定** `s2daotest.properties`(雛形: `testsupport/s2daotest.properties.example`):
+2. **接続設定** `s2daotest.properties`(雛形: `runtime/testsupport/s2daotest.properties.example`):
    ```properties
    jdbc.driver=org.postgresql.Driver
    jdbc.url=jdbc:postgresql://127.0.0.1:5432/mydb

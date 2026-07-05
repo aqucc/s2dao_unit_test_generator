@@ -29,7 +29,7 @@ Maven 3.9.11。実 Java5 VM は本環境に導入不可のため、後述の代�
   ```
   生成されるバイトコードは **major version 49(= Java5 世代)**。実 Java5 VM で
   ロード可能な世代である。
-- **testsupport 本体**: `testsupport/pom.xml` の
+- **testsupport 本体**: `runtime/testsupport/pom.xml` の
   `maven.compiler.source/target` を **1.6 → 1.5** に変更。`mvn test` で
   ビルド成功・単体テスト **14 件すべて成功**。本体 7 クラスすべて major 49 を確認:
   `DbDialect / EvidenceWriter / GetDatasetUtil / S2TestContext / TestDataParam /
@@ -45,7 +45,7 @@ Maven 3.9.11。実 Java5 VM は本環境に導入不可のため、後述の代�
 
 構文だけでなく **使用 API が Java5 に存在するか**を機械検証した。
 
-- `testsupport/pom.xml` に `animal-sniffer-maven-plugin:1.23` +
+- `runtime/testsupport/pom.xml` に `animal-sniffer-maven-plugin:1.23` +
   `org.codehaus.mojo.signature:java15:1.0`(Maven Central 取得)を導入し、
   `check` ゴールを **test フェーズ**に束縛。`mvn test` 実行時に本体クラス
   (`target/classes`)を検査する。

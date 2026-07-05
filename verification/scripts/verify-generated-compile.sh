@@ -69,9 +69,9 @@ if [ ! -f "$GEN_JAR" ]; then
 fi
 
 echo "[2/4] testsupport をビルド..."
-SUP_JAR="$ROOT/testsupport/target/s2dao-testgen-support.jar"
+SUP_JAR="$ROOT/runtime/testsupport/target/s2dao-testgen-support.jar"
 if [ ! -f "$SUP_JAR" ]; then
-    (cd "$ROOT/testsupport" && mvn -q package -DskipTests) || fail "testsupport のビルドに失敗"
+    (cd "$ROOT/runtime/testsupport" && mvn -q package -DskipTests) || fail "testsupport のビルドに失敗"
 fi
 
 rm -rf "$WORK_DIR"

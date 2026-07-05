@@ -77,14 +77,14 @@ if [ ! -f "$GEN_JAR" ]; then
 fi
 
 echo "[2/5] testsupport をビルド(1.5 + animal-sniffer)..."
-SUP_JAR="$ROOT/testsupport/target/s2dao-testgen-support.jar"
+SUP_JAR="$ROOT/runtime/testsupport/target/s2dao-testgen-support.jar"
 if [ ! -f "$SUP_JAR" ]; then
-    (cd "$ROOT/testsupport" && mvn -q package) || fail "testsupport のビルドに失敗"
+    (cd "$ROOT/runtime/testsupport" && mvn -q package) || fail "testsupport のビルドに失敗"
 fi
 
 # --- testsupport 本体ソースも ECJ で -1.5 単体コンパイル(Eclipse 実コンパイラでの健全性)---
 echo "[3/5] testsupport 本体を ECJ -1.5 でコンパイル..."
-SUP_SRC="$ROOT/testsupport/src/main/java"
+SUP_SRC="$ROOT/runtime/testsupport/src/main/java"
 SUP_OUT="$WORK_DIR/testsupport-classes"
 rm -rf "$SUP_OUT"; mkdir -p "$SUP_OUT"
 SUP_SOURCES=$(find "$SUP_SRC" -name '*.java')

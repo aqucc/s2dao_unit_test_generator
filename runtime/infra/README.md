@@ -34,7 +34,7 @@ Windows 側の Eclipse からは WSL2 の localhost 転送により
 | ユーザー | `S2DAOTEST` / `s2daotest` | `s2daotest` / `s2daotest` |
 | ドライバ | ojdbc5(Java5)/ ojdbc6(Java8)※利用者調達 | postgresql-42.2.x(`verification/lib/` 同梱) |
 | dicon 例 | `verification/oracle/s2dao-oracle.dicon` | `verification/dicon/s2dao-pg.dicon` |
-| properties 例 | `verification/oracle/s2daotest-oracle.properties.example` | `testsupport/s2daotest.properties.example` |
+| properties 例 | `verification/oracle/s2daotest-oracle.properties.example` | `runtime/testsupport/s2daotest.properties.example` |
 
 `initdb/01_schema.sql` は本リポジトリの検証用スキーマ(EMP/DEPT/NOPKTABLE)。
 **自アプリの検証時は実 DDL に差し替える**こと(初回起動時のみ実行。

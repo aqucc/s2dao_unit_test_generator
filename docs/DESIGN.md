@@ -22,12 +22,12 @@ Seasar2 / S2Dao で実装されたアプリケーションの Oracle11g → Post
 ├── generator/                … 【製品】ジェネレーター本体 (Maven, Java8 で動作)
 │   ├── pom.xml
 │   └── src/main/java/...
-├── testsupport/              … 【製品】生成テストが使う実行時ランタイム (Java5 互換構文)
-│   └── src/main/java/...
+├── runtime/                  … 【生成後に必要なもの】生成テストの実行環境
+│   ├── testsupport/          … テスト実行時ライブラリ (Java5 互換。jar を classpath へ)
+│   └── infra/                … テスト用 DB 環境 (docker-compose。DB が無い人向け)
+│       ├── old-db-oracle11g/ … Oracle XE 11g (+JA16SJIS 張り替えスクリプト)
+│       └── new-db-postgres16/… PostgreSQL 16.8 (ja_JP.utf8)
 ├── vendor/                   … 【参照】ベンダリングした Seasar2/S2Dao ソース (Apache-2.0)
-├── infra/                    … 【利用者向け】テスト用 DB 環境 (docker-compose)
-│   ├── old-db-oracle11g/     … Oracle XE 11g (+JA16SJIS 張り替えスクリプト)
-│   └── new-db-postgres16/    … PostgreSQL 16.8 (ja_JP.utf8)
 └── verification/             … 本リポジトリで行った検証作業一式
     ├── samples/              … インターネット上の実 S2Dao ソース(検証対象)
     ├── scripts/              … 生成コードのコンパイル検証 (javac 1.5 / ECJ)
