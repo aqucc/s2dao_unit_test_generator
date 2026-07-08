@@ -204,15 +204,27 @@ public final class Main {
             }
             daos.add(reader.read(f));
         }
+        // (a) 従来互換: simpleName(小文字)キー。既存のリレーション解決経路はこれを使う。
         final java.util.Map<String, Object> registry =
                 new java.util.LinkedHashMap<String, Object>();
+        // (b) 新規: tableName(大文字正規化)キー。テーブル名からエンティティを逆引きする。
+        final java.util.Map<String, Object> byTable =
+                new java.util.LinkedHashMap<String, Object>();
         for (final DaoMeta d : daos) {
-            if (d.entity != null && d.entity.simpleName != null) {
+            if (d.entity == null) {
+                continue;
+            }
+            if (d.entity.simpleName != null) {
                 registry.put(d.entity.simpleName.toLowerCase(java.util.Locale.ENGLISH),
+                        d.entity);
+            }
+            if (d.entity.tableName != null && d.entity.tableName.trim().length() > 0) {
+                byTable.put(d.entity.tableName.trim().toUpperCase(java.util.Locale.ENGLISH),
                         d.entity);
             }
         }
         gen.setEntityRegistry(registry);
+        gen.setEntityByTable(byTable);
 
         for (final DaoMeta dao : daos) {
             final TestClassGenerator.Result r = gen.generate(dao, pkg, report);

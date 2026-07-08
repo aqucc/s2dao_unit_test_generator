@@ -3,6 +3,8 @@ package com.example.s2daotestgen.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * フェーズ1が出力するメタ情報のデータモデル。
  *
@@ -73,6 +75,12 @@ public final class MetaModel {
         public boolean timestamp = false;
         /** アクセス方法: "FIELD" / "GETTER"。 */
         public String access;
+        /**
+         * 自動採番対象か(JPA/S2JDBC 風 @GeneratedValue)。S2Dao 経路では常に false。
+         * 既定値 false のときは JSON へ出力しない(既存メタ JSON との後方互換のため末尾に追加)。
+         */
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        public boolean generated = false;
     }
 
     /** リレーション(N:1 等)参照メタ。 */

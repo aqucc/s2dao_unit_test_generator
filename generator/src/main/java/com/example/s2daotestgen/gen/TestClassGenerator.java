@@ -44,9 +44,38 @@ public final class TestClassGenerator {
      */
     private Map entityRegistry = new LinkedHashMap();
 
+    /**
+     * テーブル名(大文字正規化)→ {@link EntityMeta}。
+     * SQL の対象テーブルからエンティティのカラム/PK を逆引きするための辞書。
+     * リレーション解決用の {@link #entityRegistry}(simpleName キー)とは別に保持する
+     * (values() 汚染を避け、既存の生成ロジックに影響を与えない)。
+     */
+    private Map entityByTable = new LinkedHashMap();
+
     /** 全 DAO のエンティティレジストリを設定する(gen-all/generate 実行時に CLI が設定)。 */
     public void setEntityRegistry(Map registry) {
         this.entityRegistry = (registry != null) ? registry : new LinkedHashMap();
+    }
+
+    /** テーブル名逆引き辞書を設定する(キーは大文字正規化済みテーブル名)。 */
+    public void setEntityByTable(Map registry) {
+        this.entityByTable = (registry != null) ? registry : new LinkedHashMap();
+    }
+
+    /**
+     * テーブル名から {@link EntityMeta} を逆引きする。大文字/小文字・前後空白のゆらぎを吸収する。
+     * ステップ3(Service/S2JDBC 対応)が「SQL の対象テーブル → エンティティのカラム/PK」を
+     * 解決するために使用する。未登録・null の場合は null を返す。
+     */
+    public EntityMeta lookupEntityByTable(String table) {
+        if (table == null) {
+            return null;
+        }
+        String key = table.trim().toUpperCase(java.util.Locale.ENGLISH);
+        if (key.length() == 0) {
+            return null;
+        }
+        return (EntityMeta) entityByTable.get(key);
     }
 
     private EntityMeta lookupEntity(String typeName) {

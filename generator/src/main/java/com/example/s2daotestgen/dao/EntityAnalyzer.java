@@ -32,6 +32,22 @@ public final class EntityAnalyzer {
         this.repo = repo;
     }
 
+    /**
+     * 型が「エンティティらしい」か判定する。
+     *
+     * <p>S2Dao/Tiger の {@code @Bean}・{@code TABLE} 定数、または
+     * JPA/S2JDBC 風の {@code @Entity} を持つ型を対象とする。DAO の bean 参照から
+     * 解決されるエンティティに加え、テーブル逆引き辞書へ広く登録する用途に使う。</p>
+     */
+    public static boolean isEntityLike(final TypeDeclaration<?> type) {
+        if (type == null) {
+            return false;
+        }
+        return AstUtil.hasAnnotation(type, "Entity")
+                || AstUtil.hasAnnotation(type, "Bean")
+                || AstUtil.hasStaticField(type, "TABLE");
+    }
+
     public EntityMeta analyze(final SourceRepository.TypeInfo info) {
         final TypeDeclaration<?> type = info.decl;
         final EntityMeta em = new EntityMeta();
@@ -41,11 +57,22 @@ public final class EntityAnalyzer {
         final AnnotationExpr bean = AstUtil.getAnnotation(type, "Bean");
 
         // --- テーブル名 ---
+        // 優先順位: S2Dao(TABLE 定数)→ Tiger(@Bean(table=))→ JPA/S2JDBC 風(@Table(name=))。
         String table = AstUtil.getStaticStringField(type, "TABLE");
         if (table == null && bean != null) {
             table = AstUtil.getAnnotationStringValue(bean, "table");
             if (table != null && table.isEmpty()) {
                 table = null;
+            }
+        }
+        if (table == null) {
+            // JPA/S2JDBC 風: @Table(name="EMP")
+            final AnnotationExpr tableAnn = AstUtil.getAnnotation(type, "Table");
+            if (tableAnn != null) {
+                table = AstUtil.getAnnotationStringValue(tableAnn, "name");
+                if (table != null && table.isEmpty()) {
+                    table = null;
+                }
             }
         }
         if (table != null) {
@@ -94,6 +121,8 @@ public final class EntityAnalyzer {
         // --- プロパティ収集(フィールド宣言順) ---
         final Map<String, MethodDeclaration> getters = collectGetters(type);
         final List<FieldEntry> fields = collectFields(type);
+        // JPA/S2JDBC 風 @Version が付いたプロパティ名(検出された場合のみ)。
+        final List<String> jpaVersion = new ArrayList<String>();
 
         for (final FieldEntry fe : fields) {
             final MethodDeclaration getter = getters.get(fe.name);
@@ -105,7 +134,7 @@ public final class EntityAnalyzer {
                     ? getter.getType().asString() : fe.type;
             processProperty(em, type, fe.name, javaType,
                     getter != null ? "GETTER" : "FIELD", fe.field, getter,
-                    noPersistent, versionName, timestampName);
+                    noPersistent, jpaVersion);
         }
         // フィールドに現れない getter 由来プロパティ
         for (final Map.Entry<String, MethodDeclaration> e : getters.entrySet()) {
@@ -113,10 +142,14 @@ public final class EntityAnalyzer {
                 continue;
             }
             processProperty(em, type, e.getKey(), e.getValue().getType().asString(),
-                    "GETTER", null, e.getValue(), noPersistent, versionName,
-                    timestampName);
+                    "GETTER", null, e.getValue(), noPersistent, jpaVersion);
         }
 
+        // 楽観ロックプロパティ: S2Dao(既定名/定数/@Bean)が該当プロパティを持てば従来どおり。
+        // 持たない場合のみ JPA/S2JDBC 風 @Version 検出結果へフォールバックする。
+        if (!containsProperty(em, versionName) && !jpaVersion.isEmpty()) {
+            versionName = jpaVersion.get(0);
+        }
         em.versionNoProperty = containsProperty(em, versionName) ? versionName : null;
         em.timestampProperty = containsProperty(em, timestampName) ? timestampName : null;
         for (final PropertyMeta pm : em.properties) {
@@ -131,8 +164,7 @@ public final class EntityAnalyzer {
     private void processProperty(final EntityMeta em, final TypeDeclaration<?> type,
             final String name, final String javaType, final String access,
             final FieldDeclaration field, final MethodDeclaration getter,
-            final List<String> noPersistent, final String versionName,
-            final String timestampName) {
+            final List<String> noPersistent, final List<String> jpaVersionOut) {
 
         // リレーション判定(<prop>_RELNO 定数 / @Relation)
         final boolean relnoConst = AstUtil.hasStaticField(type, name + "_RELNO");
@@ -163,11 +195,18 @@ public final class EntityAnalyzer {
         pm.access = access;
 
         // カラム名: <prop>_COLUMN 定数 / @Column / 既定=プロパティ名
+        // @Column は Tiger の単一メンバ形式 @Column("X") と JPA 風 @Column(name="X") の双方に対応。
         String column = AstUtil.getStaticStringField(type, name + "_COLUMN");
         if (column == null) {
             final AnnotationExpr colAnn = memberAnnotation(field, getter, "Column");
             if (colAnn != null) {
                 column = AstUtil.getAnnotationStringValue(colAnn, "value");
+                if (column == null) {
+                    column = AstUtil.getAnnotationStringValue(colAnn, "name");
+                }
+                if (column != null && column.isEmpty()) {
+                    column = null;
+                }
             }
         }
         if (column != null) {
@@ -178,7 +217,7 @@ public final class EntityAnalyzer {
             pm.columnNameSource = "DEFAULT_PROPERTYNAME";
         }
 
-        // 永続化判定
+        // 永続化判定(S2Dao の NO_PERSISTENT_PROPS + JPA/S2JDBC 風 @Transient)
         boolean persistent = true;
         for (final String n : noPersistent) {
             if (n.equals(name)) {
@@ -186,12 +225,23 @@ public final class EntityAnalyzer {
                 break;
             }
         }
+        if (persistent && memberAnnotation(field, getter, "Transient") != null) {
+            persistent = false;
+        }
         pm.persistent = persistent;
 
         // 主キー判定(<prop>_ID 定数 / @Id)
         final boolean idConst = AstUtil.hasStaticField(type, name + "_ID");
         final AnnotationExpr idAnn = memberAnnotation(field, getter, "Id");
         pm.primaryKey = idConst || idAnn != null;
+
+        // 自動採番(JPA/S2JDBC 風 @GeneratedValue)。S2Dao 経路では常に付与されない。
+        pm.generated = memberAnnotation(field, getter, "GeneratedValue") != null;
+
+        // 楽観ロック(JPA/S2JDBC 風 @Version)。検出時はプロパティ名を呼び出し元へ伝える。
+        if (memberAnnotation(field, getter, "Version") != null) {
+            jpaVersionOut.add(name);
+        }
 
         em.properties.add(pm);
     }
