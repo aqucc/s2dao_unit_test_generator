@@ -154,6 +154,7 @@ public final class DaoAnalyzer {
         final String manualSql = readManualSql(type, md, name);
         if (manualSql != null) {
             mm.sql = buildSqlMeta("MANUAL_ANNOTATION", manualSql, null, entity);
+            refineKindFromSql(mm);
             return mm;
         }
 
@@ -167,6 +168,7 @@ public final class DaoAnalyzer {
             try {
                 final String content = sqlIndex.read(sqlFile);
                 mm.sql = buildSqlMeta("SQL_FILE", content, sqlFile.getAbsolutePath(), entity);
+                refineKindFromSql(mm);
             } catch (final IOException e) {
                 dao.notes.add("SQL ファイル読込失敗: " + sqlFile + " (" + e.getMessage() + ")");
             }
@@ -187,6 +189,27 @@ public final class DaoAnalyzer {
         }
         mm.sql = buildAutoSql(mm, entity);
         return mm;
+    }
+
+    /**
+     * 明示 SQL(手書き _SQL/@Sql・SQL ファイル)がある場合は、SQL 文の先頭トークンから
+     * 判定した文種別({@code structure.statementType})で {@code methodKind} を上書きする。
+     *
+     * <p>これによりメソッド名プレフィクスの命名に依存せず「実際に DB が行う操作」で
+     * CRUD 種別を決められる(S2JDBC の基底クラス委譲のように、メソッド名から CRUD を
+     * 読み取れないケースに対応)。文種別が不定({@code OTHER} や構造未解析)のときは、
+     * 既に設定済みのメソッド名ベースの種別を維持する。自動生成 SQL(AUTO_*)は
+     * SQL 自体がメソッド名から組み立てられるため、ここでは触らない。</p>
+     */
+    private void refineKindFromSql(final MethodMeta mm) {
+        if (mm.sql == null || mm.sql.structure == null) {
+            return;
+        }
+        final String st = mm.sql.structure.statementType;
+        if ("SELECT".equals(st) || "INSERT".equals(st)
+                || "UPDATE".equals(st) || "DELETE".equals(st)) {
+            mm.methodKind = st;
+        }
     }
 
     private SqlMeta buildAutoSql(final MethodMeta mm, final EntityMeta entity) {
