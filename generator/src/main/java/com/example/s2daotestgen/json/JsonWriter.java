@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.example.s2daotestgen.model.MetaModel.DaoMeta;
+import com.example.s2daotestgen.model.MetaModel.EntityMeta;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -32,5 +33,14 @@ public final class JsonWriter {
 
     public String toJson(final DaoMeta dao) throws IOException {
         return mapper.writeValueAsString(dao);
+    }
+
+    /**
+     * スタンドアロンのエンティティメタを {@code <Entity>.entity.json} として出力する。
+     * DAO 由来の {@code <Dao>.meta.json} とは別ファイル・別拡張子で衝突を避け、
+     * generate 側の「テーブル逆引き辞書」補完に用いる。
+     */
+    public void writeEntity(final EntityMeta entity, final File out) throws IOException {
+        mapper.writeValue(out, entity);
     }
 }

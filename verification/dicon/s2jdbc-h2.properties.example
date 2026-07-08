@@ -1,0 +1,22 @@
+# S2JDBC Service 生成テスト用の s2daotest.properties 例(H2 Oracle 互換 = 旧環境相当)。
+#
+# 生成テストは S2TestContext がこのファイルを読み、
+#  - jdbc.* : データ投入 / データセット取得用の素の JDBC 接続(Service と同一 DB を指すこと)
+#  - dicon  : S2Container の設定(JdbcManager と Service を繋ぐ。s2jdbc-h2.dicon 相当)
+# を使う。実行には S2JDBC ランタイム jar が classpath に必要。
+
+jdbc.driver=org.h2.Driver
+jdbc.url=jdbc:h2:mem:s2jdbcgen;MODE=Oracle;DB_CLOSE_DELAY=-1
+jdbc.user=sa
+jdbc.password=
+dialect=h2-oracle
+dicon=s2jdbc-h2.dicon
+evidence.dir=./evidence
+
+# PostgreSQL16(新環境)で実行する場合の例:
+# jdbc.driver=org.postgresql.Driver
+# jdbc.url=jdbc:postgresql://localhost:5432/s2jdbcgen
+# jdbc.user=s2jdbc
+# jdbc.password=s2jdbc
+# dialect=postgre
+# dicon=s2jdbc-pg.dicon   (dialect を PostgreDialect にした dicon を用意)

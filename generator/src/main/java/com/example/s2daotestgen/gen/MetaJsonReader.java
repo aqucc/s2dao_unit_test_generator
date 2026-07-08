@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.example.s2daotestgen.model.MetaModel.DaoMeta;
+import com.example.s2daotestgen.model.MetaModel.EntityMeta;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -26,5 +27,10 @@ public final class MetaJsonReader {
 
     public DaoMeta read(File f) throws IOException {
         return mapper.readValue(f, DaoMeta.class);
+    }
+
+    /** {@code <Entity>.entity.json} を {@link EntityMeta} に読み戻す。 */
+    public EntityMeta readEntity(File f) throws IOException {
+        return mapper.readValue(f, EntityMeta.class);
     }
 }

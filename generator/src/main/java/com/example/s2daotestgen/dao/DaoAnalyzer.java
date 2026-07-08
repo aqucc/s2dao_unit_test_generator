@@ -62,22 +62,45 @@ public final class DaoAnalyzer {
         this.autoSql = new AutoSqlBuilder(dialect);
     }
 
+    /** 対象とみなすクラス名サフィックス(末尾一致)。S2Dao の Dao に加え S2JDBC の Service。 */
+    private static final String[] TYPE_SUFFIXES = { "Dao", "Service" };
+
+    private static boolean endsWithAnySuffix(final String simpleName) {
+        for (int i = 0; i < TYPE_SUFFIXES.length; i++) {
+            if (simpleName.endsWith(TYPE_SUFFIXES[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isDao(final SourceRepository.TypeInfo info) {
         final TypeDeclaration<?> type = info.decl;
         if (!(type instanceof ClassOrInterfaceDeclaration)) {
             return false;
         }
         final ClassOrInterfaceDeclaration c = (ClassOrInterfaceDeclaration) type;
-        if (!c.isInterface()) {
+        // 既存トリガ(@S2Dao / BEAN 定数)に加え、末尾 Dao/Service を対象とする。
+        final boolean triggered = AstUtil.hasAnnotation(type, "S2Dao")
+                || AstUtil.hasStaticField(type, "BEAN")
+                || endsWithAnySuffix(info.simpleName);
+        if (!triggered) {
             return false;
         }
-        if (AstUtil.hasAnnotation(type, "S2Dao")) {
+        if (c.isInterface()) {
             return true;
         }
-        if (AstUtil.hasStaticField(type, "BEAN")) {
-            return true;
+        // --- 具象クラスの安全弁 ---
+        // S2JDBC の Service は具象クラスなので許可するが、以下は誤検出を避けて除外する:
+        //  - 抽象クラス(基底 Service/AbstractDao 等。委譲先でありテスト対象ではない)
+        //  - エンティティ自身(@Entity/@Bean/TABLE を持つ型。末尾 Service/Dao でも対象外)
+        if (c.isAbstract()) {
+            return false;
         }
-        return info.simpleName.endsWith("Dao");
+        if (EntityAnalyzer.isEntityLike(type)) {
+            return false;
+        }
+        return true;
     }
 
     public DaoMeta analyze(final SourceRepository.TypeInfo info) {
@@ -109,6 +132,15 @@ public final class DaoAnalyzer {
             }
         }
         dao.entity = entity;
+
+        // S2JDBC 等の Service 判定: BEAN を持たない具象クラス(エンティティを解決できない
+        // = entity==null)は Service 経路としてマークする。インタフェース(従来の S2Dao)や
+        // BEAN を持つ具象クラスは従来どおり DAO 経路(sourceKind=null)のまま。
+        if (type instanceof ClassOrInterfaceDeclaration
+                && !((ClassOrInterfaceDeclaration) type).isInterface()
+                && entity == null) {
+            dao.sourceKind = "SERVICE";
+        }
 
         for (final MethodDeclaration md : type.findAll(MethodDeclaration.class)) {
             // インタフェース直下のメソッドのみ(ネスト型除外)

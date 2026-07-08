@@ -10,12 +10,14 @@ import java.util.List;
 
 import com.example.s2daotestgen.dao.DaoAnalyzer;
 import com.example.s2daotestgen.dao.Dialect;
+import com.example.s2daotestgen.dao.EntityAnalyzer;
 import com.example.s2daotestgen.dao.SourceRepository;
 import com.example.s2daotestgen.gen.GenerationReport;
 import com.example.s2daotestgen.gen.MetaJsonReader;
 import com.example.s2daotestgen.gen.TestClassGenerator;
 import com.example.s2daotestgen.json.JsonWriter;
 import com.example.s2daotestgen.model.MetaModel.DaoMeta;
+import com.example.s2daotestgen.model.MetaModel.EntityMeta;
 import com.example.s2daotestgen.sql.SqlFileIndex;
 
 /**
@@ -113,6 +115,7 @@ public final class Main {
         }
 
         final DaoAnalyzer analyzer = new DaoAnalyzer(repo, sqlIndex, dialect);
+        final EntityAnalyzer entityAnalyzer = new EntityAnalyzer(repo);
         final JsonWriter writer = new JsonWriter();
         outDir.mkdirs();
 
@@ -127,6 +130,24 @@ public final class Main {
             System.out.println("  " + info.fqn + " → " + outFile.getName()
                     + " (methods=" + dao.methods.size() + ")");
             count++;
+        }
+
+        // --- スタンドアロンのエンティティメタ(<Entity>.entity.json)を出力 ---
+        // S2JDBC の Service は BEAN を持たず、参照エンティティは戻り値ジェネリクスや
+        // 別フォルダに存在するため、DAO 由来の登録だけでは辞書に載らない。
+        // isEntityLike な全型を解析し、テーブル逆引き辞書を完全にする補完情報を出す。
+        int entityCount = 0;
+        for (final SourceRepository.TypeInfo info : repo.getAllTypes()) {
+            if (!EntityAnalyzer.isEntityLike(info.decl)) {
+                continue;
+            }
+            final EntityMeta em = entityAnalyzer.analyze(info);
+            final File outFile = new File(outDir, info.simpleName + ".entity.json");
+            writer.writeEntity(em, outFile);
+            entityCount++;
+        }
+        if (entityCount > 0) {
+            System.out.println("  エンティティメタ " + entityCount + " 件 → *.entity.json");
         }
         return count;
     }
@@ -221,6 +242,31 @@ public final class Main {
             if (d.entity.tableName != null && d.entity.tableName.trim().length() > 0) {
                 byTable.put(d.entity.tableName.trim().toUpperCase(java.util.Locale.ENGLISH),
                         d.entity);
+            }
+        }
+        // (c) 補完: スタンドアロンの *.entity.json を辞書へ登録する。
+        //     DAO 由来(上の登録)を優先し、未登録キーのみ補う(putIfAbsent 相当)。
+        //     これで Service(BEAN 無し)でも「対象テーブル → カラム/PK」を逆引きできる。
+        for (int i = 0; i < files.length; i++) {
+            final File f = files[i];
+            if (!f.getName().endsWith(".entity.json")) {
+                continue;
+            }
+            final EntityMeta em = reader.readEntity(f);
+            if (em == null) {
+                continue;
+            }
+            if (em.simpleName != null) {
+                final String rk = em.simpleName.toLowerCase(java.util.Locale.ENGLISH);
+                if (!registry.containsKey(rk)) {
+                    registry.put(rk, em);
+                }
+            }
+            if (em.tableName != null && em.tableName.trim().length() > 0) {
+                final String tk = em.tableName.trim().toUpperCase(java.util.Locale.ENGLISH);
+                if (!byTable.containsKey(tk)) {
+                    byTable.put(tk, em);
+                }
             }
         }
         gen.setEntityRegistry(registry);

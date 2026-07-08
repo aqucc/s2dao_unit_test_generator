@@ -100,6 +100,9 @@ public final class TestClassGenerator {
     }
 
     public Result generate(DaoMeta dao, String overridePackage, GenerationReport report) {
+        if ("SERVICE".equals(dao.sourceKind)) {
+            return generateService(dao, overridePackage, report);
+        }
         String pkg = (overridePackage != null && overridePackage.length() > 0)
                 ? overridePackage : nz(dao.packageName);
         String daoFq = fqDao(dao);
@@ -175,6 +178,655 @@ public final class TestClassGenerator {
         report.classes++;
         report.testMethods += testCount;
         return r;
+    }
+
+    // =========================================================================
+    // ================= S2JDBC Service 経路(ステップ3) =======================
+    // =========================================================================
+    //
+    // S2JDBC の Service は具象クラスで、BEAN(エンティティ)を持たず JdbcManager へ
+    // 委譲する。dao.entity は null なので DAO 経路の setUp シード(BEAN 前提)は使えない。
+    // そこで Service 専用に、各テストメソッド内で「SQL の対象テーブル → エンティティ
+    // (テーブル逆引き辞書 lookupEntityByTable)」を引いて決定的データを投入し、実行後に
+    // 検証する。DAO 経路の生成物は一切変更しない(このブロックは完全に独立)。
+
+    private Result generateService(DaoMeta dao, String overridePackage, GenerationReport report) {
+        String pkg = (overridePackage != null && overridePackage.length() > 0)
+                ? overridePackage : nz(dao.packageName);
+        String svcFq = fqDao(dao);
+        String className = dao.daoSimpleName + "Test";
+
+        List genMethods = new ArrayList(); // MethodMeta
+        List skipComments = new ArrayList(); // String
+        for (int i = 0; i < dao.methods.size(); i++) {
+            MethodMeta m = (MethodMeta) dao.methods.get(i);
+            String reason = serviceSkipReason(m);
+            if (reason == null) {
+                genMethods.add(m);
+            } else {
+                skipComments.add("    // TODO: テスト未生成(スキップ) " + m.name + " : " + reason);
+                report.addSkip(dao.daoSimpleName, m.name, reason);
+            }
+        }
+
+        StringBuffer sb = new StringBuffer();
+        emitHeader(sb, pkg, className, svcFq);
+        // setUp: コンテナから Service を取得するのみ(テーブル投入は各テスト内で行う)。
+        sb.append("    protected void setUp() throws Exception {\n");
+        sb.append("        super.setUp();\n");
+        if (genMethods.isEmpty()) {
+            sb.append("        // 自動生成可能なテストメソッドが無いため、コンテナ/DB は初期化しない\n");
+            sb.append("    }\n\n");
+        } else {
+            sb.append("        ctx = new S2TestContext();\n");
+            sb.append("        dao = (").append(svcFq).append(") ctx.getComponent(")
+              .append(svcFq).append(".class);\n");
+            sb.append("    }\n\n");
+        }
+        emitTearDown(sb);
+
+        int testCount = 0;
+        for (int i = 0; i < genMethods.size(); i++) {
+            MethodMeta m = (MethodMeta) genMethods.get(i);
+            emitServiceTestMethod(sb, dao, m);
+            testCount++;
+        }
+        for (int i = 0; i < skipComments.size(); i++) {
+            sb.append(skipComments.get(i)).append("\n");
+        }
+        if (testCount == 0) {
+            sb.append("\n    /** この Service には自動生成可能なテストメソッドがありません(上記スキップ参照)。 */\n");
+            sb.append("    public void testNoGeneratableMethods() throws Exception {\n");
+            sb.append("        assertTrue(true);\n");
+            sb.append("    }\n");
+        }
+        sb.append("}\n");
+
+        Result r = new Result();
+        r.packageName = pkg;
+        r.className = className;
+        r.source = sb.toString();
+        r.testMethods = testCount;
+        r.skipped = skipComments.size();
+
+        GenerationReport.ClassSummary cs = new GenerationReport.ClassSummary();
+        cs.daoSimpleName = dao.daoSimpleName;
+        cs.testMethods = testCount;
+        cs.skipped = skipComments.size();
+        report.classSummaries.add(cs);
+        report.classes++;
+        report.testMethods += testCount;
+        return r;
+    }
+
+    /** Service メソッドの生成可否。Map/ジェネリクス引数は許容する(DAO 経路との違い)。 */
+    private String serviceSkipReason(MethodMeta m) {
+        String kind = nz(m.methodKind);
+        if (kind.equals("PROCEDURE")) {
+            return "ストアドプロシージャ(PROCEDURE)は未対応";
+        }
+        if (m.sql == null) {
+            return "SQL が解決できていない";
+        }
+        if ("UNRESOLVED".equals(m.sql.resolutionType)) {
+            return "SQL 未解決(UNRESOLVED)";
+        }
+        SqlStructure st = m.sql.structure;
+        if (st == null || st.tables == null || st.tables.isEmpty()) {
+            return "対象テーブルを特定できない(DDL 等・データ組立不能)";
+        }
+        return null;
+    }
+
+    private String primaryTable(MethodMeta m) {
+        SqlStructure st = (m.sql != null) ? m.sql.structure : null;
+        if (st == null || st.tables == null || st.tables.isEmpty()) {
+            return null;
+        }
+        return (String) st.tables.get(0);
+    }
+
+    private void emitServiceTestMethod(StringBuffer sb, DaoMeta dao, MethodMeta m) {
+        String kind = nz(m.methodKind);
+        sb.append("    /** ").append(m.name).append(" : ").append(kind)
+          .append(" (").append(nz(m.sql != null ? m.sql.resolutionType : ""))
+          .append(", S2JDBC Service) */\n");
+        sb.append("    public void test").append(cap(m.name)).append("() throws Exception {\n");
+        sb.append("        java.sql.Connection conn = ctx.getConnection();\n");
+        sb.append("        try {\n");
+        sb.append("            EvidenceWriter ev = ctx.newEvidenceWriter();\n");
+
+        if (kind.equals("SELECT")) {
+            emitServiceSelect(sb, dao, m);
+        } else {
+            emitServiceMutation(sb, dao, m, kind);
+        }
+
+        sb.append("        } finally {\n");
+        sb.append("            conn.close();\n");
+        sb.append("        }\n");
+        sb.append("    }\n\n");
+    }
+
+    // ---- Service SELECT(find/get: List<Entity> 等) ----
+
+    private void emitServiceSelect(StringBuffer sb, DaoMeta dao, MethodMeta m) {
+        String table = primaryTable(m);
+        EntityMeta te = lookupEntityByTable(table);
+        // 戻り値ジェネリクスの型引数(List<Emp> → Emp)から結果エンティティを解決。無ければ対象表。
+        EntityMeta resultEntity = lookupEntity(genericArg(m.returnType));
+        if (resultEntity == null) {
+            resultEntity = lookupEntity(m.returnType);
+        }
+        if (resultEntity == null) {
+            resultEntity = te;
+        }
+
+        // WHERE '=' で束縛されるカラム集合(投入時に固定値を使う対象)
+        Set whereCols = whereEqColumns(m);
+
+        // 対象テーブルへ決定的データ投入(全永続カラムを BASE 値で 1 行)
+        if (te != null) {
+            sb.append("            // --- 対象テーブル ").append(table)
+              .append(" へ決定的データ投入 ---\n");
+            sb.append("            WriteDbUtil.deleteAll(conn, \"").append(table).append("\");\n");
+            emitServiceSeedRow(sb, te);
+        } else {
+            sb.append("            // 対象テーブルのエンティティメタが辞書に無いため投入は省略\n");
+        }
+
+        // 引数準備
+        List argVars = emitServiceArgs(sb, dao, m, te, whereCols);
+
+        // 実行
+        String ret = resolveReturnType(m.returnType, dao.packageName);
+        boolean isVoid = ret.equals("void");
+        boolean isCollection = ret.equals("java.util.List") || ret.equals("java.util.Collection");
+        sb.append("            // --- Service 実行 ---\n");
+        String callExpr = "dao." + m.name + "(" + join(argVars) + ")";
+        if (isVoid) {
+            sb.append("            ").append(callExpr).append(";\n");
+        } else {
+            sb.append("            ").append(ret).append(" result = ").append(callExpr).append(";\n");
+        }
+
+        // 戻り値 assert(find は強め: 件数 + 先頭行の主キー)
+        sb.append("            // --- 戻り値 assert ---\n");
+        boolean expectHit = te != null && serviceExpectHit(m);
+        if (!isVoid) {
+            if (isCollection) {
+                sb.append("            assertNotNull(result);\n");
+                if (expectHit) {
+                    sb.append("            assertTrue(\"1 件以上ヒットするはず\", result.size() >= 1);\n");
+                    emitServiceElementAssert(sb, resultEntity);
+                }
+            } else if (ret.endsWith("[]")) {
+                sb.append("            assertNotNull(result);\n");
+                if (expectHit) {
+                    sb.append("            assertTrue(\"1 件以上ヒットするはず\", result.length >= 1);\n");
+                }
+            } else {
+                if (expectHit) {
+                    sb.append("            assertNotNull(\"該当行が取得できるはず\", result);\n");
+                } else {
+                    sb.append("            // 条件次第で null になりうるためエビデンス出力のみ\n");
+                }
+            }
+            sb.append("            ev.writeReturn(\"").append(dao.daoSimpleName).append("\", \"")
+              .append(m.name).append("\", ").append(boxResult(ret, "result")).append(");\n");
+        } else {
+            sb.append("            // 戻り値なし(void)\n");
+        }
+
+        // データセット + エビデンス
+        emitServiceDataset(sb, dao, m, te, table);
+    }
+
+    /** 先頭要素の主キーが投入値(BASE)と一致することを assert する。 */
+    private void emitServiceElementAssert(StringBuffer sb, EntityMeta resultEntity) {
+        if (resultEntity == null || resultEntity.primaryKeyColumns.isEmpty()) {
+            return;
+        }
+        String pkCol = (String) resultEntity.primaryKeyColumns.get(0);
+        PropertyMeta pk = propByColumn(resultEntity, pkCol);
+        if (pk == null || resultEntity.className == null) {
+            return;
+        }
+        String fq = resultEntity.className;
+        TestValues.Value v = TestValues.of(pk.javaType, pk.columnName, TestValues.BASE);
+        sb.append("            ").append(fq).append(" row0 = (").append(fq)
+          .append(") result.get(0);\n");
+        sb.append("            assertEquals(\"先頭行の主キーが投入値と一致\", ")
+          .append(boxForType(pk.javaType, v.expr)).append(", ")
+          .append(boxGetter(pk.javaType, "row0.get" + cap(pk.propertyName) + "()")).append(");\n");
+    }
+
+    // ---- Service mutation(INSERT/UPDATE/DELETE: void/int, Map 入力) ----
+
+    private void emitServiceMutation(StringBuffer sb, DaoMeta dao, MethodMeta m, String op) {
+        String table = primaryTable(m);
+        EntityMeta te = lookupEntityByTable(table);
+
+        MutInfo info = new MutInfo();
+        if (te != null) {
+            sb.append("            // --- 対象テーブル ").append(table).append(" の準備(")
+              .append(op).append(") ---\n");
+            sb.append("            WriteDbUtil.deleteAll(conn, \"").append(table).append("\");\n");
+            if (!op.equals("INSERT")) {
+                // UPDATE/DELETE は対象行を投入してから実行する(BASE 値の完全な 1 行)
+                emitServiceSeedRow(sb, te);
+            }
+            info = emitMutationMap(sb, m, te, op);
+        } else {
+            sb.append("            // 対象テーブルのエンティティメタが辞書に無いため、")
+              .append("SQL のバインドキーのみで Map を構築(安全フォールバック)\n");
+            info = emitMutationMap(sb, m, null, op);
+        }
+
+        // 呼び出し引数: Map 型パラメータには構築済み Map、スカラは決定的値、その他は null。
+        List callArgs = new ArrayList();
+        for (int i = 0; i < m.parameters.size(); i++) {
+            ParamMeta p = (ParamMeta) m.parameters.get(i);
+            String cat = typeCategory(p.type);
+            if (cat.equals("GENERIC") && isMapType(p.type)) {
+                callArgs.add(info.mapVar);
+            } else if (cat.equals("SCALAR")) {
+                callArgs.add(emitScalarArg(sb, dao, te, m, p, i));
+            } else if (cat.equals("BEAN")) {
+                callArgs.add(emitDtoArg(sb, dao, te, m, p));
+            } else {
+                String var = safeVar(p.name);
+                sb.append("            ").append(resolveType(p.type, dao.packageName))
+                  .append(" ").append(var).append(" = null; // 未対応型のため null\n");
+                callArgs.add(var);
+            }
+        }
+
+        String ret = resolveReturnType(m.returnType, dao.packageName);
+        boolean isVoid = ret.equals("void");
+        sb.append("            // --- Service 実行 ---\n");
+        String callExpr = "dao." + m.name + "(" + join(callArgs) + ")";
+        if (isVoid) {
+            sb.append("            ").append(callExpr).append(";\n");
+        } else {
+            sb.append("            ").append(ret).append(" result = ").append(callExpr).append(";\n");
+            if (ret.equals("int") || ret.equals("long")) {
+                sb.append("            assertTrue(\"更新/削除/登録 件数は 1 以上\", result >= 1);\n");
+            }
+            sb.append("            ev.writeReturn(\"").append(dao.daoSimpleName).append("\", \"")
+              .append(m.name).append("\", ").append(boxResult(ret, "result")).append(");\n");
+        }
+
+        // データセット取得 + 変更 assert
+        emitServiceDataset(sb, dao, m, te, table);
+        if (te != null && table != null && info.pkColUpper != null) {
+            String dsVar = "ds_" + safeVar(table);
+            if (op.equals("INSERT")) {
+                sb.append("            assertNotNull(\"新規行が登録されていること\", GetDatasetUtil.find(")
+                  .append(dsVar).append(", \"").append(info.pkColUpper).append("\", ")
+                  .append(info.pkExpr).append("));\n");
+            } else if (op.equals("DELETE")) {
+                sb.append("            assertNull(\"対象行が削除されていること\", GetDatasetUtil.find(")
+                  .append(dsVar).append(", \"").append(info.pkColUpper).append("\", ")
+                  .append(info.pkExpr).append("));\n");
+            } else if (op.equals("UPDATE")) {
+                sb.append("            java.util.Map updated = GetDatasetUtil.find(")
+                  .append(dsVar).append(", \"").append(info.pkColUpper).append("\", ")
+                  .append(info.pkExpr).append(");\n");
+                sb.append("            assertNotNull(\"対象行が存在すること\", updated);\n");
+                if (info.assertColUpper != null) {
+                    sb.append("            assertEquals(\"更新後の値が反映されていること\", EvidenceWriter.normalize(")
+                      .append(info.assertColExpr).append("), EvidenceWriter.normalize(updated.get(\"")
+                      .append(info.assertColUpper).append("\")));\n");
+                }
+            }
+        }
+    }
+
+    /** mutation の Map 入力構築で得た検証用情報。 */
+    private static final class MutInfo {
+        String mapVar = "arg";
+        String pkColUpper;   // 対象テーブル主キーのカラム名(大文字)
+        String pkExpr;       // 主キーの値式(INSERT=投入PK, UPDATE/DELETE=BASE)
+        String assertColUpper; // UPDATE で変化を検証する SET カラム(大文字)
+        String assertColExpr;  // その変化後(ALT)値式
+    }
+
+    /**
+     * SQL の bindVariables から Map 入力を組み立てるコードを出力する。
+     * WHERE '=' 束縛キーは対象行に一致する BASE 値、SET キーは UPDATE で ALT 値(変化観測用)。
+     */
+    private MutInfo emitMutationMap(StringBuffer sb, MethodMeta m, EntityMeta te, String op) {
+        MutInfo info = new MutInfo();
+        Set whereBinds = whereBindExpressions(m);
+        // 主キーカラム
+        String pkCol = (te != null && !te.primaryKeyColumns.isEmpty())
+                ? (String) te.primaryKeyColumns.get(0) : null;
+
+        sb.append("            // --- 入力 Map 構築(SQL の /*key*/ バインドに対応) ---\n");
+        sb.append("            java.util.Map ").append(info.mapVar)
+          .append(" = new java.util.HashMap();\n");
+
+        List binds = distinctBindRoots(m);
+        for (int i = 0; i < binds.size(); i++) {
+            String key = (String) binds.get(i);
+            boolean isFilter = whereBinds.contains(key);
+            // キー → カラム/型 の解決
+            String col = columnForBind(m, te, key);
+            PropertyMeta prop = (te != null) ? propByColumn(te, col) : null;
+            String javaType = (prop != null) ? prop.javaType : guessType(col);
+            boolean isPk = pkCol != null && TestValues.canonical(pkCol)
+                    .equals(TestValues.canonical(col));
+            boolean isVer = prop != null && prop.versionNo;
+            boolean isTs = prop != null && prop.timestamp;
+            int variant;
+            if (op.equals("UPDATE") && !isFilter && !isPk && !isVer && !isTs) {
+                variant = TestValues.ALT; // SET 対象列は変化させる
+            } else {
+                variant = TestValues.BASE; // フィルタ/PK/楽観ロック/INSERT/DELETE は BASE
+            }
+            TestValues.Value v = TestValues.of(javaType, col, variant);
+            sb.append("            ").append(info.mapVar).append(".put(\"").append(key)
+              .append("\", ").append(v.expr).append("); // ").append(col).append("=")
+              .append(v.display);
+            if (isFilter) {
+                sb.append(" (WHERE 束縛)");
+            }
+            sb.append("\n");
+
+            if (isPk) {
+                info.pkColUpper = col.toUpperCase(java.util.Locale.ENGLISH);
+                info.pkExpr = TestValues.of(javaType, col,
+                        op.equals("INSERT") ? TestValues.BASE : TestValues.BASE).expr;
+            }
+            if (op.equals("UPDATE") && info.assertColUpper == null
+                    && !isFilter && !isPk && !isVer && !isTs) {
+                info.assertColUpper = col.toUpperCase(java.util.Locale.ENGLISH);
+                info.assertColExpr = v.expr;
+            }
+        }
+        return info;
+    }
+
+    /** 全永続カラムを BASE 値で 1 行投入する(Service の対象テーブルシード)。 */
+    private void emitServiceSeedRow(StringBuffer sb, EntityMeta te) {
+        List cols = new ArrayList();
+        List vals = new ArrayList();
+        List notes = new ArrayList();
+        for (int i = 0; i < te.properties.size(); i++) {
+            PropertyMeta p = (PropertyMeta) te.properties.get(i);
+            if (!p.persistent) {
+                continue;
+            }
+            TestValues.Value v = TestValues.of(p.javaType, p.columnName, TestValues.BASE);
+            cols.add(p.columnName);
+            vals.add(v.expr);
+            notes.add(p.columnName + "=" + v.display);
+        }
+        emitInsert(sb, te.tableName, cols, vals, notes);
+    }
+
+    private void emitServiceDataset(StringBuffer sb, DaoMeta dao, MethodMeta m,
+            EntityMeta te, String table) {
+        sb.append("            // --- 操作後データセット取得 + エビデンス出力 ---\n");
+        List tables = (m.sql != null && m.sql.structure != null)
+                ? m.sql.structure.tables : new ArrayList();
+        Set done = new LinkedHashSet();
+        for (int i = 0; i < tables.size(); i++) {
+            String t = (String) tables.get(i);
+            String up = t.toUpperCase(java.util.Locale.ENGLISH);
+            if (done.contains(up)) {
+                continue;
+            }
+            done.add(up);
+            EntityMeta ent = (t.equalsIgnoreCase(table)) ? te : lookupEntityByTable(t);
+            String orderBy = orderByFor(ent, t, t);
+            String dsVar = "ds_" + safeVar(t);
+            sb.append("            java.util.List ").append(dsVar)
+              .append(" = GetDatasetUtil.getDataset(conn, \"").append(t).append("\"")
+              .append(orderBy).append(");\n");
+            sb.append("            ev.writeDataset(\"").append(dao.daoSimpleName).append("\", \"")
+              .append(m.name).append("\", \"").append(t).append("\", ").append(dsVar).append(");\n");
+        }
+        if (done.isEmpty()) {
+            sb.append("            // 対象テーブル不明のためデータセット出力なし\n");
+        }
+    }
+
+    // ---- Service 用 引数生成 ----
+
+    private List emitServiceArgs(StringBuffer sb, DaoMeta dao, MethodMeta m,
+            EntityMeta te, Set whereCols) {
+        List vars = new ArrayList();
+        if (!m.parameters.isEmpty()) {
+            sb.append("            // --- 引数準備(投入データにヒットする決定的値) ---\n");
+        }
+        for (int i = 0; i < m.parameters.size(); i++) {
+            ParamMeta p = (ParamMeta) m.parameters.get(i);
+            String cat = typeCategory(p.type);
+            if (cat.equals("GENERIC") && isMapType(p.type)) {
+                vars.add(emitServiceMapArg(sb, m, te, p));
+            } else if (cat.equals("SCALAR")) {
+                vars.add(emitScalarArg(sb, dao, te, m, p, i));
+            } else if (cat.equals("BEAN")) {
+                vars.add(emitDtoArg(sb, dao, te, m, p));
+            } else {
+                // その他(配列/未知ジェネリクス): null を渡す安全フォールバック
+                String var = safeVar(p.name);
+                String decl = resolveType(p.type, dao.packageName);
+                sb.append("            ").append(decl).append(" ").append(var)
+                  .append(" = null; // 未対応型のため null\n");
+                vars.add(var);
+            }
+        }
+        return vars;
+    }
+
+    /** SELECT の Map 引数: WHERE '=' 束縛キーに投入値(BASE)を詰める。 */
+    private String emitServiceMapArg(StringBuffer sb, MethodMeta m, EntityMeta te, ParamMeta p) {
+        String var = safeVar(p.name);
+        sb.append("            java.util.Map ").append(var)
+          .append(" = new java.util.HashMap();\n");
+        Set whereBinds = whereBindExpressions(m);
+        List binds = distinctBindRoots(m);
+        for (int i = 0; i < binds.size(); i++) {
+            String key = (String) binds.get(i);
+            String col = columnForBind(m, te, key);
+            PropertyMeta prop = (te != null) ? propByColumn(te, col) : null;
+            String javaType = (prop != null) ? prop.javaType : guessType(col);
+            TestValues.Value v = TestValues.of(javaType, col, TestValues.BASE);
+            sb.append("            ").append(var).append(".put(\"").append(key)
+              .append("\", ").append(v.expr).append("); // ").append(col).append("=")
+              .append(v.display);
+            if (whereBinds.contains(key)) {
+                sb.append(" (WHERE 束縛にヒット)");
+            }
+            sb.append("\n");
+        }
+        return var;
+    }
+
+    // ---- Service 用 ヘルパ ----
+
+    private boolean isMapType(String type) {
+        String t = nz(type).trim();
+        int lt = t.indexOf('<');
+        if (lt >= 0) {
+            t = t.substring(0, lt).trim();
+        }
+        int dot = t.lastIndexOf('.');
+        if (dot >= 0) {
+            t = t.substring(dot + 1);
+        }
+        return t.equals("Map") || t.equals("HashMap") || t.equals("LinkedHashMap")
+                || t.equals("TreeMap") || t.equals("SortedMap");
+    }
+
+    /** 戻り値型のジェネリクス型引数(先頭)を単純名で返す。無ければ null。 */
+    private String genericArg(String type) {
+        String t = nz(type);
+        int lt = t.indexOf('<');
+        int gt = t.lastIndexOf('>');
+        if (lt < 0 || gt < 0 || gt <= lt + 1) {
+            return null;
+        }
+        String inner = t.substring(lt + 1, gt).trim();
+        int comma = inner.indexOf(',');
+        if (comma >= 0) {
+            inner = inner.substring(0, comma).trim();
+        }
+        int inLt = inner.indexOf('<');
+        if (inLt >= 0) {
+            inner = inner.substring(0, inLt).trim();
+        }
+        int dot = inner.lastIndexOf('.');
+        if (dot >= 0) {
+            inner = inner.substring(dot + 1);
+        }
+        return inner.length() > 0 ? inner : null;
+    }
+
+    /** SQL バインドの root 名を出現順・重複排除で返す。 */
+    private List distinctBindRoots(MethodMeta m) {
+        List out = new ArrayList();
+        Set seen = new LinkedHashSet();
+        if (m.sql == null) {
+            return out;
+        }
+        for (int i = 0; i < m.sql.bindVariables.size(); i++) {
+            com.example.s2daotestgen.model.MetaModel.BindVarMeta b =
+                    (com.example.s2daotestgen.model.MetaModel.BindVarMeta) m.sql.bindVariables.get(i);
+            String root = nz(b.rootParam);
+            if (root.length() == 0) {
+                root = nz(b.expression);
+            }
+            if (root.length() == 0 || seen.contains(root)) {
+                continue;
+            }
+            seen.add(root);
+            out.add(root);
+        }
+        return out;
+    }
+
+    /** WHERE 句でバインドされている式(bindExpression)の集合。 */
+    private Set whereBindExpressions(MethodMeta m) {
+        Set s = new LinkedHashSet();
+        SqlStructure st = (m.sql != null) ? m.sql.structure : null;
+        if (st == null) {
+            return s;
+        }
+        for (int i = 0; i < st.whereBindings.size(); i++) {
+            ColumnBinding wb = (ColumnBinding) st.whereBindings.get(i);
+            if (wb.bindExpression != null) {
+                s.add(wb.bindExpression);
+            }
+        }
+        return s;
+    }
+
+    /** WHERE '=' で束縛されるカラム(正準化)集合。 */
+    private Set whereEqColumns(MethodMeta m) {
+        Set s = new LinkedHashSet();
+        SqlStructure st = (m.sql != null) ? m.sql.structure : null;
+        if (st == null) {
+            return s;
+        }
+        for (int i = 0; i < st.whereBindings.size(); i++) {
+            ColumnBinding wb = (ColumnBinding) st.whereBindings.get(i);
+            if ("=".equals(wb.operator)) {
+                s.add(TestValues.canonical(wb.column));
+            }
+        }
+        return s;
+    }
+
+    /** バインドキーに対応するカラム名を解決する(WHERE 束縛→エンティティ照合→キー名)。 */
+    private String columnForBind(MethodMeta m, EntityMeta te, String key) {
+        SqlStructure st = (m.sql != null) ? m.sql.structure : null;
+        if (st != null) {
+            for (int i = 0; i < st.whereBindings.size(); i++) {
+                ColumnBinding wb = (ColumnBinding) st.whereBindings.get(i);
+                if (key.equals(wb.bindExpression) && wb.column != null) {
+                    return wb.column;
+                }
+            }
+        }
+        if (te != null) {
+            for (int i = 0; i < te.properties.size(); i++) {
+                PropertyMeta p = (PropertyMeta) te.properties.get(i);
+                if (p.propertyName.equals(key)
+                        || TestValues.canonical(p.columnName).equals(TestValues.canonical(key))) {
+                    return p.columnName;
+                }
+            }
+        }
+        return key;
+    }
+
+    /** エンティティ不明時のカラム型推定(数値っぽければ int、それ以外は String)。 */
+    private String guessType(String col) {
+        String canon = TestValues.canonical(col);
+        if (canon.endsWith("no") || canon.equals("id") || canon.endsWith("id")) {
+            return "int";
+        }
+        return "String";
+    }
+
+    /** Service SELECT のヒット保証(スカラ/Map 引数が全て '=' WHERE で束縛されるか)。 */
+    private boolean serviceExpectHit(MethodMeta m) {
+        SqlStructure st = (m.sql != null) ? m.sql.structure : null;
+        if (st == null || st.whereBindings.isEmpty()) {
+            // WHERE が無い = 全件。投入行があるので 1 件以上ヒットする。
+            return st != null;
+        }
+        for (int i = 0; i < st.whereBindings.size(); i++) {
+            ColumnBinding wb = (ColumnBinding) st.whereBindings.get(i);
+            if (!"=".equals(wb.operator)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** assertEquals の expected 側: プリミティブ数値式はボックス化して Object 化する。 */
+    private String boxForType(String javaType, String expr) {
+        // TestValues.of は数値/文字列とも既にボックス式(Integer.valueOf 等)を返すためそのまま。
+        return expr;
+    }
+
+    /** getter 戻り値をボックス化して assertEquals(Object,Object) に渡せるようにする。 */
+    private String boxGetter(String javaType, String getterCall) {
+        String t = javaType == null ? "" : javaType.trim();
+        int dot = t.lastIndexOf('.');
+        if (dot >= 0) {
+            t = t.substring(dot + 1);
+        }
+        if (t.equals("int")) {
+            return "Integer.valueOf(" + getterCall + ")";
+        }
+        if (t.equals("long")) {
+            return "Long.valueOf(" + getterCall + ")";
+        }
+        if (t.equals("short")) {
+            return "Short.valueOf(" + getterCall + ")";
+        }
+        if (t.equals("byte")) {
+            return "Byte.valueOf(" + getterCall + ")";
+        }
+        if (t.equals("float")) {
+            return "Float.valueOf(" + getterCall + ")";
+        }
+        if (t.equals("double")) {
+            return "Double.valueOf(" + getterCall + ")";
+        }
+        if (t.equals("boolean")) {
+            return "Boolean.valueOf(" + getterCall + ")";
+        }
+        if (t.equals("char")) {
+            return "Character.valueOf(" + getterCall + ")";
+        }
+        return getterCall;
     }
 
     // ================= ヘッダ / setUp / tearDown =================

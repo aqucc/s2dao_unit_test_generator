@@ -1,0 +1,2 @@
+DELETE FROM EMP
+WHERE EMPNO = /*empno*/0

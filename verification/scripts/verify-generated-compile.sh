@@ -140,6 +140,11 @@ verify tiger \
     "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java" \
     "$ROOT/verification/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources"
 
+echo "[+] s2jdbc (S2JDBC Service / JPA 風エンティティ) フィクスチャを検証..."
+verify s2jdbc \
+    "$ROOT/verification/samples/s2jdbc/src/main/java" \
+    "$ROOT/verification/samples/s2jdbc/src/main/resources"
+
 echo ""
 if [ "$TOTAL_ERRORS" -eq 0 ]; then
     echo "==== 検証 OK: 両サンプルとも生成テストが -source 1.5 でエラーゼロでコンパイルできました ===="

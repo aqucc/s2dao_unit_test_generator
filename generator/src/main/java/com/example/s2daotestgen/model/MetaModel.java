@@ -32,6 +32,12 @@ public final class MetaModel {
         public String sourceFile;
         /** BEAN が指すエンティティの完全修飾名(未指定/解決不能なら null)。 */
         public String beanClassName;
+        /**
+         * 解析元の種別。S2JDBC 等の Service(BEAN を持たない具象クラスで
+         * JdbcManager 委譲)の場合のみ {@code "SERVICE"} を設定する。従来の S2Dao は
+         * null のままとし、既存メタ JSON との後方互換のため null 時は出力しない。
+         */
+        public String sourceKind;
         /** 解決済みエンティティメタ(見つかった場合のみ)。 */
         public EntityMeta entity;
         /** メソッド一覧。 */

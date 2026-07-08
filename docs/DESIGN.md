@@ -154,6 +154,33 @@ dao 1 つにつき 1 つのメタ情報 JSON(`<Dao>.meta.json`)。フェーズ2�
 メタ情報から決定的に生成**する(同じ dao/sql からは常に同じテストと同じデータ)。
 日付・時刻も固定値を使用する。
 
+### 3.6 S2JDBC Service 層対応(ステップ3)
+
+S2Dao(DAO インタフェース + BEAN 定数)に加え、S2JDBC 世代の **Service(具象クラス)**
+にも対応する。Service は共通の抽象基底クラス(JdbcManager 委譲)を継承し、
+`jdbcManager.selectBySqlFile(...).getResultList()` 等で SQL ファイルを実行する。
+
+- **対象判定(`DaoAnalyzer.isDao`)**: 末尾 `Dao`/`Service`、`@S2Dao`、`BEAN` 定数の
+  いずれかをトリガとする。具象クラスも許可するが、誤検出防止のため
+  「抽象クラス」「エンティティ(`@Entity`/`@Bean`/`TABLE`)」は除外する
+  (基底 `Abstract*Service` やエンティティ自身を拾わない)。
+- **CRUD 種別**: メソッド名からは判定できないため、対応する 2-way SQL の先頭トークン
+  (SELECT/INSERT/UPDATE/DELETE)で決める(ステップ1の `refineKindFromSql`)。
+- **エンティティ辞書の完全化**: Service は BEAN を持たず、参照エンティティは戻り値
+  ジェネリクス(`List<Emp>`)や別フォルダにある。そこで解析フェーズで
+  `EntityAnalyzer.isEntityLike` な全型を **`<Entity>.entity.json`** として出力し、
+  生成フェーズでテーブル逆引き辞書(テーブル名→カラム/PK)へ補完登録する
+  (DAO 由来の `<Dao>.meta.json` を優先、`entity.json` は未登録キーのみ補う)。
+- **テスト生成**:
+  - find/get 系(SELECT・`List<Entity>`): 戻り値ジェネリクスから結果エンティティを
+    特定し、対象テーブルへ決定的データを投入 → 実行 → 件数・先頭行 PK を assert。
+  - update 系(INSERT/UPDATE/DELETE・戻り void/int・`Map` 引数): SQL の bindVariables
+    からキー名を取り、決定的値を詰めた `java.util.Map`(Java5 互換の `new HashMap`+`put`)を
+    渡す。対象テーブルを逆引きできれば PK/全カラムで投入・追跡し、UPDATE は SET 列の
+    変化を、INSERT/DELETE は行の存在/不在を assert する。逆引き不能なら「呼ぶだけ+
+    データセット出力」に安全フォールバック。
+- 生成物・辞書登録とも **既存 S2Dao 経路には一切影響しない**(Service 経路は独立)。
+
 ## 4. 検証計画
 
 ### 4.1 検証対象の実ソース
