@@ -1,9 +1,9 @@
-package example.s2jdbc.base;
+package example.servicebase.base;
 
 import java.util.List;
 
 /**
- * S2JDBC の {@code org.seasar.extension.jdbc.JdbcManager} を模した最小スタブ。
+ * S2JDBC の {@code org.seasar.extension.jdbc.JdbcManager}(s2jdbcManager)を模した最小スタブ。
  *
  * <p>フィクスチャを S2JDBC ランタイム jar 無しでコンパイル可能にするための自己完結
  * インタフェース。実行(実 DB クエリ発行)は利用者環境の実 S2JDBC で行う想定。

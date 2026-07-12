@@ -1,4 +1,4 @@
-package example.s2jdbc.jpa;
+package example.servicebase.jpa;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

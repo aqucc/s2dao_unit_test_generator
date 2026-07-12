@@ -2,3 +2,6 @@ SELECT
   EMPNO, ENAME, JOB, DEPTNO, SAL, VERSION_NO
 FROM EMP
 WHERE DEPTNO = /*deptno*/10
+/*IF job != null*/
+  AND JOB = /*job*/'CLERK'
+/*END*/

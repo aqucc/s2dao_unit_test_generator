@@ -174,6 +174,9 @@ S2Dao(DAO インタフェース + BEAN 定数)に加え、S2JDBC 世代の **Ser
 - **テスト生成**:
   - find/get 系(SELECT・`List<Entity>`): 戻り値ジェネリクスから結果エンティティを
     特定し、対象テーブルへ決定的データを投入 → 実行 → 件数・先頭行 PK を assert。
+    引数が `Map`(基底 `findByParams(Class, co, Map)` 委譲型)の場合も update 系と
+    同様に SQL の bindVariables からキーを取り、投入行にヒットする値(WHERE 束縛は
+    その行の値)を詰めた `Map` を渡す。
   - update 系(INSERT/UPDATE/DELETE・戻り void/int・`Map` 引数): SQL の bindVariables
     からキー名を取り、決定的値を詰めた `java.util.Map`(Java5 互換の `new HashMap`+`put`)を
     渡す。対象テーブルを逆引きできれば PK/全カラムで投入・追跡し、UPDATE は SET 列の

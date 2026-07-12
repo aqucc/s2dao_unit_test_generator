@@ -1,0 +1,71 @@
+{
+  "className" : "example.servicebase.entity.Emp",
+  "simpleName" : "Emp",
+  "tableName" : "EMP",
+  "tableNameSource" : "ANNOTATION",
+  "properties" : [ {
+    "propertyName" : "empno",
+    "javaType" : "int",
+    "columnName" : "EMPNO",
+    "columnNameSource" : "ANNOTATION",
+    "persistent" : true,
+    "primaryKey" : true,
+    "versionNo" : false,
+    "timestamp" : false,
+    "access" : "GETTER"
+  }, {
+    "propertyName" : "ename",
+    "javaType" : "String",
+    "columnName" : "ENAME",
+    "columnNameSource" : "ANNOTATION",
+    "persistent" : true,
+    "primaryKey" : false,
+    "versionNo" : false,
+    "timestamp" : false,
+    "access" : "GETTER"
+  }, {
+    "propertyName" : "job",
+    "javaType" : "String",
+    "columnName" : "JOB",
+    "columnNameSource" : "ANNOTATION",
+    "persistent" : true,
+    "primaryKey" : false,
+    "versionNo" : false,
+    "timestamp" : false,
+    "access" : "GETTER"
+  }, {
+    "propertyName" : "deptno",
+    "javaType" : "int",
+    "columnName" : "DEPTNO",
+    "columnNameSource" : "ANNOTATION",
+    "persistent" : true,
+    "primaryKey" : false,
+    "versionNo" : false,
+    "timestamp" : false,
+    "access" : "GETTER"
+  }, {
+    "propertyName" : "sal",
+    "javaType" : "int",
+    "columnName" : "SAL",
+    "columnNameSource" : "ANNOTATION",
+    "persistent" : true,
+    "primaryKey" : false,
+    "versionNo" : false,
+    "timestamp" : false,
+    "access" : "GETTER"
+  }, {
+    "propertyName" : "versionNo",
+    "javaType" : "int",
+    "columnName" : "VERSION_NO",
+    "columnNameSource" : "ANNOTATION",
+    "persistent" : true,
+    "primaryKey" : false,
+    "versionNo" : true,
+    "timestamp" : false,
+    "access" : "GETTER"
+  } ],
+  "relations" : [ ],
+  "primaryKeyColumns" : [ "EMPNO" ],
+  "versionNoProperty" : "versionNo",
+  "primaryKeySource" : "ANNOTATION"
+}

@@ -1,0 +1,206 @@
+{
+  "daoClassName" : "example.servicebase.service.EmpService",
+  "daoSimpleName" : "EmpService",
+  "packageName" : "example.servicebase.service",
+  "annotationStyle" : "CONSTANT",
+  "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/java/example/servicebase/service/EmpService.java",
+  "sourceKind" : "SERVICE",
+  "methods" : [ {
+    "name" : "findData",
+    "returnType" : "List<Emp>",
+    "parameters" : [ {
+      "name" : "objobj",
+      "type" : "Map<Object,Object>"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "SQL_FILE",
+      "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/resources/example/servicebase/service/EmpService_findData.sql",
+      "rawSql" : "SELECT\n  EMPNO, ENAME, JOB, DEPTNO, SAL, VERSION_NO\nFROM EMP\nWHERE DEPTNO = /*deptno*/10\n/*IF job != null*/\n  AND JOB = /*job*/'CLERK'\n/*END*/\n",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "job",
+        "rootParam" : "job",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ "job != null" ],
+      "hasBegin" : false,
+      "expandedSql" : "SELECT\n  EMPNO, ENAME, JOB, DEPTNO, SAL, VERSION_NO\nFROM EMP\nWHERE DEPTNO = ?\n\n  AND JOB = ?\n",
+      "expandedBindOrder" : [ "deptno", "job" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMPNO", "ENAME", "JOB", "DEPTNO", "SAL", "VERSION_NO" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "DEPTNO",
+          "bindExpression" : "deptno",
+          "operator" : "="
+        }, {
+          "column" : "JOB",
+          "bindExpression" : "job",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "registerData",
+    "returnType" : "int",
+    "parameters" : [ {
+      "name" : "objobj",
+      "type" : "Map<Object,Object>"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "INSERT",
+    "sql" : {
+      "resolutionType" : "SQL_FILE",
+      "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/resources/example/servicebase/service/EmpService_registerData.sql",
+      "rawSql" : "INSERT INTO EMP (EMPNO, ENAME, JOB, DEPTNO, SAL, VERSION_NO)\nVALUES (/*empno*/0, /*ename*/'X', /*job*/'X', /*deptno*/0, /*sal*/0, /*versionNo*/0)\n",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "empno",
+        "rootParam" : "empno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "ename",
+        "rootParam" : "ename",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "job",
+        "rootParam" : "job",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "sal",
+        "rootParam" : "sal",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "versionNo",
+        "rootParam" : "versionNo",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "INSERT INTO EMP (EMPNO, ENAME, JOB, DEPTNO, SAL, VERSION_NO)\nVALUES (?, ?, ?, ?, ?, ?)",
+      "expandedBindOrder" : [ "empno", "ename", "job", "deptno", "sal", "versionNo" ],
+      "structure" : {
+        "statementType" : "INSERT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ ]
+      }
+    }
+  }, {
+    "name" : "changeData",
+    "returnType" : "int",
+    "parameters" : [ {
+      "name" : "objobj",
+      "type" : "Map<Object,Object>"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "SQL_FILE",
+      "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/resources/example/servicebase/service/EmpService_changeData.sql",
+      "rawSql" : "UPDATE EMP\nSET SAL = /*sal*/0, ENAME = /*ename*/'X'\nWHERE EMPNO = /*empno*/0\n",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "sal",
+        "rootParam" : "sal",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "ename",
+        "rootParam" : "ename",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "empno",
+        "rootParam" : "empno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "UPDATE EMP\nSET SAL = ?, ENAME = ?\nWHERE EMPNO = ?",
+      "expandedBindOrder" : [ "sal", "ename", "empno" ],
+      "structure" : {
+        "statementType" : "UPDATE",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "EMPNO",
+          "bindExpression" : "empno",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "removeData",
+    "returnType" : "int",
+    "parameters" : [ {
+      "name" : "objobj",
+      "type" : "Map<Object,Object>"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "DELETE",
+    "sql" : {
+      "resolutionType" : "SQL_FILE",
+      "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/resources/example/servicebase/service/EmpService_removeData.sql",
+      "rawSql" : "DELETE FROM EMP\nWHERE EMPNO = /*empno*/0\n",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "empno",
+        "rootParam" : "empno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "DELETE FROM EMP\nWHERE EMPNO = ?",
+      "expandedBindOrder" : [ "empno" ],
+      "structure" : {
+        "statementType" : "DELETE",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "EMPNO",
+          "bindExpression" : "empno",
+          "operator" : "="
+        } ]
+      }
+    }
+  } ],
+  "notes" : [ ]
+}

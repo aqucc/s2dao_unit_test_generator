@@ -1,10 +1,10 @@
-package example.s2jdbc.entity;
+package example.servicebase.entity;
 
-import example.s2jdbc.jpa.Column;
-import example.s2jdbc.jpa.Entity;
-import example.s2jdbc.jpa.Id;
-import example.s2jdbc.jpa.Table;
-import example.s2jdbc.jpa.Version;
+import example.servicebase.jpa.Column;
+import example.servicebase.jpa.Entity;
+import example.servicebase.jpa.Id;
+import example.servicebase.jpa.Table;
+import example.servicebase.jpa.Version;
 
 /**
  * JPA/S2JDBC 風のエンティティ(@Entity/@Table/@Column/@Id/@Version)。
