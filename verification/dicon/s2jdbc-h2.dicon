@@ -52,7 +52,7 @@
 	<!-- ===== Service 自動登録(パッケージ配下の *Service を component 化) ===== -->
 	<component class="org.seasar.framework.container.autoregister.FileSystemComponentAutoRegister">
 		<initMethod name="addClassPattern">
-			<arg>"example.s2jdbc.service"</arg>
+			<arg>"example.servicebase.service"</arg>
 			<arg>".*Service"</arg>
 		</initMethod>
 	</component>
