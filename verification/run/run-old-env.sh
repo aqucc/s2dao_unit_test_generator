@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # 【旧環境相当】H2 Database の Oracle 互換モード + JDK8(-source 1.6)+ JUnit3。
-# 生成テストを両サンプルで実行し、エビデンス CSV を verification/old-env/evidence/ に出力する。
+# 生成テストを両サンプルで実行し、エビデンス CSV を verification/results/old-env/evidence/ に出力する。
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$HERE/run-lib.sh"
@@ -14,10 +14,10 @@ URL="jdbc:h2:mem:s2daogen;MODE=Oracle;DB_CLOSE_DELAY=-1"
 USER="sa"
 PASS=""
 
-CONST_JAVA="$HERE/samples/s2dao/s2-dao-examples/src/main/java"
-CONST_SQL="$HERE/samples/s2dao/s2-dao-examples/src/main/resources"
-TIGER_JAVA="$HERE/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java"
-TIGER_SQL="$HERE/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources"
+CONST_JAVA="$HERE/../samples/s2dao/s2-dao-examples/src/main/java"
+CONST_SQL="$HERE/../samples/s2dao/s2-dao-examples/src/main/resources"
+TIGER_JAVA="$HERE/../samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java"
+TIGER_SQL="$HERE/../samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources"
 
 fail=0
 run_sample "$ENVDIR" "$ENVLABEL" "$DIALECT" "$DRIVER" "$URL" "$USER" "$PASS" \

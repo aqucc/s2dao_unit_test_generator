@@ -59,7 +59,7 @@
   取り込むと文字化けやコンパイルエラーの原因になります。
 - そのため本テンプレートは `encoding/<project>=MS932` を設定し、生成も `--encoding MS932`
   で行う運用としています。生成コードの日本語コメントは **すべて MS932 で表現可能な文字**
-  のみを使用していることを検証済みです（`verification/scripts/verify-eclipse-compile.sh` が
+  のみを使用していることを検証済みです（`verification/checks/verify-eclipse-compile.sh` が
   ECJ `-encoding MS932 -1.5` でエラーゼロを確認）。
 - 逆に、ワークスペース既定が UTF-8 のままなら、UTF-8 で生成し
   `encoding/<project>=UTF-8` に変更しても構いません（`new-env` テンプレート参照）。

@@ -3,7 +3,7 @@
 # Start the local PostgreSQL 16 cluster and (re)create the smoke-test database + role.
 # Idempotent: drops and recreates the role/database each run.
 #
-# Connection used by verification/env/smoke/dicon/app-pg.dicon:
+# Connection used by verification/setup/smoke/dicon/app-pg.dicon:
 #   jdbc:postgresql://127.0.0.1:5432/s2daosmoke   user=s2dao  password=s2dao
 #
 set -euo pipefail

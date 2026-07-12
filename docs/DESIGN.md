@@ -29,16 +29,16 @@ Seasar2 / S2Dao で実装されたアプリケーションの Oracle11g → Post
 │       └── new-db-postgres16/… PostgreSQL 16.8 (ja_JP.utf8)
 ├── vendor/                   … 【参照】ベンダリングした Seasar2/S2Dao ソース (Apache-2.0)
 └── verification/             … 本リポジトリで行った検証作業一式
-    ├── samples/              … インターネット上の実 S2Dao ソース(検証対象)
-    ├── scripts/              … 生成コードのコンパイル検証 (javac 1.5 / ECJ)
-    ├── env/                  … Seasar2 ビルド・スモーク・DB 起動スクリプト
+    ├── README.md            … verification/ の歩き方(各フォルダの役割と検証の流れ)
+    ├── samples/              … 実プロジェクトを模した検証対象(入力: s2dao / tiger / servicebase)
+    ├── generated/            … samples からの生成結果サンプル(出力)
     ├── lib/                  … Seasar2 ランタイム jar 一式
-    ├── generated/            … 生成テスト(検証時点の成果物)
-    ├── old-env/              … 旧環境相当での実行 (H2 Oracle互換 + -source 1.5)
-    ├── new-env/              … 新環境での実行 (PostgreSQL16 + Java8)
+    ├── setup/                … 初回環境構築 (Seasar2 ビルド・スモーク・DB 起動スクリプト)
+    ├── run/                  … 両環境の実行一式 (run-*.sh, runner/, dicon/, ddl/, config/, compare/)
+    ├── results/              … 実行結果 (old-env=H2 Oracle互換 + -source 1.5, new-env=PostgreSQL16 + Java8)
+    ├── checks/               … 生成コードのコンパイル検証 (javac 1.5 / ECJ)
     ├── oracle/               … 実 Oracle 用 DDL/dicon/properties
-    ├── eclipse-project-templates/ … Eclipse(Pleiades) 用プロジェクト雛形
-    └── compare/              … 結果・データセット突き合わせ
+    └── eclipse-project-templates/ … Eclipse(Pleiades) 用プロジェクト雛形
 ```
 
 ## 3. ジェネレーター本体 (generator/)
@@ -205,7 +205,7 @@ S2Dao(DAO インタフェース + BEAN 定数)に加え、S2JDBC 世代の **Ser
 同一 dao/sql から生成した同一テストを両環境で実行し、
 - JUnit 結果(成功/失敗/実行数)
 - エビデンス CSV(戻り値・データセット)
-を正規化した上で diff し、一致レポートを verification/compare/ に出力する。
+を正規化した上で diff し、一致レポートを verification/run/compare/ に出力する。
 
 ## 5. サブエージェント分担
 

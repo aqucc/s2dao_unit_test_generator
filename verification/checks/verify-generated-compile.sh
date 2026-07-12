@@ -13,7 +13,7 @@
 # 実行(DB 接続)までは行わない。それは後続の検証フェーズが担当する。
 #
 # 使い方:
-#   scripts/verify-generated-compile.sh
+#   checks/verify-generated-compile.sh
 #
 # 環境変数(省略可):
 #   JDK8_HOME    JDK8 の場所 (既定 /usr/lib/jvm/java-8-openjdk-amd64)

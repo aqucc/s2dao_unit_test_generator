@@ -7,7 +7,7 @@
 #      (生成テストは Java5 互換。バイトコード major49 = Java5 世代)
 #   2) .sql / dicon / s2daotest.properties をクラスパスに配置
 #   3) RunGeneratedTests(DDL 流し込み + JUnit3 実行)
-# を行う。エビデンス CSV と実行ログを verification/<envdir>/ に残す。
+# を行う。エビデンス CSV と実行ログを verification/results/<envdir>/ に残す。
 set -euo pipefail
 
 JDK8_HOME="${JDK8_HOME:-/usr/lib/jvm/java-8-openjdk-amd64}"
@@ -15,10 +15,10 @@ export JAVA_HOME="$JDK8_HOME"
 export PATH="$JAVA_HOME/bin:$PATH"
 export JAVA_TOOL_OPTIONS=""   # ログを汚さない(オフライン実行)
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LIB="$ROOT/verification/lib"
-DDL="$ROOT/verification/ddl/schema.sql"
-RUNNER="$ROOT/verification/runner/RunGeneratedTests.java"
+DDL="$ROOT/verification/run/ddl/schema.sql"
+RUNNER="$ROOT/verification/run/runner/RunGeneratedTests.java"
 SUPPORT_JAR="$ROOT/runtime/testsupport/target/s2dao-testgen-support.jar"
 CP_LIB="$(find "$LIB" -maxdepth 1 -name '*.jar' | tr '\n' ':')"
 
@@ -39,9 +39,9 @@ run_sample() {
     local testclasses=("$@")
 
     local gendir="$ROOT/verification/generated/$sample"
-    local build="$ROOT/verification/$envdir/build/$sample"
-    local evdir="$ROOT/verification/$envdir/evidence/$sample"
-    local logf="$ROOT/verification/$envdir/log/${sample}.log"
+    local build="$ROOT/verification/results/$envdir/build/$sample"
+    local evdir="$ROOT/verification/results/$envdir/evidence/$sample"
+    local logf="$ROOT/verification/results/$envdir/log/${sample}.log"
     rm -rf "$build" "$evdir"
     mkdir -p "$build" "$evdir" "$(dirname "$logf")"
 
@@ -68,7 +68,7 @@ run_sample() {
             cp "$f" "$build/$f"
         done )
     fi
-    cp "$ROOT/verification/dicon/$dicon" "$build/app.dicon"
+    cp "$ROOT/verification/run/dicon/$dicon" "$build/app.dicon"
 
     # 3) s2daotest.properties
     local prop="$build/s2daotest.properties"

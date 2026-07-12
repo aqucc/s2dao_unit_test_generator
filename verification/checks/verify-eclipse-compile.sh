@@ -11,7 +11,7 @@
 # エンコーディングでも生成・コンパイルできることを検証する。
 #
 # 使い方:
-#   scripts/verify-eclipse-compile.sh
+#   checks/verify-eclipse-compile.sh
 #
 # 環境変数(省略可):
 #   JDK8_HOME    JDK8 の場所 (既定 /usr/lib/jvm/java-8-openjdk-amd64)

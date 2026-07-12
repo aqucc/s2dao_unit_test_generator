@@ -1,7 +1,7 @@
 -- =====================================================================
 -- 生成テスト実行用スキーマ【実 Oracle 11g 用】
 --
--- verification/ddl/schema.sql(H2 Oracle互換モード / PostgreSQL16 用)と
+-- verification/run/ddl/schema.sql(H2 Oracle互換モード / PostgreSQL16 用)と
 -- 論理的に同一のテーブルを、Oracle 11g ネイティブの型で定義する。
 --   ・NUMERIC   → NUMBER
 --   ・VARCHAR   → VARCHAR2

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # S2Dao runtime smoke test on PostgreSQL 16 ("new environment").
-# Requires the cluster + database created by verification/env/pg-setup.sh.
+# Requires the cluster + database created by verification/setup/pg-setup.sh.
 # Must be run with JDK8.
 #
 set -euo pipefail

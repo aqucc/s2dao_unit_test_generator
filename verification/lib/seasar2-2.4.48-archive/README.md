@@ -15,4 +15,4 @@ maven.seasar.org 停止によりバイナリが失われているため、ソー
 `s2-framework-2.3.23.jar` / `s2-extension-2.3.23.jar` + `s2-dao-1.0.52.jar` を使う。
 
 ビルド方法・除外パッケージ・JDBC3 スタブの詳細は `docs/research/RUNTIME_BUILD.md` を参照。
-再ビルドは `verification/env/build-seasar2.sh`。
+再ビルドは `verification/setup/build-seasar2.sh`。

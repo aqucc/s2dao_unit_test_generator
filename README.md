@@ -30,7 +30,7 @@ Oracle → PostgreSQL 移行時に「同一 dao/sql に対して新旧環境で�
 | `runtime/testsupport/` | テスト実行時ライブラリ(Java5 互換、junit3 のみ依存。実行時に jar を classpath へ) |
 | `runtime/infra/` | テスト用 DB 環境の docker-compose 一式(DB が無い人向け。旧: Oracle XE 11g、新: PostgreSQL 16.8) |
 | `vendor/` | 【参照】ベンダリングした Seasar2/S2Dao ソース(Apache-2.0) |
-| `verification/` | 本リポジトリで行った検証作業一式(samples=実 S2Dao ソース、scripts=コンパイル検証、Seasar2 ランタイム jar、dicon、DDL、実行スクリプト、エビデンス) |
+| `verification/` | 本リポジトリで行った検証作業一式(samples=検証対象の入力、generated=生成結果サンプル、lib=Seasar2 ランタイム jar、setup=初回環境構築、run=両環境の実行一式、results=実行結果、checks=コンパイル検証。詳細は `verification/README.md`) |
 | `docs/DESIGN.md` | 設計書 |
 | `docs/CONSTRAINTS.md` | 本開発環境での検証上の制約(Oracle/Java5 の代替方法) |
 | `docs/VERIFICATION.md` | 新旧環境での実行・一致検証レポート |
@@ -90,14 +90,14 @@ java -jar generator/target/s2dao-testgen.jar generate --meta ./meta --out ./gene
    `jdbc:oracle:thin:...` に差し替えるだけ(dicon も 4 行差)
 3. **実行**: `java -Ds2daotest.config=... -Ds2daotest.evidence.dir=./evidence junit.textui.TestRunner <生成Testクラス>`
 
-実行例は `verification/run-old-env.sh` / `run-new-env.sh` を参照してください。
+実行例は `verification/run/run-old-env.sh` / `run-new-env.sh` を参照してください。
 
 ### 4. 新旧環境の一致検証
 
 両環境のエビデンス CSV(戻り値+操作後データセット)を比較:
 
 ```bash
-bash verification/compare/compare.sh
+bash verification/run/compare/compare.sh
 ```
 
 S2Dao が自動更新するカラム(TSTAMP/VERSIONNO 等)は比較から除外されます。

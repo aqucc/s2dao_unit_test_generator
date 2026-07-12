@@ -13,7 +13,7 @@
 #   against Central-equivalent jars. No src/main/java implementation code is modified except a
 #   single guarded line (see PATCH below).
 #
-# WHY a JDBC3 compile-time stub (verification/env/jdbc3-stub):
+# WHY a JDBC3 compile-time stub (verification/setup/jdbc3-stub):
 #   Seasar2 2.4.x predates JDBC4. Its java.sql-implementing classes (ConnectionWrapperImpl,
 #   DataSourceImpl, XADataSourceImpl, ResultSet/Statement wrappers, ...) do not implement the
 #   methods that JDBC 4.0/4.1 added to java.sql.* in Java 6/7. The original jars were compiled

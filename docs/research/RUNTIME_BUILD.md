@@ -11,10 +11,10 @@ H2(Oracle 互換モード)・PostgreSQL 16 でのスモークテスト結果を�
 成果物:
 - `verification/lib/` … 実行時ランタイム jar 一式(スモーク検証済み)
 - `verification/lib/seasar2-2.4.48-archive/` … タグ Seasar2.4.48 からビルドした 2.4.48 jar(アーカイブ、後述)
-- `verification/env/build-seasar2.sh` … 再現可能なビルドスクリプト(clone→patch→build→jar)
-- `verification/env/jdbc3-stub/` … JDBC3 コンパイル用スタブ(後述)
-- `verification/env/pg-setup.sh` … PostgreSQL 起動 + テスト DB/ロール作成
-- `verification/env/smoke/` … スモークテストコード(`SmokeTest.java`)・dicon・DDL・実行スクリプト
+- `verification/setup/build-seasar2.sh` … 再現可能なビルドスクリプト(clone→patch→build→jar)
+- `verification/setup/jdbc3-stub/` … JDBC3 コンパイル用スタブ(後述)
+- `verification/setup/pg-setup.sh` … PostgreSQL 起動 + テスト DB/ロール作成
+- `verification/setup/smoke/` … スモークテストコード(`SmokeTest.java`)・dicon・DDL・実行スクリプト
 
 ---
 
@@ -101,7 +101,7 @@ s2-extension の `SqlParserImpl` が担っており、その挙動は 2.3.23 と
 3. 親 pom は `maven-compiler-plugin` の `source/target` を **1.4** に固定しており、最近の
    Maven/JDK では扱いづらい。
 
-そこで `verification/env/build-seasar2.sh` は各モジュールの `src/main/java` を **依存順**
+そこで `verification/setup/build-seasar2.sh` は各モジュールの `src/main/java` を **依存順**
 (framework → extension → tiger、dao → dao-tiger)に `javac -source 1.6 -target 1.6 -encoding UTF-8`
 でコンパイルし、`src/main/resources`(dicon / dtd / properties 等)を同梱して jar 化する。
 `-source/-target 1.6` は JDK8 で指定可能な下限で、Java5 互換世代のバイトコードを生成する。
@@ -119,7 +119,7 @@ s2-extension の `SqlParserImpl` が担っており、その挙動は 2.3.23 と
 
 ## 4. JDK8 で古い Seasar2 をビルドするための JDBC3 スタブ
 
-`verification/env/jdbc3-stub/`
+`verification/setup/jdbc3-stub/`
 
 Seasar2 2.4.x / S2Dao 1.0.x は **JDBC3 世代(Java 1.4)**のコードであり、`java.sql.*` /
 `javax.sql.*` を実装する多数のクラス
@@ -155,7 +155,7 @@ Seasar2 2.4.x / S2Dao 1.0.x は **JDBC3 世代(Java 1.4)**のコードであり�
 
 ## 5. スモークテスト結果
 
-`verification/env/smoke/SmokeTest.java` は次を検証する(constant-annotation 版 `examples.dao.EmployeeDao`):
+`verification/setup/smoke/SmokeTest.java` は次を検証する(constant-annotation 版 `examples.dao.EmployeeDao`):
 
 1. dicon で S2Container を起動し `dao.dicon` 相当のコンポーネント群 + `S2DaoInterceptor` を構成
 2. `container.getComponent(EmployeeDao.class)` で AOP 適用済み DAO を取得
@@ -178,7 +178,7 @@ Seasar2 2.4.x / S2Dao 1.0.x は **JDBC3 世代(Java 1.4)**のコードであり�
 ==== H2-Oracle-mode: ALL PASSED ====
 ```
 dicon: `dicon/app-h2.dicon`(`jdbc:h2:mem:s2daosmoke;MODE=Oracle;DB_CLOSE_DELAY=-1`)
-実行: `verification/env/smoke/run-h2.sh`
+実行: `verification/setup/smoke/run-h2.sh`
 
 ### 5.2 PostgreSQL 16.13 = 新環境 — **ALL PASSED**
 
@@ -193,8 +193,8 @@ dicon: `dicon/app-h2.dicon`(`jdbc:h2:mem:s2daosmoke;MODE=Oracle;DB_CLOSE_DELAY=-
 ==== PostgreSQL16: ALL PASSED ====
 ```
 dicon: `dicon/app-pg.dicon`(`jdbc:postgresql://127.0.0.1:5432/s2daosmoke`, user=s2dao)
-セットアップ: `verification/env/pg-setup.sh`(クラスタ起動 + ロール/DB 作成、TCP md5 認証)
-実行: `verification/env/smoke/run-pg.sh`
+セットアップ: `verification/setup/pg-setup.sh`(クラスタ起動 + ロール/DB 作成、TCP md5 認証)
+実行: `verification/setup/smoke/run-pg.sh`
 
 同一 DDL(Oracle 方言 `TO_DATE`)が H2 Oracle モード・PostgreSQL 双方でそのまま通ることも確認。
 
@@ -220,7 +220,7 @@ Excel DataSet を使う場合のみ `poi-3.0-FINAL.jar`。
 > 実 Oracle11g / 実 PostgreSQL では `h2-*.jar` / `postgresql-*.jar` を実 JDBC ドライバ
 > (ojdbc / 目的の postgresql バージョン)に差し替えるだけでよい。
 
-### 6.2 dicon 設定の要点(`verification/env/smoke/dicon/app-*.dicon` 参照)
+### 6.2 dicon 設定の要点(`verification/setup/smoke/dicon/app-*.dicon` 参照)
 
 - 1 ファイルに **JTA/DataSource 層** と **S2Dao コンポーネント群** と **対象 DAO** をまとめた自己完結 dicon。
 - DataSource 層(`j2ee.dicon` 相当):
@@ -253,11 +253,11 @@ Excel DataSet を使う場合のみ `poi-3.0-FINAL.jar`。
 
 ```bash
 # 依存 jar は verification/lib に同梱済み。ソースから作り直す場合:
-JDK8_HOME=/usr/lib/jvm/java-8-openjdk-amd64 verification/env/build-seasar2.sh
-#   -> verification/env/build-out/ に 5 jar を再生成(2.3.23 は samples 同梱の既ビルド jar を使用)
+JDK8_HOME=/usr/lib/jvm/java-8-openjdk-amd64 verification/setup/build-seasar2.sh
+#   -> verification/setup/build-out/ に 5 jar を再生成(2.3.23 は samples 同梱の既ビルド jar を使用)
 
 # スモーク:
-verification/env/smoke/run-h2.sh          # H2 Oracle モード
-verification/env/pg-setup.sh              # PostgreSQL 起動 + DB 作成
-verification/env/smoke/run-pg.sh          # PostgreSQL 16
+verification/setup/smoke/run-h2.sh          # H2 Oracle モード
+verification/setup/pg-setup.sh              # PostgreSQL 起動 + DB 作成
+verification/setup/smoke/run-pg.sh          # PostgreSQL 16
 ```

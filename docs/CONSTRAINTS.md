@@ -28,7 +28,7 @@
     `-source/-target 1.5` を obsolete 警告付きで受理し、バイトコード
     **major version 49(= Java5 世代)**を生成する。testsupport の pom も
     `maven.compiler.source/target=1.5` に設定し、生成テストは
-    `verification/scripts/verify-generated-compile.sh` が両サンプルとも 1.5 でエラーゼロを確認。
+    `verification/checks/verify-generated-compile.sh` が両サンプルとも 1.5 でエラーゼロを確認。
   - **API レベルの Java5 互換を機械検証(animal-sniffer)**:testsupport 本体クラス
     (`target/classes`)を `animal-sniffer-maven-plugin` +
     `org.codehaus.mojo.signature:java15:1.0` シグネチャで検査し、
@@ -38,7 +38,7 @@
     出力する(下記 VERIFICATION_JAVA5_ECLIPSE.md にパターン網羅レビューあり)。
   - **ECJ(Eclipse JDT バッチコンパイラ)での検証**:Eclipse/Pleiades が実際に
     使うコンパイラ ECJ(`org.eclipse.jdt.core.compiler:ecj:4.6.1`)で
-    `-1.5` コンパイルし、エラーゼロ・警告一覧を確認(`verification/scripts/verify-eclipse-compile.sh`)。
+    `-1.5` コンパイルし、エラーゼロ・警告一覧を確認(`verification/checks/verify-eclipse-compile.sh`)。
   - JUnit は 3.8.x 形式(`junit.framework.TestCase`)で生成し、
     Java5 時代のランナーでも動作する形とする
 - 影響: 実 Java5 VM 上での実行確認のみ利用者環境での実施が必要

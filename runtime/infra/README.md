@@ -33,7 +33,7 @@ Windows 側の Eclipse からは WSL2 の localhost 転送により
 | JDBC URL | `jdbc:oracle:thin:@//localhost:1521/XE` | `jdbc:postgresql://localhost:5432/s2daogen` |
 | ユーザー | `S2DAOTEST` / `s2daotest` | `s2daotest` / `s2daotest` |
 | ドライバ | ojdbc5(Java5)/ ojdbc6(Java8)※利用者調達 | postgresql-42.2.x(`verification/lib/` 同梱) |
-| dicon 例 | `verification/oracle/s2dao-oracle.dicon` | `verification/dicon/s2dao-pg.dicon` |
+| dicon 例 | `verification/oracle/s2dao-oracle.dicon` | `verification/run/dicon/s2dao-pg.dicon` |
 | properties 例 | `verification/oracle/s2daotest-oracle.properties.example` | `runtime/testsupport/s2daotest.properties.example` |
 
 `initdb/01_schema.sql` は本リポジトリの検証用スキーマ(EMP/DEPT/NOPKTABLE)。
@@ -119,7 +119,7 @@ Windows 側の Eclipse からは WSL2 の localhost 転送により
 
 ## 本リポジトリの検証スクリプトとの関係
 
-`verification/run-old-env.sh` / `run-new-env.sh` は CI 向けに
+`verification/run/run-old-env.sh` / `run-new-env.sh` は CI 向けに
 H2(Oracle 互換モード)とローカル PostgreSQL を使う。実 Oracle XE コンテナで
 生成テストを動かす手順は `docs/ORACLE_MIGRATION_CHECKLIST.md` を参照
 (dicon の URL をこの compose の接続先に合わせるだけ)。

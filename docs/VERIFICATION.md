@@ -8,8 +8,8 @@
   - 定数アノテーション方式: `verification/samples/s2dao/s2-dao-examples`(パッケージ `examples.dao`)
   - Tiger アノテーション方式: `verification/samples/s2dao-tiger/s2-dao-tiger-examples`(パッケージ `examples.dao.tiger`)
 - 生成テスト: `verification/generated/<sample>/`(`gen-all` で生成)
-- 再現スクリプト: `verification/run-old-env.sh` / `verification/run-new-env.sh` / `verification/compare/compare.sh`
-- 実行ログ: `verification/{old-env,new-env}/log/`、エビデンス CSV: `verification/{old-env,new-env}/evidence/`
+- 再現スクリプト: `verification/run/run-old-env.sh` / `verification/run/run-new-env.sh` / `verification/run/compare/compare.sh`
+- 実行ログ: `verification/results/{old-env,new-env}/log/`、エビデンス CSV: `verification/results/{old-env,new-env}/evidence/`
 
 ---
 
@@ -26,8 +26,8 @@
 | JVM | OpenJDK 8(生成コードは `-source/-target 1.6` でコンパイル) | OpenJDK 8 |
 | JUnit | 3.8.2(`junit.framework.TestCase`) | 3.8.2 |
 | S2 ランタイム | s2-framework/s2-extension **2.3.23** + s2-dao/s2-dao-tiger **1.0.52**(両環境共通) | 同左 |
-| dicon | `verification/dicon/s2dao-h2.dicon`, `s2dao-tiger-h2.dicon` | `…-pg.dicon`(差分は DataSource の driver/URL/user/password の 4 行のみ) |
-| DDL | `verification/ddl/schema.sql`(EMP/DEPT/NOPKTABLE、両 DB 共通) | 同左 |
+| dicon | `verification/run/dicon/s2dao-h2.dicon`, `s2dao-tiger-h2.dicon` | `…-pg.dicon`(差分は DataSource の driver/URL/user/password の 4 行のみ) |
+| DDL | `verification/run/ddl/schema.sql`(EMP/DEPT/NOPKTABLE、両 DB 共通) | 同左 |
 
 - **DDL は 1 本を両 DB でそのまま適用**(`NUMERIC` / `VARCHAR` / `DATE` / `TIMESTAMP` / `DROP TABLE IF EXISTS`)。
   H2 Oracle 互換モード・PostgreSQL 双方が同一 DDL を解釈できることを確認。
@@ -95,7 +95,7 @@
 
 ## 3. エビデンス CSV 一致検証
 
-`verification/compare/compare.py`(python3)で正規化済み CSV を突き合わせた。
+`verification/run/compare/compare.py`(python3)で正規化済み CSV を突き合わせた。
 
 - **比較ファイル数: 75(定数 37 + Tiger 38)**
 - **一致: 75 / 不一致: 0 / 片側のみ: 0 → 完全一致(PASS)**
@@ -199,11 +199,11 @@ java -jar generator/target/s2dao-testgen.jar gen-all \
   --out verification/generated/s2dao-tiger --dbms oracle
 
 # 1) 旧環境相当(H2 Oracle モード)
-bash verification/run-old-env.sh
+bash verification/run/run-old-env.sh
 
-# 2) 新環境(PostgreSQL16 / 事前に verification/env/pg-setup.sh)
-bash verification/run-new-env.sh
+# 2) 新環境(PostgreSQL16 / 事前に verification/setup/pg-setup.sh)
+bash verification/run/run-new-env.sh
 
 # 3) 一致検証(JUnit結果 + エビデンス CSV)
-bash verification/compare/compare.sh
+bash verification/run/compare/compare.sh
 ```

@@ -125,7 +125,7 @@ ojdbc14.jar または ojdbc5.jar     … Java5 の場合(Java6+ なら ojdbc6.ja
 # コンパイル(生成テスト + entity/DAO ソース + ランナー)
 javac -encoding UTF-8 -source 1.5 -target 1.5 -cp "<上記jar一式>" \
       -sourcepath "<daoソース>:<生成テストdir>" -d build \
-      verification/runner/RunGeneratedTests.java <生成テスト>.java...
+      verification/run/runner/RunGeneratedTests.java <生成テスト>.java...
 
 # .sql を DAO と同じパッケージパスへ、dicon/properties をクラスパスルートへ配置後:
 java -cp "<上記jar一式>:build" \
@@ -154,7 +154,7 @@ java -cp "<上記jar一式>:build" \
 ### 2-7. 新旧突き合わせ
 
 旧(実 Oracle)・新(PostgreSQL 16)それぞれのエビデンスディレクトリを
-`verification/compare/compare.py <oldDir> <newDir>` に渡す
+`verification/run/compare/compare.py <oldDir> <newDir>` に渡す
 (自動更新カラム TIMESTAMP/TSTAMP/VERSIONNO/VERSION_NO は既定で除外)。
 
 ## 3. DB キャラクタセットを SJIS 系にする場合(テスト用コンテナの張り替え運用)

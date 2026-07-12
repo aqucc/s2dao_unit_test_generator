@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# 【新環境】PostgreSQL 16 + JDK8 + JUnit3。verification/env/pg-setup.sh 実行後に使う
+# 【新環境】PostgreSQL 16 + JDK8 + JUnit3。verification/setup/pg-setup.sh 実行後に使う
 # (DB=s2daogen が無ければ pg-setup.sh を参考に作成。ここでは s2daosmoke と同じロール s2dao を使う)。
-# 生成テストを両サンプルで実行し、エビデンス CSV を verification/new-env/evidence/ に出力する。
+# 生成テストを両サンプルで実行し、エビデンス CSV を verification/results/new-env/evidence/ に出力する。
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$HERE/run-lib.sh"
@@ -34,10 +34,10 @@ URL="jdbc:postgresql://127.0.0.1:5432/s2daogen"
 USER="s2dao"
 PASS="s2dao"
 
-CONST_JAVA="$HERE/samples/s2dao/s2-dao-examples/src/main/java"
-CONST_SQL="$HERE/samples/s2dao/s2-dao-examples/src/main/resources"
-TIGER_JAVA="$HERE/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java"
-TIGER_SQL="$HERE/samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources"
+CONST_JAVA="$HERE/../samples/s2dao/s2-dao-examples/src/main/java"
+CONST_SQL="$HERE/../samples/s2dao/s2-dao-examples/src/main/resources"
+TIGER_JAVA="$HERE/../samples/s2dao-tiger/s2-dao-tiger-examples/src/main/java"
+TIGER_SQL="$HERE/../samples/s2dao-tiger/s2-dao-tiger-examples/src/main/resources"
 
 fail=0
 run_sample "$ENVDIR" "$ENVLABEL" "$DIALECT" "$DRIVER" "$URL" "$USER" "$PASS" \

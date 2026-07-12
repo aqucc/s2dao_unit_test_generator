@@ -30,7 +30,7 @@ PostgreSQL 観点は **PostgreSQL 16 実 DB への実接続**で検証した。
 レビュー対象: verification/generated/ の生成テスト実物 8+5 クラス、
 testsupport 本体(S2TestContext / WriteDbUtil / GetDatasetUtil / EvidenceWriter /
 ValueFactory / TestDataParam / DbDialect)、generator の gen パッケージ
-(TestClassGenerator / TestValues)、verification/runner/RunGeneratedTests.java。
+(TestClassGenerator / TestValues)、verification/run/runner/RunGeneratedTests.java。
 
 発見した問題と対処の全一覧(重要度付き)は **docs/ORACLE_MIGRATION_CHECKLIST.md 第 1 章**を参照。
 要点:
