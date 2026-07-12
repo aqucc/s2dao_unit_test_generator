@@ -25,6 +25,7 @@ public class EmployeeDaoTest extends TestCase {
         try {
             WriteDbUtil.deleteAll(conn, "EMP");
             WriteDbUtil.deleteAll(conn, "dept");
+
             // 親/リレーション先テーブル dept の行(FK/JOIN 整合用)
             WriteDbUtil.write(conn, new TestDataParam("dept",
                 new String[] { "deptno", "dname", "loc", "versionNo" },
@@ -34,6 +35,7 @@ public class EmployeeDaoTest extends TestCase {
                     ValueFactory.forColumn("java.lang.String", "loc"), // loc (埋め草:ValueFactory決定値)
                     ValueFactory.forColumn("int", "versionNo") // versionNo (埋め草:ValueFactory決定値)
                 }));
+
             // 対象テーブル EMP の決定的テストデータ
             WriteDbUtil.write(conn, new TestDataParam("EMP",
                 new String[] { "empno", "ename", "job", "mgr", "hiredate", "sal", "comm", "deptno", "tstamp" },
@@ -65,12 +67,15 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- DAO 実行 ---
             java.util.List result = dao.getAllEmployees();
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.size() >= 1);
             ev.writeReturn("EmployeeDao", "getAllEmployees", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getAllEmployees", "emp", ds_emp);
@@ -86,15 +91,19 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             examples.dao.EmployeeSearchCondition dto = new examples.dao.EmployeeSearchCondition();
             dto.setJob("CLERK"); // job=CLERK にヒット
+
             // --- DAO 実行 ---
             java.util.List result = dao.getEmps(dto);
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.size() >= 1);
             ev.writeReturn("EmployeeDao", "getEmps", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getEmps", "emp", ds_emp);
@@ -108,13 +117,17 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             int empno = Integer.valueOf(1001); // 投入 empno=1001 にヒット
+
             // --- DAO 実行 ---
             examples.dao.Employee result = dao.getEmployee(empno);
+
             // --- 戻り値 assert ---
             assertNotNull("該当行が取得できるはず", result);
             ev.writeReturn("EmployeeDao", "getEmployee", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getEmployee", "emp", ds_emp);
@@ -130,11 +143,14 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- DAO 実行 ---
             int result = dao.getCount();
+
             // --- 戻り値 assert ---
             assertTrue("count は 1 以上", result >= 1);
             ev.writeReturn("EmployeeDao", "getCount", Integer.valueOf(result));
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getCount", "emp", ds_emp);
@@ -148,15 +164,19 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             java.lang.String job = "CLERK"; // 投入 job=CLERK にヒット
             java.lang.Integer deptno = Integer.valueOf(50); // 投入 deptno=50 にヒット
+
             // --- DAO 実行 ---
             java.util.List result = dao.getEmployeeByJobDeptno(job, deptno);
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.size() >= 1);
             ev.writeReturn("EmployeeDao", "getEmployeeByJobDeptno", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getEmployeeByJobDeptno", "emp", ds_emp);
@@ -170,14 +190,18 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             java.lang.Integer deptno = Integer.valueOf(50); // 投入 deptno=50 にヒット
+
             // --- DAO 実行 ---
             java.util.List result = dao.getEmployeeByDeptno(deptno);
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.size() >= 1);
             ev.writeReturn("EmployeeDao", "getEmployeeByDeptno", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getEmployeeByDeptno", "EMP", ds_EMP);
@@ -191,6 +215,7 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- エンティティ組み立て(UPDATE) ---
             examples.dao.Employee employee = new examples.dao.Employee();
             employee.setEmpno(Long.valueOf(1001L)); // empno=1001
@@ -202,10 +227,12 @@ public class EmployeeDaoTest extends TestCase {
             employee.setComm(Float.valueOf(501.0f)); // comm=501
             employee.setDeptno(Integer.valueOf(50)); // deptno=50 (JOIN/FKキーのため親行に一致するBASE値を維持)
             employee.setTimestamp(java.sql.Timestamp.valueOf("2001-01-01 00:00:00")); // tstamp=2001-01-01 00:00:00
+
             // --- DAO 実行 ---
             int result = dao.update(employee);
             assertTrue("更新/削除/登録 件数は 1 以上", result >= 1);
             ev.writeReturn("EmployeeDao", "update", Integer.valueOf(result));
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "update", "emp", ds_emp);
@@ -222,12 +249,15 @@ public class EmployeeDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- DAO 実行 ---
             int[] result = dao.getAllEmployeeNumbers();
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.length >= 1);
             ev.writeReturn("EmployeeDao", "getAllEmployeeNumbers", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getAllEmployeeNumbers", "emp", ds_emp);

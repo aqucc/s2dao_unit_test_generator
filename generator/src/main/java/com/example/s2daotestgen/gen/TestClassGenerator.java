@@ -100,9 +100,47 @@ public final class TestClassGenerator {
     }
 
     public Result generate(DaoMeta dao, String overridePackage, GenerationReport report) {
-        if ("SERVICE".equals(dao.sourceKind)) {
-            return generateService(dao, overridePackage, report);
+        Result r = "SERVICE".equals(dao.sourceKind)
+                ? generateService(dao, overridePackage, report)
+                : generateDao(dao, overridePackage, report);
+        // ブロック先頭コメントの手前に空行を入れて可読性を上げる(生成物共通の整形)
+        r.source = separateBlockComments(r.source);
+        return r;
+    }
+
+    /**
+     * 行頭コメント(ブロックの先頭に置かれる {@code // ...} コメント)の直前に空行を 1 行挿入する。
+     *
+     * <p>直前行がすでに空行・行頭コメント・ブロック開始({@code {} で終わる行)のいずれかの場合は
+     * 挿入しない(空行の重複や、波括弧直後の不自然な空行を避ける)。行末尾に付くインラインコメント
+     * (コード + {@code // ...})や javadoc({@code /** ... *}{@code /})は対象外。</p>
+     */
+    public static String separateBlockComments(String source) {
+        String[] lines = source.split("\n", -1);
+        StringBuffer out = new StringBuffer();
+        String prev = null;
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            String trimmed = line.trim();
+            if (trimmed.startsWith("//") && prev != null) {
+                String pt = prev.trim();
+                boolean prevBlank = pt.length() == 0;
+                boolean prevComment = pt.startsWith("//");
+                boolean prevOpensBlock = pt.endsWith("{");
+                if (!prevBlank && !prevComment && !prevOpensBlock) {
+                    out.append("\n");
+                }
+            }
+            out.append(line);
+            if (i < lines.length - 1) {
+                out.append("\n");
+            }
+            prev = line;
         }
+        return out.toString();
+    }
+
+    private Result generateDao(DaoMeta dao, String overridePackage, GenerationReport report) {
         String pkg = (overridePackage != null && overridePackage.length() > 0)
                 ? overridePackage : nz(dao.packageName);
         String daoFq = fqDao(dao);

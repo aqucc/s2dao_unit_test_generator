@@ -24,6 +24,7 @@ public class NoPkTableDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             WriteDbUtil.deleteAll(conn, "NoPkTable");
+
             // 対象テーブル NoPkTable の決定的テストデータ
             WriteDbUtil.write(conn, new TestDataParam("NoPkTable",
                 new String[] { "aaa", "bbb" },
@@ -48,12 +49,15 @@ public class NoPkTableDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- DAO 実行 ---
             examples.dao.NoPkTable[] result = dao.selectAll();
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.length >= 1);
             ev.writeReturn("NoPkTableDao", "selectAll", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_NoPkTable = GetDatasetUtil.getDataset(conn, "NoPkTable", new String[] { "aaa" });
             ev.writeDataset("NoPkTableDao", "selectAll", "NoPkTable", ds_NoPkTable);

@@ -19,6 +19,7 @@ public class StoredProcedureTestDaoTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
+
         // 自動生成可能なテストメソッドが無いため、コンテナ/DB は初期化しない
     }
 

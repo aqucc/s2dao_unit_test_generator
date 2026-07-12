@@ -25,6 +25,7 @@ public class EmployeeAutoDaoTest extends TestCase {
         try {
             WriteDbUtil.deleteAll(conn, "EMP");
             WriteDbUtil.deleteAll(conn, "DEPT");
+
             // 親/リレーション先テーブル DEPT の行(FK/JOIN 整合用)
             WriteDbUtil.write(conn, new TestDataParam("DEPT",
                 new String[] { "deptno", "dname", "loc", "versionNo" },
@@ -34,6 +35,7 @@ public class EmployeeAutoDaoTest extends TestCase {
                     ValueFactory.forColumn("java.lang.String", "loc"), // loc (埋め草:ValueFactory決定値)
                     ValueFactory.forColumn("int", "versionNo") // versionNo (埋め草:ValueFactory決定値)
                 }));
+
             // 対象テーブル EMP の決定的テストデータ
             WriteDbUtil.write(conn, new TestDataParam("EMP",
                 new String[] { "empno", "ename", "job", "mgr", "hiredate", "sal", "comm", "deptno", "tstamp" },
@@ -65,12 +67,15 @@ public class EmployeeAutoDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- DAO 実行 ---
             java.util.List result = dao.getAllEmployees();
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.size() >= 1);
             ev.writeReturn("EmployeeAutoDao", "getAllEmployees", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getAllEmployees", "EMP", ds_EMP);
@@ -84,15 +89,19 @@ public class EmployeeAutoDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             java.lang.String job = "CLERK"; // 投入 EMP.job=CLERK にヒット
             java.lang.Integer deptno = Integer.valueOf(50); // 投入 EMP.deptno=50 にヒット
+
             // --- DAO 実行 ---
             java.util.List result = dao.getEmployeeByJobDeptno(job, deptno);
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.size() >= 1);
             ev.writeReturn("EmployeeAutoDao", "getEmployeeByJobDeptno", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeeByJobDeptno", "EMP", ds_EMP);
@@ -106,13 +115,17 @@ public class EmployeeAutoDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             int empno = Integer.valueOf(1001); // 投入 EMP.empno=1001 にヒット
+
             // --- DAO 実行 ---
             examples.dao.tiger.Employee result = dao.getEmployeeByEmpno(empno);
+
             // --- 戻り値 assert ---
             assertNotNull("該当行が取得できるはず", result);
             ev.writeReturn("EmployeeAutoDao", "getEmployeeByEmpno", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeeByEmpno", "EMP", ds_EMP);
@@ -126,14 +139,18 @@ public class EmployeeAutoDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             float minSal = Float.valueOf(62.0f); // 決定値 62
             float maxSal = Float.valueOf(80.0f); // 決定値 80
+
             // --- DAO 実行 ---
             java.util.List result = dao.getEmployeesBySal(minSal, maxSal);
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             ev.writeReturn("EmployeeAutoDao", "getEmployeesBySal", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeesBySal", "EMP", ds_EMP);
@@ -147,13 +164,17 @@ public class EmployeeAutoDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             java.lang.String dname = "SALES"; // 決定値 SALES
+
             // --- DAO 実行 ---
             java.util.List result = dao.getEmployeeByDname(dname);
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             ev.writeReturn("EmployeeAutoDao", "getEmployeeByDname", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeeByDname", "EMP", ds_EMP);
@@ -167,15 +188,19 @@ public class EmployeeAutoDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             examples.dao.tiger.EmployeeSearchCondition dto = new examples.dao.tiger.EmployeeSearchCondition();
             dto.setJob("CLERK"); // EMP.job=CLERK にヒット
+
             // --- DAO 実行 ---
             java.util.List result = dao.getEmployeesBySearchCondition(dto);
+
             // --- 戻り値 assert ---
             assertNotNull(result);
             assertTrue("1 件以上ヒットするはず", result.size() >= 1);
             ev.writeReturn("EmployeeAutoDao", "getEmployeesBySearchCondition", result);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeesBySearchCondition", "EMP", ds_EMP);
@@ -189,6 +214,7 @@ public class EmployeeAutoDaoTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- エンティティ組み立て(UPDATE) ---
             examples.dao.tiger.Employee employee = new examples.dao.tiger.Employee();
             employee.setEmpno(Long.valueOf(1001L)); // empno=1001
@@ -200,14 +226,17 @@ public class EmployeeAutoDaoTest extends TestCase {
             employee.setComm(Float.valueOf(501.0f)); // comm=501
             employee.setDeptno(Integer.valueOf(50)); // deptno=50 (JOIN/FKキーのため親行に一致するBASE値を維持)
             employee.setTimestamp(java.sql.Timestamp.valueOf("2001-01-01 00:00:00")); // tstamp=2001-01-01 00:00:00
+
             // --- DAO 実行 ---
             dao.update(employee);
+
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "update", "EMP", ds_EMP);
             java.util.Map updated = GetDatasetUtil.find(ds_EMP, "EMPNO", Long.valueOf(1001L));
             assertNotNull("対象行が存在すること", updated);
             assertEquals("更新後の値が反映されていること", EvidenceWriter.normalize("TESTAU"), EvidenceWriter.normalize(updated.get("ENAME")));
+
             // timestamp は S2Dao が自動更新するため「変化したこと」のみ確認
             assertFalse("timestamp が投入値から変化していること", EvidenceWriter.normalize(java.sql.Timestamp.valueOf("2001-01-01 00:00:00")).equals(EvidenceWriter.normalize(updated.get("TSTAMP"))));
         } finally {

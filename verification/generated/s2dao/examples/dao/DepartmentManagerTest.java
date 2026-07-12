@@ -25,6 +25,7 @@ public class DepartmentManagerTest extends TestCase {
         try {
             WriteDbUtil.deleteAll(conn, "EMP"); // 対象テーブルを参照する子テーブル(FK対策で先に削除)
             WriteDbUtil.deleteAll(conn, "DEPT");
+
             // 対象テーブル DEPT の決定的テストデータ
             WriteDbUtil.write(conn, new TestDataParam("DEPT",
                 new String[] { "deptno", "dname", "loc", "versionNo" },
@@ -51,10 +52,13 @@ public class DepartmentManagerTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             examples.dao.Department department = new examples.dao.Department();
+
             // --- DAO 実行 ---
             dao.generate(department);
+
             // --- 戻り値 assert ---
             // 戻り値なし(void)
             // --- 操作後データセット取得 + エビデンス出力 ---
@@ -70,10 +74,13 @@ public class DepartmentManagerTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             examples.dao.Department department = new examples.dao.Department();
+
             // --- DAO 実行 ---
             dao.change(department);
+
             // --- 戻り値 assert ---
             // 戻り値なし(void)
             // --- 操作後データセット取得 + エビデンス出力 ---
@@ -89,10 +96,13 @@ public class DepartmentManagerTest extends TestCase {
         java.sql.Connection conn = ctx.getConnection();
         try {
             EvidenceWriter ev = ctx.newEvidenceWriter();
+
             // --- 引数準備(投入データにヒットする決定的値) ---
             examples.dao.Department department = new examples.dao.Department();
+
             // --- DAO 実行 ---
             dao.destory(department);
+
             // --- 戻り値 assert ---
             // 戻り値なし(void)
             // --- 操作後データセット取得 + エビデンス出力 ---
