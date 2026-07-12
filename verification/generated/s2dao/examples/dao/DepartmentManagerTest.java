@@ -35,6 +35,7 @@ public class DepartmentManagerTest extends TestCase {
                     "TOKYO", // loc=TOKYO (照合対象:固定値)
                     Integer.valueOf(0) // versionNo=0 (照合対象:固定値)
                 }));
+
         } finally {
             conn.close();
         }
@@ -64,6 +65,7 @@ public class DepartmentManagerTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_DEPT = GetDatasetUtil.getDataset(conn, "DEPT", new String[] { "deptno" });
             ev.writeDataset("DepartmentManager", "generate", "DEPT", ds_DEPT);
+
         } finally {
             conn.close();
         }
@@ -86,6 +88,7 @@ public class DepartmentManagerTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_DEPT = GetDatasetUtil.getDataset(conn, "DEPT", new String[] { "deptno" });
             ev.writeDataset("DepartmentManager", "change", "DEPT", ds_DEPT);
+
         } finally {
             conn.close();
         }
@@ -108,6 +111,7 @@ public class DepartmentManagerTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_DEPT = GetDatasetUtil.getDataset(conn, "DEPT", new String[] { "deptno" });
             ev.writeDataset("DepartmentManager", "destory", "DEPT", ds_DEPT);
+
         } finally {
             conn.close();
         }

@@ -35,6 +35,7 @@ public class DepartmentDaoTest extends TestCase {
                     ValueFactory.forColumn("java.lang.String", "loc"), // loc (埋め草:ValueFactory決定値)
                     Integer.valueOf(0) // versionNo=0 (照合対象:固定値)
                 }));
+
         } finally {
             conn.close();
         }
@@ -67,6 +68,7 @@ public class DepartmentDaoTest extends TestCase {
             java.util.List ds_DEPT = GetDatasetUtil.getDataset(conn, "DEPT", new String[] { "deptno" });
             ev.writeDataset("DepartmentDao", "insert", "DEPT", ds_DEPT);
             assertNotNull("新規行が登録されていること", GetDatasetUtil.find(ds_DEPT, "DEPTNO", Integer.valueOf(51)));
+
         } finally {
             conn.close();
         }
@@ -97,6 +99,7 @@ public class DepartmentDaoTest extends TestCase {
 
             // versionNo は S2Dao が自動更新するため「変化したこと」のみ確認
             assertFalse("versionNo が投入値から変化していること", EvidenceWriter.normalize(Integer.valueOf(0)).equals(EvidenceWriter.normalize(updated.get("VERSIONNO"))));
+
         } finally {
             conn.close();
         }
@@ -122,6 +125,7 @@ public class DepartmentDaoTest extends TestCase {
             java.util.List ds_DEPT = GetDatasetUtil.getDataset(conn, "DEPT", new String[] { "deptno" });
             ev.writeDataset("DepartmentDao", "delete", "DEPT", ds_DEPT);
             assertNull("対象行が削除されていること", GetDatasetUtil.find(ds_DEPT, "DEPTNO", Integer.valueOf(50)));
+
         } finally {
             conn.close();
         }

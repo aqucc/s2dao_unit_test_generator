@@ -67,6 +67,7 @@ public class EmpServiceTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "EMPNO" });
             ev.writeDataset("EmpService", "findData", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -99,6 +100,7 @@ public class EmpServiceTest extends TestCase {
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "EMPNO" });
             ev.writeDataset("EmpService", "registerData", "EMP", ds_EMP);
             assertNotNull("新規行が登録されていること", GetDatasetUtil.find(ds_EMP, "EMPNO", Integer.valueOf(1001)));
+
         } finally {
             conn.close();
         }
@@ -140,6 +142,7 @@ public class EmpServiceTest extends TestCase {
             java.util.Map updated = GetDatasetUtil.find(ds_EMP, "EMPNO", Integer.valueOf(1001));
             assertNotNull("対象行が存在すること", updated);
             assertEquals("更新後の値が反映されていること", EvidenceWriter.normalize(Integer.valueOf(3001)), EvidenceWriter.normalize(updated.get("SAL")));
+
         } finally {
             conn.close();
         }
@@ -177,6 +180,7 @@ public class EmpServiceTest extends TestCase {
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "EMPNO" });
             ev.writeDataset("EmpService", "removeData", "EMP", ds_EMP);
             assertNull("対象行が削除されていること", GetDatasetUtil.find(ds_EMP, "EMPNO", Integer.valueOf(1001)));
+
         } finally {
             conn.close();
         }

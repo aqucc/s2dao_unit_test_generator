@@ -105,6 +105,7 @@ public final class TestClassGenerator {
                 : generateDao(dao, overridePackage, report);
         // ブロック先頭コメントの手前に空行を入れて可読性を上げる(生成物共通の整形)
         r.source = separateBlockComments(r.source);
+        r.source = separateCatchFinally(r.source);
         return r;
     }
 
@@ -128,6 +129,37 @@ public final class TestClassGenerator {
                 boolean prevComment = pt.startsWith("//");
                 boolean prevOpensBlock = pt.endsWith("{");
                 if (!prevBlank && !prevComment && !prevOpensBlock) {
+                    out.append("\n");
+                }
+            }
+            out.append(line);
+            if (i < lines.length - 1) {
+                out.append("\n");
+            }
+            prev = line;
+        }
+        return out.toString();
+    }
+
+    /**
+     * 「<code>} catch (...) {</code>」「<code>} finally {</code>」行の直前に空行を 1 行挿入する
+     * (try ブロック末尾と例外処理/後始末の視覚的な区切り。可読性向上目的)。
+     *
+     * <p>直前行がすでに空行、または波括弧開始で終わる行(= try 本体が空)の場合は挿入しない。</p>
+     */
+    public static String separateCatchFinally(String source) {
+        String[] lines = source.split("\n", -1);
+        StringBuffer out = new StringBuffer();
+        String prev = null;
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            String trimmed = line.trim();
+            if ((trimmed.startsWith("} catch") || trimmed.startsWith("} finally"))
+                    && prev != null) {
+                String pt = prev.trim();
+                boolean prevBlank = pt.length() == 0;
+                boolean prevOpensBlock = pt.endsWith("{");
+                if (!prevBlank && !prevOpensBlock) {
                     out.append("\n");
                 }
             }

@@ -50,6 +50,7 @@ public class EmployeeAutoDaoTest extends TestCase {
                     Integer.valueOf(50), // deptno=50 (照合対象:固定値)
                     java.sql.Timestamp.valueOf("2001-01-01 00:00:00") // tstamp=2001-01-01 00:00:00 (照合対象:固定値)
                 }));
+
         } finally {
             conn.close();
         }
@@ -79,6 +80,7 @@ public class EmployeeAutoDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getAllEmployees", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -105,6 +107,7 @@ public class EmployeeAutoDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeeByJobDeptno", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -129,6 +132,7 @@ public class EmployeeAutoDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeeByEmpno", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -154,6 +158,7 @@ public class EmployeeAutoDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeesBySal", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -178,6 +183,7 @@ public class EmployeeAutoDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeeByDname", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -204,6 +210,7 @@ public class EmployeeAutoDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeAutoDao", "getEmployeesBySearchCondition", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -239,6 +246,7 @@ public class EmployeeAutoDaoTest extends TestCase {
 
             // timestamp は S2Dao が自動更新するため「変化したこと」のみ確認
             assertFalse("timestamp が投入値から変化していること", EvidenceWriter.normalize(java.sql.Timestamp.valueOf("2001-01-01 00:00:00")).equals(EvidenceWriter.normalize(updated.get("TSTAMP"))));
+
         } finally {
             conn.close();
         }

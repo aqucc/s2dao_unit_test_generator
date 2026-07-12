@@ -50,6 +50,7 @@ public class EmployeeDaoTest extends TestCase {
                     Integer.valueOf(50), // deptno=50 (照合対象:固定値)
                     java.sql.Timestamp.valueOf("2001-01-01 00:00:00") // tstamp=2001-01-01 00:00:00 (照合対象:固定値)
                 }));
+
         } finally {
             conn.close();
         }
@@ -81,6 +82,7 @@ public class EmployeeDaoTest extends TestCase {
             ev.writeDataset("EmployeeDao", "getAllEmployees", "emp", ds_emp);
             java.util.List ds_dept = GetDatasetUtil.getDataset(conn, "dept");
             ev.writeDataset("EmployeeDao", "getAllEmployees", "dept", ds_dept);
+
         } finally {
             conn.close();
         }
@@ -107,6 +109,7 @@ public class EmployeeDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getEmps", "emp", ds_emp);
+
         } finally {
             conn.close();
         }
@@ -133,6 +136,7 @@ public class EmployeeDaoTest extends TestCase {
             ev.writeDataset("EmployeeDao", "getEmployee", "emp", ds_emp);
             java.util.List ds_dept = GetDatasetUtil.getDataset(conn, "dept");
             ev.writeDataset("EmployeeDao", "getEmployee", "dept", ds_dept);
+
         } finally {
             conn.close();
         }
@@ -154,6 +158,7 @@ public class EmployeeDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getCount", "emp", ds_emp);
+
         } finally {
             conn.close();
         }
@@ -180,6 +185,7 @@ public class EmployeeDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getEmployeeByJobDeptno", "emp", ds_emp);
+
         } finally {
             conn.close();
         }
@@ -205,6 +211,7 @@ public class EmployeeDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getEmployeeByDeptno", "EMP", ds_EMP);
+
         } finally {
             conn.close();
         }
@@ -239,6 +246,7 @@ public class EmployeeDaoTest extends TestCase {
             java.util.Map updated = GetDatasetUtil.find(ds_emp, "EMPNO", Long.valueOf(1001L));
             assertNotNull("対象行が存在すること", updated);
             assertEquals("更新後の値が反映されていること", EvidenceWriter.normalize("TESTAU"), EvidenceWriter.normalize(updated.get("ENAME")));
+
         } finally {
             conn.close();
         }
@@ -261,6 +269,7 @@ public class EmployeeDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_emp = GetDatasetUtil.getDataset(conn, "emp", new String[] { "empno" });
             ev.writeDataset("EmployeeDao", "getAllEmployeeNumbers", "emp", ds_emp);
+
         } finally {
             conn.close();
         }

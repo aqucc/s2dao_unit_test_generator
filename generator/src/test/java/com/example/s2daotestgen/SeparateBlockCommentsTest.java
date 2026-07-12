@@ -51,6 +51,40 @@ public class SeparateBlockCommentsTest {
     }
 
     @Test
+    public void insertsBlankLineBeforeFinally() {
+        String src = "conn.close();\n        } finally {\n            x();\n";
+        assertEquals("conn.close();\n\n        } finally {\n            x();\n",
+                TestClassGenerator.separateCatchFinally(src));
+    }
+
+    @Test
+    public void insertsBlankLineBeforeCatch() {
+        String src = "a();\n        } catch (Exception e) {\n            b();\n";
+        assertEquals("a();\n\n        } catch (Exception e) {\n            b();\n",
+                TestClassGenerator.separateCatchFinally(src));
+    }
+
+    @Test
+    public void noBlankBeforeFinallyWhenTryBodyEmpty() {
+        String src = "try {\n        } finally {\n";
+        // try 本体が空(直前が波括弧開始)の場合は挿入しない
+        assertEquals(src, TestClassGenerator.separateCatchFinally(src));
+    }
+
+    @Test
+    public void noDoubleBlankBeforeFinally() {
+        String src = "a();\n\n        } finally {\n";
+        assertEquals(src, TestClassGenerator.separateCatchFinally(src));
+    }
+
+    @Test
+    public void plainClosingBraceIsUntouched() {
+        String src = "a();\n        }\n    }\n";
+        // 通常の閉じ括弧には挿入しない
+        assertEquals(src, TestClassGenerator.separateCatchFinally(src));
+    }
+
+    @Test
     public void appliedToGeneratedServiceSource() throws Exception {
         // 実生成物でも「文 → 空行 → 行頭コメント」の並びになっていること
         java.util.Map<String, com.example.s2daotestgen.model.MetaModel.DaoMeta> daos =

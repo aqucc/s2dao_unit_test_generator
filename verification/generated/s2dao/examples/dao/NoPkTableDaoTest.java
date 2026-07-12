@@ -32,6 +32,7 @@ public class NoPkTableDaoTest extends TestCase {
                     "A1", // aaa=A1 (照合対象:固定値)
                     ValueFactory.forColumn("Integer", "bbb") // bbb (埋め草:ValueFactory決定値)
                 }));
+
         } finally {
             conn.close();
         }
@@ -61,6 +62,7 @@ public class NoPkTableDaoTest extends TestCase {
             // --- 操作後データセット取得 + エビデンス出力 ---
             java.util.List ds_NoPkTable = GetDatasetUtil.getDataset(conn, "NoPkTable", new String[] { "aaa" });
             ev.writeDataset("NoPkTableDao", "selectAll", "NoPkTable", ds_NoPkTable);
+
         } finally {
             conn.close();
         }
