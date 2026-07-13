@@ -21,10 +21,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- 本体クラスは Java5 世代でコンパイルする(JDK8 の javac は -source/-target 1.5 を
-             obsolete 警告付きで受理し、バイトコード major version 49 = Java5 を生成する) -->
+             obsolete 警告付きで受理し、バイトコード major version 49 = Java5 を生成する)。
+             推奨ビルド環境は JDK8 + Maven 3.9.x(fork 不要でそのままビルドできる)。
+             JDK9 以降の JVM で mvn を起動した場合のみ、下の jdk9-plus プロファイルが
+             JDK8 の javac を fork する(場所は -Djdk8.home=... で指定可)。 -->
         <maven.compiler.source>1.5</maven.compiler.source>
         <maven.compiler.target>1.5</maven.compiler.target>
-        <!-- JDK21 から mvn を起動しても JDK8 の javac を強制的に使用する -->
+        <!-- JDK9+ ビルド時に fork する JDK8 の場所(既定は本リポジトリの CI コンテナの値。
+             各自の環境では mvn -Djdk8.home=C:/jdk1.8.0_xxx などで上書きする) -->
         <jdk8.home>/usr/lib/jvm/java-8-openjdk-amd64</jdk8.home>
     </properties>
 
@@ -55,11 +59,8 @@
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
-                    <!-- JDK8 の javac を fork して Java5 世代(major 49)のバイトコードを生成する -->
-                    <fork>true</fork>
-                    <executable>${jdk8.home}/bin/javac</executable>
                     <compilerArgs>
-                        <!-- 1.5 では bootclasspath 未指定 / source|target obsolete の警告が出るが本環境では許容 -->
+                        <!-- 1.5 では bootclasspath 未指定 / source|target obsolete の警告が出るが許容 -->
                         <arg>-Xlint:none</arg>
                     </compilerArgs>
                 </configuration>
@@ -97,4 +98,29 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- JDK9 以降の JVM で mvn を起動した場合のみ有効化。
+             JDK9+ の javac は -source/-target 1.5 を受け付けないため、
+             JDK8 の javac(${jdk8.home}/bin/javac)を fork してコンパイルする。
+             JDK8 で mvn を起動している通常の利用者環境では発動しない。 -->
+        <profile>
+            <id>jdk9-plus</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <fork>true</fork>
+                            <executable>${jdk8.home}/bin/javac</executable>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

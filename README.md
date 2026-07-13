@@ -47,9 +47,15 @@ cd generator  && mvn package     # → target/s2dao-testgen.jar (実行可能 fa
 cd runtime/testsupport && mvn package    # → target/s2dao-testgen-support.jar
 ```
 
-- 対応ビルド環境: **JDK 8〜21 + Maven 3.9.x**(Maven 3.9.16 + JDK8 で検証済み)。
-  generator の pom は `maven.compiler.source/target=8` 指定のため
-  JDK8 の javac でもそのままビルドできる(Maven 4 系は未検証)。
+- 対応ビルド環境: **JDK 8〜21 + Maven 3.9.x**(Maven 3.9.16 + JDK8 で検証済み。
+  Maven 4 系は未検証)。**推奨は JDK8 で mvn を起動する**こと。
+  - `generator/`: `source/target=8`。ビルド JDK が 8 でも 21 でもそのまま通る。
+    成果物(生成テストのソースコード)は Java のバージョンに依存しないテキスト。
+  - `runtime/testsupport/`: `source/target=1.5` — 生成テストと一緒に
+    **旧環境(Java5 JVM)にロードされる jar** のため、バイトコードは Java5 世代
+    (major 49)で固定。**JDK8 で mvn を起動すればそのままビルドできる**。
+    JDK9 以降で起動した場合のみ `jdk9-plus` プロファイルが JDK8 の javac を
+    fork する(場所は `mvn -Djdk8.home=<JDK8のパス>` で指定)。
 
 ### 2. テストコード生成
 
