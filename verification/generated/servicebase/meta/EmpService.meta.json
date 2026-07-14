@@ -54,6 +54,147 @@
       }
     }
   }, {
+    "name" : "searchSpecial",
+    "returnType" : "List<Emp>",
+    "parameters" : [ {
+      "name" : "objobj",
+      "type" : "Map<Object,Object>"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "SELECT",
+    "sql" : {
+      "resolutionType" : "SQL_FILE",
+      "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/resources/example/servicebase/service/EmpService_specialQuery.sql",
+      "rawSql" : "SELECT\n  EMPNO, ENAME, JOB, DEPTNO, SAL, VERSION_NO\nFROM EMP\nWHERE DEPTNO = /*deptno*/10\n  AND JOB = /*job*/'CLERK'\n",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "deptno",
+        "rootParam" : "deptno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "job",
+        "rootParam" : "job",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "SELECT\n  EMPNO, ENAME, JOB, DEPTNO, SAL, VERSION_NO\nFROM EMP\nWHERE DEPTNO = ?\n  AND JOB = ?",
+      "expandedBindOrder" : [ "deptno", "job" ],
+      "structure" : {
+        "statementType" : "SELECT",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ "EMPNO", "ENAME", "JOB", "DEPTNO", "SAL", "VERSION_NO" ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "DEPTNO",
+          "bindExpression" : "deptno",
+          "operator" : "="
+        }, {
+          "column" : "JOB",
+          "bindExpression" : "job",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "applyBonus",
+    "returnType" : "int",
+    "parameters" : [ {
+      "name" : "objobj",
+      "type" : "Map<Object,Object>"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "SQL_FILE",
+      "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/resources/example/servicebase/service/EmpService_bonusUpdate.sql",
+      "rawSql" : "UPDATE EMP\nSET SAL = /*sal*/0\nWHERE EMPNO = /*empno*/0\n",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "sal",
+        "rootParam" : "sal",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "empno",
+        "rootParam" : "empno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "UPDATE EMP\nSET SAL = ?\nWHERE EMPNO = ?",
+      "expandedBindOrder" : [ "sal", "empno" ],
+      "structure" : {
+        "statementType" : "UPDATE",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "EMPNO",
+          "bindExpression" : "empno",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
+    "name" : "cancelBonus2",
+    "returnType" : "int",
+    "parameters" : [ {
+      "name" : "objobj",
+      "type" : "Map<Object,Object>"
+    } ],
+    "argNames" : [ ],
+    "noPersistentProps" : [ ],
+    "persistentProps" : [ ],
+    "methodKind" : "UPDATE",
+    "sql" : {
+      "resolutionType" : "SQL_FILE",
+      "sourceFile" : "/home/user/s2dao_unit_test_generator/verification/samples/servicebase/src/main/resources/example/servicebase/service/EmpService_cancelBonus.sql",
+      "rawSql" : "UPDATE EMP\nSET SAL = /*sal*/0, ENAME = /*ename*/'X'\nWHERE EMPNO = /*empno*/0\n",
+      "twoWay" : true,
+      "bindVariables" : [ {
+        "expression" : "sal",
+        "rootParam" : "sal",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "ename",
+        "rootParam" : "ename",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      }, {
+        "expression" : "empno",
+        "rootParam" : "empno",
+        "propertyPath" : "",
+        "kind" : "BIND"
+      } ],
+      "embeddedVariables" : [ ],
+      "ifConditions" : [ ],
+      "hasBegin" : false,
+      "expandedSql" : "UPDATE EMP\nSET SAL = ?, ENAME = ?\nWHERE EMPNO = ?",
+      "expandedBindOrder" : [ "sal", "ename", "empno" ],
+      "structure" : {
+        "statementType" : "UPDATE",
+        "tables" : [ "EMP" ],
+        "selectColumns" : [ ],
+        "selectStarExpanded" : false,
+        "whereBindings" : [ {
+          "column" : "EMPNO",
+          "bindExpression" : "empno",
+          "operator" : "="
+        } ]
+      }
+    }
+  }, {
     "name" : "registerData",
     "returnType" : "int",
     "parameters" : [ {
@@ -202,5 +343,5 @@
       }
     }
   } ],
-  "notes" : [ ]
+  "notes" : [ "メソッド 'searchSpecial' の本体の bySql 系呼び出し(候補 'specialQuery')から解決: EmpService_specialQuery.sql", "メソッド 'applyBonus' の本体の bySql 系呼び出し(候補 'bonusUpdate.sql')から解決: EmpService_bonusUpdate.sql", "メソッド 'cancelBonus2' の本体の bySql 系呼び出し(候補 'cancelBonus')から解決: EmpService_cancelBonus.sql" ]
 }

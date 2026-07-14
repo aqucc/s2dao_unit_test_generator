@@ -94,6 +94,50 @@ public class ServiceGenTest {
     }
 
     @Test
+    public void explicitBySqlFileMethodsResolved() {
+        // 明示指定(引数に SQL 名/パス)の 3 パターンが SQL_FILE として解決され、
+        // methodKind が SQL 中身どおりになること。
+        final DaoMeta svc = daos.get("EmpService");
+        // (1) 素の名称: selectBySqlFile(Emp.class, "specialQuery", objobj)
+        final MethodMeta special = AnalysisFixture.method(svc, "searchSpecial");
+        assertEquals("SQL_FILE", special.sql.resolutionType);
+        assertEquals("SELECT", special.methodKind);
+        // (2) .sql 付きリテラル: updateBySqlFile("bonusUpdate.sql", objobj)
+        final MethodMeta apply = AnalysisFixture.method(svc, "applyBonus");
+        assertEquals("SQL_FILE", apply.sql.resolutionType);
+        assertEquals("UPDATE", apply.methodKind);
+        // (3) 定数渡し: updateBySqlFile(CANCEL_SQL, objobj)(CANCEL_SQL="cancelBonus")
+        final MethodMeta cancel = AnalysisFixture.method(svc, "cancelBonus2");
+        assertEquals("SQL_FILE", cancel.sql.resolutionType);
+        assertEquals("UPDATE", cancel.methodKind);
+    }
+
+    @Test
+    public void explicitBySqlFileResolutionNoted() {
+        // トレーサビリティ: メソッド本体の bySql 系呼び出しから解決した旨が notes に残る。
+        final DaoMeta svc = daos.get("EmpService");
+        boolean noted = false;
+        for (final String n : svc.notes) {
+            if (n.indexOf("searchSpecial") >= 0
+                    && n.indexOf("EmpService_specialQuery.sql") >= 0) {
+                noted = true;
+            }
+        }
+        assertTrue("bySql 系呼び出しからの解決が notes に記録される", noted);
+    }
+
+    @Test
+    public void explicitBySqlFileTestsGenerated() {
+        // 明示指定 3 メソッドのテストが生成されること。
+        assertTrue(generated.indexOf("public void testSearchSpecial()") >= 0);
+        assertTrue(generated.indexOf("public void testApplyBonus()") >= 0);
+        assertTrue(generated.indexOf("public void testCancelBonus2()") >= 0);
+        assertTrue("searchSpecial を実行", generated.indexOf("dao.searchSpecial(") >= 0);
+        assertTrue("applyBonus を実行", generated.indexOf("dao.applyBonus(") >= 0);
+        assertTrue("cancelBonus2 を実行", generated.indexOf("dao.cancelBonus2(") >= 0);
+    }
+
+    @Test
     public void genericsAndMapTypesCaptured() {
         final DaoMeta svc = daos.get("EmpService");
         final MethodMeta find = AnalysisFixture.method(svc, "findData");

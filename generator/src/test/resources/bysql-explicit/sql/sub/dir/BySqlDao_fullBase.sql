@@ -1,0 +1,1 @@
+SELECT ID, NAME FROM FOO WHERE NAME = /*name*/'X'

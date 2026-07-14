@@ -24,9 +24,39 @@ import example.servicebase.entity.Emp;
  */
 public class EmpService extends ServiceBase {
 
+    /** {@code cancelBonus2} が使う SQL 名(定数渡しパターン)。→ EmpService_cancelBonus.sql。 */
+    private static final String CANCEL_SQL = "cancelBonus";
+
     /** 検索(SQL は SELECT)。結果は Emp のリスト。 */
     public List<Emp> findData(Map<Object, Object> objobj) {
         return findByParams(Emp.class, "findData", objobj);
+    }
+
+    /**
+     * 明示名(<b>素の名称</b>)で SQL を指定する検索。基底の {@code findByParams} を
+     * 経由せず {@code selectBySqlFile(Emp.class, "specialQuery", objobj)} を直接呼ぶ。
+     * → SQL ファイル {@code EmpService_specialQuery.sql}(SELECT)。
+     */
+    public List<Emp> searchSpecial(Map<Object, Object> objobj) {
+        return selectBySqlFile(Emp.class, "specialQuery", objobj);
+    }
+
+    /**
+     * 明示名(<b>.sql 付きリテラル</b>)で SQL を指定する更新。
+     * {@code updateBySqlFile("bonusUpdate.sql", objobj)} を直接呼ぶ。
+     * → SQL ファイル {@code EmpService_bonusUpdate.sql}(UPDATE)。件数を返す。
+     */
+    public int applyBonus(Map<Object, Object> objobj) {
+        return updateBySqlFile("bonusUpdate.sql", objobj);
+    }
+
+    /**
+     * 明示名(<b>定数渡し</b>)で SQL を指定する更新。
+     * {@code updateBySqlFile(CANCEL_SQL, objobj)}(CANCEL_SQL="cancelBonus")を直接呼ぶ。
+     * → SQL ファイル {@code EmpService_cancelBonus.sql}(UPDATE)。件数を返す。
+     */
+    public int cancelBonus2(Map<Object, Object> objobj) {
+        return updateBySqlFile(CANCEL_SQL, objobj);
     }
 
     /** 登録(SQL は INSERT)。件数を返す。 */

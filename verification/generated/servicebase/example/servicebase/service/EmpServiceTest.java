@@ -73,6 +73,132 @@ public class EmpServiceTest extends TestCase {
         }
     }
 
+    /** searchSpecial : SELECT (SQL_FILE, S2JDBC Service) */
+    public void testSearchSpecial() throws Exception {
+        java.sql.Connection conn = ctx.getConnection();
+        try {
+            EvidenceWriter ev = ctx.newEvidenceWriter();
+
+            // --- 対象テーブル EMP へ決定的データ投入 ---
+            WriteDbUtil.deleteAll(conn, "EMP");
+            WriteDbUtil.write(conn, new TestDataParam("EMP",
+                new String[] { "EMPNO", "ENAME", "JOB", "DEPTNO", "SAL", "VERSION_NO" },
+                new Object[] {
+                    Integer.valueOf(1001), // EMPNO=1001
+                    "TESTA", // ENAME=TESTA
+                    "CLERK", // JOB=CLERK
+                    Integer.valueOf(50), // DEPTNO=50
+                    Integer.valueOf(3000), // SAL=3000
+                    Integer.valueOf(34) // VERSION_NO=34
+                }));
+
+            // --- 引数準備(投入データにヒットする決定的値) ---
+            java.util.Map objobj = new java.util.HashMap();
+            objobj.put("deptno", Integer.valueOf(50)); // DEPTNO=50 (WHERE 束縛にヒット)
+            objobj.put("job", "CLERK"); // JOB=CLERK (WHERE 束縛にヒット)
+
+            // --- Service 実行 ---
+            java.util.List result = dao.searchSpecial(objobj);
+
+            // --- 戻り値 assert ---
+            assertNotNull(result);
+            assertTrue("1 件以上ヒットするはず", result.size() >= 1);
+            example.servicebase.entity.Emp row0 = (example.servicebase.entity.Emp) result.get(0);
+            assertEquals("先頭行の主キーが投入値と一致", Integer.valueOf(1001), Integer.valueOf(row0.getEmpno()));
+            ev.writeReturn("EmpService", "searchSpecial", result);
+
+            // --- 操作後データセット取得 + エビデンス出力 ---
+            java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "EMPNO" });
+            ev.writeDataset("EmpService", "searchSpecial", "EMP", ds_EMP);
+
+        } finally {
+            conn.close();
+        }
+    }
+
+    /** applyBonus : UPDATE (SQL_FILE, S2JDBC Service) */
+    public void testApplyBonus() throws Exception {
+        java.sql.Connection conn = ctx.getConnection();
+        try {
+            EvidenceWriter ev = ctx.newEvidenceWriter();
+
+            // --- 対象テーブル EMP の準備(UPDATE) ---
+            WriteDbUtil.deleteAll(conn, "EMP");
+            WriteDbUtil.write(conn, new TestDataParam("EMP",
+                new String[] { "EMPNO", "ENAME", "JOB", "DEPTNO", "SAL", "VERSION_NO" },
+                new Object[] {
+                    Integer.valueOf(1001), // EMPNO=1001
+                    "TESTA", // ENAME=TESTA
+                    "CLERK", // JOB=CLERK
+                    Integer.valueOf(50), // DEPTNO=50
+                    Integer.valueOf(3000), // SAL=3000
+                    Integer.valueOf(34) // VERSION_NO=34
+                }));
+
+            // --- 入力 Map 構築(SQL の /*key*/ バインドに対応) ---
+            java.util.Map arg = new java.util.HashMap();
+            arg.put("sal", Integer.valueOf(3001)); // SAL=3001
+            arg.put("empno", Integer.valueOf(1001)); // EMPNO=1001 (WHERE 束縛)
+
+            // --- Service 実行 ---
+            int result = dao.applyBonus(arg);
+            assertTrue("更新/削除/登録 件数は 1 以上", result >= 1);
+            ev.writeReturn("EmpService", "applyBonus", Integer.valueOf(result));
+
+            // --- 操作後データセット取得 + エビデンス出力 ---
+            java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "EMPNO" });
+            ev.writeDataset("EmpService", "applyBonus", "EMP", ds_EMP);
+            java.util.Map updated = GetDatasetUtil.find(ds_EMP, "EMPNO", Integer.valueOf(1001));
+            assertNotNull("対象行が存在すること", updated);
+            assertEquals("更新後の値が反映されていること", EvidenceWriter.normalize(Integer.valueOf(3001)), EvidenceWriter.normalize(updated.get("SAL")));
+
+        } finally {
+            conn.close();
+        }
+    }
+
+    /** cancelBonus2 : UPDATE (SQL_FILE, S2JDBC Service) */
+    public void testCancelBonus2() throws Exception {
+        java.sql.Connection conn = ctx.getConnection();
+        try {
+            EvidenceWriter ev = ctx.newEvidenceWriter();
+
+            // --- 対象テーブル EMP の準備(UPDATE) ---
+            WriteDbUtil.deleteAll(conn, "EMP");
+            WriteDbUtil.write(conn, new TestDataParam("EMP",
+                new String[] { "EMPNO", "ENAME", "JOB", "DEPTNO", "SAL", "VERSION_NO" },
+                new Object[] {
+                    Integer.valueOf(1001), // EMPNO=1001
+                    "TESTA", // ENAME=TESTA
+                    "CLERK", // JOB=CLERK
+                    Integer.valueOf(50), // DEPTNO=50
+                    Integer.valueOf(3000), // SAL=3000
+                    Integer.valueOf(34) // VERSION_NO=34
+                }));
+
+            // --- 入力 Map 構築(SQL の /*key*/ バインドに対応) ---
+            java.util.Map arg = new java.util.HashMap();
+            arg.put("sal", Integer.valueOf(3001)); // SAL=3001
+            arg.put("ename", "TESTAU"); // ENAME=TESTAU
+            arg.put("empno", Integer.valueOf(1001)); // EMPNO=1001 (WHERE 束縛)
+
+            // --- Service 実行 ---
+            int result = dao.cancelBonus2(arg);
+            assertTrue("更新/削除/登録 件数は 1 以上", result >= 1);
+            ev.writeReturn("EmpService", "cancelBonus2", Integer.valueOf(result));
+
+            // --- 操作後データセット取得 + エビデンス出力 ---
+            java.util.List ds_EMP = GetDatasetUtil.getDataset(conn, "EMP", new String[] { "EMPNO" });
+            ev.writeDataset("EmpService", "cancelBonus2", "EMP", ds_EMP);
+            java.util.Map updated = GetDatasetUtil.find(ds_EMP, "EMPNO", Integer.valueOf(1001));
+            assertNotNull("対象行が存在すること", updated);
+            assertEquals("更新後の値が反映されていること", EvidenceWriter.normalize(Integer.valueOf(3001)), EvidenceWriter.normalize(updated.get("SAL")));
+
+        } finally {
+            conn.close();
+        }
+    }
+
     /** registerData : INSERT (SQL_FILE, S2JDBC Service) */
     public void testRegisterData() throws Exception {
         java.sql.Connection conn = ctx.getConnection();

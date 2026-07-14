@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import com.example.s2daotestgen.model.MetaModel.BindVarMeta;
@@ -25,6 +26,9 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 
 /**
  * DAO インタフェースを S2Dao 規約(定数/Tiger アノテーション)に従って解析し、
@@ -207,6 +211,11 @@ public final class DaoAnalyzer {
             return mm;
         }
 
+        // (3) メソッド本体の bySql 系呼び出し(引数に SQL 名/パスを明示指定する呼び方)から解決
+        if (resolveFromBySqlCalls(dao, type, md, entity, mm)) {
+            return mm;
+        }
+
         // delete + query(ファイル無し)
         if (DaoNaming.isDelete(name) && mm.query != null && entity != null) {
             final AutoSqlBuilder.Result r = autoSql.buildDeleteByQuery(entity, mm.query);
@@ -242,6 +251,159 @@ public final class DaoAnalyzer {
                 || "UPDATE".equals(st) || "DELETE".equals(st)) {
             mm.methodKind = st;
         }
+    }
+
+    /**
+     * (3) メソッド本体({@code MethodDeclaration} の body)を走査し、
+     * <b>メソッド名に "BySql" を含む呼び出し</b>(selectBySqlFile / updateBySqlFile /
+     * deleteBySqlFile / getResultListBySqlFile / selectBySql 等。呼び出し元が
+     * {@code this} でも {@code jdbcManager} でも可 = メソッド名のみで判定)の
+     * <b>文字列引数</b>を SQL ファイル名候補として収集し、{@code --sql} フォルダ配下
+     * (= {@link SqlFileIndex})から解決を試みる。
+     *
+     * <p>候補となる文字列引数は、直接の文字列リテラル {@code "xxx"}(および {@code "a" + "b"}
+     * 連結)と、同一クラスの {@code static final String} 定数参照
+     * ({@code NameExpr} / {@code FieldAccessExpr} → {@link AstUtil#getStaticStringField})。
+     * インライン SQL(SELECT/INSERT/UPDATE/DELETE で始まる文字列)は今回のスコープ外の
+     * ため候補から除外する。</p>
+     *
+     * <p>解決できた場合は {@code resolutionType="SQL_FILE"} として 2-way 解析へ回し
+     * ({@link #refineKindFromSql} も適用)、トレーサビリティのため {@code dao.notes} に
+     * 解決元を一行残す。複数候補が解決したときは<b>最初に解決したもの</b>を採用し、
+     * 残りは notes に記録する。何も解決できなければ {@code false} を返し、呼び出し側は
+     * 従来どおり自動生成へフォールバックする。</p>
+     *
+     * @return SQL を解決して {@code mm.sql} を設定したら true(自動生成へは進まない)
+     */
+    private boolean resolveFromBySqlCalls(final DaoMeta dao,
+            final TypeDeclaration<?> type, final MethodDeclaration md,
+            final EntityMeta entity, final MethodMeta mm) {
+        if (!md.getBody().isPresent()) {
+            return false;
+        }
+        File resolved = null;
+        String resolvedCandidate = null;
+        final List<String> extraResolved = new ArrayList<String>();
+        for (final String candidate : collectBySqlNameCandidates(type, md)) {
+            final File f = resolveSqlByCandidate(dao.daoSimpleName, candidate);
+            if (f == null) {
+                continue;
+            }
+            if (resolved == null) {
+                resolved = f;
+                resolvedCandidate = candidate;
+            } else {
+                extraResolved.add(candidate + " → " + f.getName());
+            }
+        }
+        if (resolved == null) {
+            return false;
+        }
+        try {
+            final String content = sqlIndex.read(resolved);
+            mm.sql = buildSqlMeta("SQL_FILE", content, resolved.getAbsolutePath(), entity);
+            refineKindFromSql(mm);
+            dao.notes.add("メソッド '" + mm.name + "' の本体の bySql 系呼び出し(候補 '"
+                    + resolvedCandidate + "')から解決: " + resolved.getName());
+            for (final String extra : extraResolved) {
+                dao.notes.add("メソッド '" + mm.name + "' の追加候補も解決(未採用): " + extra);
+            }
+        } catch (final IOException e) {
+            dao.notes.add("SQL ファイル読込失敗: " + resolved + " (" + e.getMessage() + ")");
+        }
+        return true;
+    }
+
+    /**
+     * メソッド本体の "BySql" を含む呼び出しの文字列引数を、出現順・重複排除で収集する。
+     * インライン SQL(SELECT/INSERT/UPDATE/DELETE で始まる文字列)は除外する。
+     */
+    private List<String> collectBySqlNameCandidates(final TypeDeclaration<?> type,
+            final MethodDeclaration md) {
+        final List<String> out = new ArrayList<String>();
+        for (final MethodCallExpr call : md.findAll(MethodCallExpr.class)) {
+            if (call.getNameAsString().indexOf("BySql") < 0) {
+                continue;
+            }
+            for (final Expression arg : call.getArguments()) {
+                final String s = resolveStringArg(type, arg);
+                if (s == null || looksLikeInlineSql(s)) {
+                    continue;
+                }
+                if (!out.contains(s)) {
+                    out.add(s);
+                }
+            }
+        }
+        return out;
+    }
+
+    /**
+     * 文字列引数を解決する。文字列リテラル(および {@code "a" + "b"} 連結)、
+     * 同一クラスの static final String 定数参照(NameExpr / FieldAccessExpr)を対象とする。
+     * それ以外(Class リテラル・Map 変数等)は null。
+     */
+    private String resolveStringArg(final TypeDeclaration<?> type, final Expression arg) {
+        final String lit = AstUtil.concatStringLiteral(arg);
+        if (lit != null) {
+            return lit;
+        }
+        if (arg instanceof NameExpr) {
+            return AstUtil.getStaticStringField(type, ((NameExpr) arg).getNameAsString());
+        }
+        if (arg instanceof FieldAccessExpr) {
+            return AstUtil.getStaticStringField(type,
+                    ((FieldAccessExpr) arg).getNameAsString());
+        }
+        return null;
+    }
+
+    /**
+     * 候補名 {@code candidate} を SqlFileIndex から解決する。
+     * <ol>
+     *   <li>正規化: ディレクトリ部(最後の '/' 以降)を残し、末尾 ".sql" を除去 → n'</li>
+     *   <li>{@code 単純名 + "_" + n' + dialectSuffix} → {@code 単純名 + "_" + n'}</li>
+     *   <li>n' が既に {@code 単純名_} で始まる場合(フルベース名指定):
+     *       {@code n' + dialectSuffix} → {@code n'}</li>
+     * </ol>
+     */
+    private File resolveSqlByCandidate(final String simpleName, final String candidate) {
+        String n = candidate;
+        final int slash = n.lastIndexOf('/');
+        if (slash >= 0) {
+            n = n.substring(slash + 1);
+        }
+        if (n.endsWith(".sql")) {
+            n = n.substring(0, n.length() - 4);
+        }
+        if (n.isEmpty()) {
+            return null;
+        }
+        final String suffix = dialect.getSuffix();
+        // (2) クラス単純名 + "_" + n'
+        final String base = simpleName + "_" + n;
+        File f = sqlIndex.find(base + suffix);
+        if (f == null) {
+            f = sqlIndex.find(base);
+        }
+        if (f != null) {
+            return f;
+        }
+        // (3) n' が既にフルベース名(単純名_ で始まる)
+        if (n.startsWith(simpleName + "_")) {
+            f = sqlIndex.find(n + suffix);
+            if (f == null) {
+                f = sqlIndex.find(n);
+            }
+        }
+        return f;
+    }
+
+    /** SELECT/INSERT/UPDATE/DELETE で始まる文字列はインライン SQL とみなす(スコープ外)。 */
+    private static boolean looksLikeInlineSql(final String s) {
+        final String t = s.trim().toUpperCase(Locale.ENGLISH);
+        return t.startsWith("SELECT") || t.startsWith("INSERT")
+                || t.startsWith("UPDATE") || t.startsWith("DELETE");
     }
 
     private SqlMeta buildAutoSql(final MethodMeta mm, final EntityMeta entity) {

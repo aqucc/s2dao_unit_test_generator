@@ -1,0 +1,1 @@
+DELETE FROM FOO WHERE ID = /*id*/0

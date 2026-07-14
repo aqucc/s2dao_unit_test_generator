@@ -78,7 +78,25 @@ S2Dao 本体 `DaoMetaDataImpl` と同一の解決順:
 
 1. `<method>_SQL` 定数 / `@Sql` があればその SQL
 2. `<DaoClassName>_<methodName>_<dbmsSuffix>.sql` → `<DaoClassName>_<methodName>.sql`
-3. .sql が無ければ **S2Dao 自動生成 SQL** をメソッド名プレフィクス
+3. **メソッド本体の bySql 系呼び出しによる明示指定**(S2JDBC の
+   `selectBySqlFile` / `updateBySqlFile` / `deleteBySqlFile` /
+   `getResultListBySqlFile` / `selectBySql` 等)。メソッド本体(`MethodDeclaration`
+   の body)を JavaParser AST で走査し、**メソッド名に "BySql" を含む呼び出し**
+   (呼び出し元が `this` でも `jdbcManager` でも可 = メソッド名のみで判定)の
+   **文字列引数**を SQL 名候補として収集する。候補は
+   (a)直接の文字列リテラル `"xxx"`(および `"a" + "b"` 連結)、
+   (b)同一クラスの `static final String` 定数参照(`NameExpr` / `FieldAccessExpr`
+   → `AstUtil.getStaticStringField`)。各候補 n について
+   `--sql` フォルダ配下(= `SqlFileIndex` 索引済み)から順に解決する:
+   ① n からディレクトリ部(最後の `/` 以降)を除去し末尾 `.sql` を除去 → n'、
+   ② `<ClassSimpleName>_<n'>[<dbmsSuffix>].sql`、
+   ③ n' が既に `<ClassSimpleName>_` で始まる(フルベース名指定)場合は
+   `<n'>[<dbmsSuffix>].sql`。最初に解決したファイルを採用し、残りは notes に記録。
+   解決すると `resolutionType=SQL_FILE` として 2-way 解析へ回す(CRUD 種別は
+   ステップ1の `refineKindFromSql` が SQL 先頭トークンで決める)。
+   インライン SQL(候補文字列が SELECT/INSERT/UPDATE/DELETE で始まる形)は
+   スコープ外として候補から除外する。
+4. .sql が無ければ **S2Dao 自動生成 SQL** をメソッド名プレフィクス
    (insert/create/add, update/modify/store/edit, delete/remove, select/find/get 等)
    とエンティティメタ情報から S2Dao と同じロジックで組み立てる
    (`INSERT INTO t (...) VALUES (...)`, `UPDATE t SET ... WHERE id = ? [AND version = ?]`,
@@ -166,6 +184,14 @@ S2Dao(DAO インタフェース + BEAN 定数)に加え、S2JDBC 世代の **Ser
   (基底 `Abstract*Service` やエンティティ自身を拾わない)。
 - **CRUD 種別**: メソッド名からは判定できないため、対応する 2-way SQL の先頭トークン
   (SELECT/INSERT/UPDATE/DELETE)で決める(ステップ1の `refineKindFromSql`)。
+- **SQL 名を引数で明示指定する呼び方への対応**: Service が基底の
+  `findByParams`/`updateByParams`(規約 `<ClassName>_<methodName>.sql`)を経由せず、
+  `selectBySqlFile(clazz, "specialQuery", map)` のように **bySql 系 API へ SQL 名/パスを
+  直接渡す**ケースがある。この場合はメソッド本体を走査して候補名を集め、
+  `<ClassSimpleName>_<明示名>.sql` を `--sql` フォルダ配下から解決する
+  (§3.2(b) の解決順(3)。素の名称・`.sql` 付き・`static final String` 定数渡し・
+  ディレクトリ付きフルベース名のいずれも対応)。解決できなければ従来どおり
+  自動生成へフォールバックする(該当ファイルが無い明示名はスキップ)。
 - **エンティティ辞書の完全化**: Service は BEAN を持たず、参照エンティティは戻り値
   ジェネリクス(`List<Emp>`)や別フォルダにある。そこで解析フェーズで
   `EntityAnalyzer.isEntityLike` な全型を **`<Entity>.entity.json`** として出力し、

@@ -48,6 +48,32 @@ public abstract class ServiceBase {
         return jdbcManager.updateBySqlFile(path, objobj);
     }
 
+    /**
+     * SQL ファイル名/パスを<b>引数で明示指定</b>する検索。実際の Seasar2 でも Service が
+     * 基底の {@code findByParams} を経由せず、直接 {@code selectBySqlFile(clazz, path, params)}
+     * を呼ぶことがある(その想定のフィクスチャ)。ここでは受け取った {@code name} を
+     * そのまま JdbcManager に渡す(SQL の実解決・バインドは Seasar2 任せ)。
+     *
+     * @param clazz  結果エンティティのクラス
+     * @param name   SQL ファイル名/パス(素の名称・{@code .sql} 付き・定数のいずれも可)
+     * @param objobj バインドパラメータ Map
+     */
+    protected List selectBySqlFile(Class clazz, String name, Map objobj) {
+        return jdbcManager.selectBySqlFile(clazz, name, objobj).getResultList();
+    }
+
+    /**
+     * SQL ファイル名/パスを<b>引数で明示指定</b>する更新(INSERT/UPDATE/DELETE)。
+     * {@link #selectBySqlFile} と同様、直接 {@code updateBySqlFile(path, params)} を
+     * 呼ぶ想定のフィクスチャ。件数を返す。
+     *
+     * @param name   SQL ファイル名/パス(素の名称・{@code .sql} 付き・定数のいずれも可)
+     * @param objobj バインドパラメータ Map
+     */
+    protected int updateBySqlFile(String name, Map objobj) {
+        return jdbcManager.updateBySqlFile(name, objobj);
+    }
+
     public void setJdbcManager(JdbcManager jdbcManager) {
         this.jdbcManager = jdbcManager;
     }
