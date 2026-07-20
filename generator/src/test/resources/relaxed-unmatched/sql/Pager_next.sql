@@ -1,0 +1,1 @@
+SELECT * FROM PAGE WHERE OFFSET = /*offset*/0

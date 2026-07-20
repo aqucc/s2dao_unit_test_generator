@@ -201,6 +201,7 @@ public final class DaoAnalyzer {
             sqlFile = sqlIndex.find(base);
         }
         if (sqlFile != null) {
+            sqlIndex.markClaimed(sqlFile);
             try {
                 final String content = sqlIndex.read(sqlFile);
                 mm.sql = buildSqlMeta("SQL_FILE", content, sqlFile.getAbsolutePath(), entity);
@@ -213,6 +214,11 @@ public final class DaoAnalyzer {
 
         // (3) メソッド本体の bySql 系呼び出し(引数に SQL 名/パスを明示指定する呼び方)から解決
         if (resolveFromBySqlCalls(dao, type, md, entity, mm)) {
+            return mm;
+        }
+
+        // (3.5) ゆらぎ吸収フォールバック(大文字小文字を無視した逆引き台帳照合)
+        if (resolveRelaxed(dao, type, md, entity, mm)) {
             return mm;
         }
 
@@ -299,6 +305,7 @@ public final class DaoAnalyzer {
         if (resolved == null) {
             return false;
         }
+        sqlIndex.markClaimed(resolved);
         try {
             final String content = sqlIndex.read(resolved);
             mm.sql = buildSqlMeta("SQL_FILE", content, resolved.getAbsolutePath(), entity);
@@ -312,6 +319,83 @@ public final class DaoAnalyzer {
             dao.notes.add("SQL ファイル読込失敗: " + resolved + " (" + e.getMessage() + ")");
         }
         return true;
+    }
+
+    /**
+     * (3.5) 大文字小文字ゆらぎ吸収フォールバック。完全一致・bySql 明示解決のいずれでも
+     * SQL ファイルが見つからなかったとき、逆引き台帳({@link SqlFileIndex#findRelaxed})で
+     * 大文字小文字を無視した緩い照合を行う。
+     *
+     * <p>照合順:
+     * <ol>
+     *   <li>{@code findRelaxed(クラス単純名, メソッド名, dialectSuffix)}</li>
+     *   <li>それでも解決しないとき、(3) と同じ bySql 候補名それぞれ(正規化後 n')で
+     *       {@code findRelaxed}。n' が {@code クラス名_} で始まるフルベース名の場合は
+     *       クラス名部/名前部に割ってから照合する。</li>
+     * </ol>
+     * 方言サフィックスの意味論は完全一致解決と同じ(現方言サフィックスのみ試す)。
+     * 解決したら {@code resolutionType="SQL_FILE"} として 2-way 解析+refineKindFromSql を
+     * 行い、{@code dao.notes} に「大文字小文字ゆらぎを吸収して解決」を記録し markClaimed する。</p>
+     *
+     * @return SQL を解決して {@code mm.sql} を設定したら true(自動生成へは進まない)
+     */
+    private boolean resolveRelaxed(final DaoMeta dao,
+            final TypeDeclaration<?> type, final MethodDeclaration md,
+            final EntityMeta entity, final MethodMeta mm) {
+        final String suffix = dialect.getSuffix();
+        // (a) メソッド名での緩い照合
+        File resolved = sqlIndex.findRelaxed(dao.daoSimpleName, mm.name, suffix);
+        String expected = dao.daoSimpleName + "_" + mm.name;
+        // (b) bySql 候補名での緩い照合
+        if (resolved == null) {
+            for (final String candidate : collectBySqlNameCandidates(type, md)) {
+                final String n = normalizeCandidateName(candidate);
+                if (n == null) {
+                    continue;
+                }
+                final String[] split = SqlFileIndex.splitOnFirstUnderscore(n);
+                if (split != null && split[0].equalsIgnoreCase(dao.daoSimpleName)) {
+                    resolved = sqlIndex.findRelaxed(split[0], split[1], suffix);
+                    expected = dao.daoSimpleName + "_" + split[1];
+                } else {
+                    resolved = sqlIndex.findRelaxed(dao.daoSimpleName, n, suffix);
+                    expected = dao.daoSimpleName + "_" + n;
+                }
+                if (resolved != null) {
+                    break;
+                }
+            }
+        }
+        if (resolved == null) {
+            return false;
+        }
+        sqlIndex.markClaimed(resolved);
+        try {
+            final String content = sqlIndex.read(resolved);
+            mm.sql = buildSqlMeta("SQL_FILE", content, resolved.getAbsolutePath(), entity);
+            refineKindFromSql(mm);
+            dao.notes.add("大文字小文字ゆらぎを吸収して解決: " + resolved.getName()
+                    + "(規約名 '" + expected + "')");
+        } catch (final IOException e) {
+            dao.notes.add("SQL ファイル読込失敗: " + resolved + " (" + e.getMessage() + ")");
+        }
+        return true;
+    }
+
+    /** 候補名からディレクトリ部(最後の '/' 以降)と末尾 ".sql" を除去する。空なら null。 */
+    private static String normalizeCandidateName(final String candidate) {
+        if (candidate == null) {
+            return null;
+        }
+        String n = candidate;
+        final int slash = n.lastIndexOf('/');
+        if (slash >= 0) {
+            n = n.substring(slash + 1);
+        }
+        if (n.endsWith(".sql")) {
+            n = n.substring(0, n.length() - 4);
+        }
+        return n.isEmpty() ? null : n;
     }
 
     /**

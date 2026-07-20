@@ -119,11 +119,17 @@ public final class Main {
         final JsonWriter writer = new JsonWriter();
         outDir.mkdirs();
 
+        // 解析対象(DAO/Service)の単純名(小文字正規化)を記録する。
+        // 未対応 .sql 報告で「クラス名部が解析対象に一致するか」の判定に使う。
+        final java.util.Set<String> analyzedNames =
+                new java.util.HashSet<String>();
+
         int count = 0;
         for (final SourceRepository.TypeInfo info : repo.getAllTypes()) {
             if (!analyzer.isDao(info)) {
                 continue;
             }
+            analyzedNames.add(info.simpleName.toLowerCase(java.util.Locale.ENGLISH));
             final DaoMeta dao = analyzer.analyze(info);
             final File outFile = new File(outDir, info.simpleName + ".meta.json");
             writer.write(dao, outFile);
@@ -149,7 +155,111 @@ public final class Main {
         if (entityCount > 0) {
             System.out.println("  エンティティメタ " + entityCount + " 件 → *.entity.json");
         }
+
+        // --- 未対応 .sql ファイルの報告(取りこぼしの可視化)---
+        reportUnmatchedSql(sqlIndex, analyzedNames, outDir);
         return count;
+    }
+
+    /**
+     * どの解決経路にも採用されなかった .sql ファイルを、クラス名部でグループ化し、
+     * 次の 3 区分で stdout と {@code <outDir>/unmatched-sql.txt} に一覧表示する。
+     * <ul>
+     *   <li>(a) クラス名部が解析済み DAO/Service に一致(ci)するのに、どのメソッドにも
+     *       対応しなかった → 「名前ズレの疑い」</li>
+     *   <li>(b) クラス名部がどの解析対象にも一致しない → 「クラス未検出」</li>
+     *   <li>(c) {@code _} を含まずクラス名部が取れない → 「規約外のファイル名」</li>
+     * </ul>
+     */
+    private static void reportUnmatchedSql(final SqlFileIndex sqlIndex,
+            final java.util.Set<String> analyzedNames, final File outDir)
+            throws Exception {
+        // クラス名部 → ファイル名一覧(表示用に元の大小を保つ)
+        final java.util.TreeMap<String, java.util.List<String>> nameMismatch =
+                new java.util.TreeMap<String, java.util.List<String>>();
+        final java.util.TreeMap<String, java.util.List<String>> classNotFound =
+                new java.util.TreeMap<String, java.util.List<String>>();
+        final java.util.List<String> nonConvention = new java.util.ArrayList<String>();
+
+        for (final File f : sqlIndex.unclaimedFiles()) {
+            final String fileName = f.getName();
+            final String base = fileName.endsWith(".sql")
+                    ? fileName.substring(0, fileName.length() - 4) : fileName;
+            final String[] split = SqlFileIndex.splitOnFirstUnderscore(base);
+            if (split == null) {
+                nonConvention.add(fileName);
+                continue;
+            }
+            final String classPart = split[0];
+            final boolean known = analyzedNames.contains(
+                    classPart.toLowerCase(java.util.Locale.ENGLISH));
+            final java.util.TreeMap<String, java.util.List<String>> bucket =
+                    known ? nameMismatch : classNotFound;
+            java.util.List<String> list = bucket.get(classPart);
+            if (list == null) {
+                list = new java.util.ArrayList<String>();
+                bucket.put(classPart, list);
+            }
+            list.add(fileName);
+        }
+        for (final java.util.List<String> l : nameMismatch.values()) {
+            java.util.Collections.sort(l);
+        }
+        for (final java.util.List<String> l : classNotFound.values()) {
+            java.util.Collections.sort(l);
+        }
+        java.util.Collections.sort(nonConvention);
+
+        final int total = countFiles(nameMismatch) + countFiles(classNotFound)
+                + nonConvention.size();
+        final StringBuilder sb = new StringBuilder();
+        if (total == 0) {
+            sb.append("未対応なし\n");
+        } else {
+            sb.append("未対応 .sql ファイル: ").append(total).append(" 件\n");
+            appendGroup(sb, "[名前ズレの疑い] クラス名部は解析済み DAO/Service に一致するが、"
+                    + "どのメソッドにも対応しませんでした:", nameMismatch);
+            appendGroup(sb, "[クラス未検出] クラス名部がどの解析対象にも一致しません"
+                    + "(対象外クラス or 命名不一致):", classNotFound);
+            if (!nonConvention.isEmpty()) {
+                sb.append("[規約外のファイル名] '_' を含まずクラス名部が取れません:\n");
+                for (final String fn : nonConvention) {
+                    sb.append("    ").append(fn).append('\n');
+                }
+            }
+        }
+
+        // stdout
+        System.out.println();
+        System.out.print(sb.toString());
+        // <outDir>/unmatched-sql.txt
+        outDir.mkdirs();
+        writeText(new File(outDir, "unmatched-sql.txt"), sb.toString(),
+                Charset.forName(DEFAULT_ENCODING));
+    }
+
+    private static int countFiles(
+            final java.util.Map<String, java.util.List<String>> byClass) {
+        int n = 0;
+        for (final java.util.List<String> l : byClass.values()) {
+            n += l.size();
+        }
+        return n;
+    }
+
+    private static void appendGroup(final StringBuilder sb, final String header,
+            final java.util.Map<String, java.util.List<String>> byClass) {
+        if (byClass.isEmpty()) {
+            return;
+        }
+        sb.append(header).append('\n');
+        for (final java.util.Map.Entry<String, java.util.List<String>> e
+                : byClass.entrySet()) {
+            sb.append("  ").append(e.getKey()).append(":\n");
+            for (final String fn : e.getValue()) {
+                sb.append("    ").append(fn).append('\n');
+            }
+        }
     }
 
     // ================= generate =================
